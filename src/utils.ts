@@ -77,7 +77,7 @@ export function POST_JSON(path, payload) {
  */
 
 class Point {
-  private x: number
+  x: number
   private y: number
   constructor(x: number, y: number) {
     this.x = x
@@ -122,7 +122,7 @@ class Point {
     return `(${this.x},${this.y})`
   }
 }
-export function makePoint(x: number, y: number) {
+export function makePoint(x: number, y: number):Point {
   return new Point(x, y)
 }
 

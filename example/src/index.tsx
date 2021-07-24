@@ -2,6 +2,9 @@ import './index.css'
 
 import React from 'react'
 import ReactDOM from 'react-dom'
-import App from './App'
+import { RectDocApp } from "./App";
+import {RectDocEditor} from "./ReactDocEditor";
 
-ReactDOM.render(<App />, document.getElementById('root'))
+let provider = new RectDocEditor({})
+
+ReactDOM.render(<RectDocApp  provider={provider}/>, document.getElementById('root'))

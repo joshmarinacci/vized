@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import '../css/dialogs.css'
+import './dialogs.css'
 
 export function Dialog(props: {
   height: number

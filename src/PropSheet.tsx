@@ -1,11 +1,13 @@
 import React, {Component, useState, useContext} from 'react';
+// @ts-ignore
 import {HBox, PopupManager, PopupManagerContext, VBox} from 'appy-comps'
 
 import selMan, {SELECTION_MANAGER} from "./SelectionManager";
+// @ts-ignore
 import HSLUVColorPicker from "./HSLUVColorPicker";
-import {TREE_ITEM_PROVIDER} from './TreeItemProvider'
+import { TreeItemProvider, TREE_ITEM_PROVIDER, TreeItem } from "./TreeItemProvider";
 
-import "../css/propsheet.css"
+import "./propsheet.css"
 
 export const TYPES = {
   STRING:'string',
@@ -17,7 +19,13 @@ export const TYPES = {
 }
 
 export class ClusterDelegate {
-  constructor(provider,key, json) {
+  private propsArray: any[];
+  private propsMap: {};
+  private propKeys: any[];
+  private provider: TreeItemProvider;
+  private renderers: {};
+  // @ts-ignore
+  constructor(provider:TreeItemProvider,key:string, json:object) {
     this.propsArray = []
     this.propsMap = {}
     this.propKeys = []
@@ -34,31 +42,38 @@ export class ClusterDelegate {
       }
     })
   }
-  getPropertyKeys(item) {
+  // @ts-ignore
+  getPropertyKeys(item:object) {
     return this.propKeys
   }
-  getPropertyValue(item,key) {
+  getPropertyValue(item:object,key:string) {
     return item[key]
   }
-  getPropertyDefaultValue(key) {
+  getPropertyDefaultValue(key:string) {
     return this.propsMap[key].default
   }
-  getPropertyType(item,key) {
+  // @ts-ignore
+  getPropertyType(item,key:string) {
     return this.propsMap[key].type
   }
-  isPropertyLocked(item,key) {
+  // @ts-ignore
+  isPropertyLocked(item:object,key:string) {
     return this.propsMap[key].locked
   }
-  isPropertyLive(item,key) {
+  // @ts-ignore
+  isPropertyLive(item:object,key:string) {
     return this.propsMap[key].live
   }
-  getPropertyEnumValues(item,key) {
+  // @ts-ignore
+  getPropertyEnumValues(item,key:string) {
     return this.propsMap[key].values
   }
-  getRendererForEnumProperty(item,key,value) {
+  // @ts-ignore
+  getRendererForEnumProperty(item,key:string,value) {
     return this.propsMap[key].renderer
   }
-  setPropertyValue(item,key,value) {
+  // @ts-ignore
+  setPropertyValue(item,key:string,value) {
     console.log("setting value to",value)
     const oldValue = item[key]
     item[key] = value
@@ -70,25 +85,32 @@ export class ClusterDelegate {
       newValue:value
     })
   }
-  hasHints(item,key) {
+  // @ts-ignore
+  hasHints(item,key:string) {
     if(this.propsMap[key].hints) return true
     return false
   }
-  getHints(item,key) {
+  // @ts-ignore
+  getHints(item,key:string) {
     return this.propsMap[key].hints
   }
 }
 
-const StandardEnumRenderer = ({object, key, value}) => {
-  return <span>{value}</span>
+// @ts-ignore
+const StandardEnumRenderer = (props:{object:object, key:string, value:any}) => {
+  return <span>{props.value}</span>
 }
-
-class PropEditor extends Component {
+type PropEditorProps = {
+  cluster:any,
+  item:object,
+  propKey:string,
+  provider:TreeItemProvider,
+}
+class PropEditor extends Component<PropEditorProps, {}> {
   render() {
     const c = this.props.cluster
     const it = this.props.item
     const key = this.props.propKey
-    const prov = this.props.provider
     if(c.isPropertyLocked(it,key)) return <i>{c.getPropertyValue(it,key)}</i>
     if(c.getPropertyType(it,key) === TYPES.BOOLEAN) return <BooleanEditor1 cluster={c} obj={it} name={key}/>
     if(c.getPropertyType(it,key) === TYPES.NUMBER)  return <NumberEditor1  cluster={c} obj={it} name={key}/>
@@ -98,14 +120,15 @@ class PropEditor extends Component {
   }
 }
 
-const NumberEditor1 = ({cluster,obj,name}) => {
+const NumberEditor1 = (props:{cluster:ClusterDelegate,obj:object,name:string}) => {
+  let {cluster, obj, name} = {...props}
   const [value,setValue] = useState(cluster.getPropertyValue(obj,name))
   let step = 1
   if(cluster.hasHints(obj,name)) {
     const hints = cluster.getHints(obj,name)
     if('incrementValue' in hints) step = hints.incrementValue
   }
-  function setObjectValue(v, offset=0) {
+  function setObjectValue(v:any, offset=0) {
     if(!isNaN(parseFloat(v))) {
       v = parseFloat(v)
       v += offset
@@ -123,24 +146,25 @@ const NumberEditor1 = ({cluster,obj,name}) => {
     setValue(e.target.value)
     if(cluster.isPropertyLive(obj,name)) setObjectValue(e.target.value)
   }}
-  onKeyDown={(e)=>{
-    if(e.key === 'ArrowUp' && e.shiftKey) {
-      e.preventDefault()
-      setObjectValue(e.target.value,+10*step)
-    }
-    if(e.key === 'ArrowDown' && e.shiftKey) {
-      e.preventDefault()
-      setObjectValue(e.target.value,-10*step)
-    }
-  }}
-  onKeyPress={(e)=>{
-    if(e.charCode === 13) setObjectValue(e.target.value)
-  }}
+  // onKeyDown={(e:KeyboardEvent)=>{
+  //   if(e.key === 'ArrowUp' && e.shiftKey) {
+  //     e.preventDefault()
+  //     setObjectValue(e.target?.value,+10*step)
+  //   }
+  //   if(e.key === 'ArrowDown' && e.shiftKey) {
+  //     e.preventDefault()
+  //     setObjectValue(e.target?.value,-10*step)
+  //   }
+  // }}
+  // onKeyPress={(e:KeyboardEvent)=>{
+  //   if(e.charCode === 13) setObjectValue(e.target?.value)
+  // }}
   onBlur={(e) => setObjectValue(e.target.value)}
   />
 }
 
-const BooleanEditor1 = ({cluster,obj,name}) => {
+const BooleanEditor1 = (props:{cluster:ClusterDelegate,obj:any,name:string}) => {
+  let {cluster, obj, name} = props
   const [value,setValue] = useState(cluster.getPropertyValue(obj,name))
   return <input type='checkbox' checked={value}
   onChange={(e)=>{
@@ -150,7 +174,8 @@ const BooleanEditor1 = ({cluster,obj,name}) => {
 
 }
 
-const StringEditor1 = ({cluster,obj,name})=>{
+const StringEditor1 = (props:{cluster:ClusterDelegate,obj:any,name:string})=>{
+  let {cluster, obj, name} = props
   const pv = cluster.getPropertyValue(obj,name)
   const [value,setValue] = useState(pv)
   return <input type='string'
@@ -166,33 +191,35 @@ const StringEditor1 = ({cluster,obj,name})=>{
       cluster.setPropertyValue(obj,name,value)
     }
   }}
-  onBlur={(e)=>{
+  onBlur={()=>{
     cluster.setPropertyValue(obj,name,value)
   }}
   />
 }
 
-const EnumEditor1 = ({cluster,obj,name}) => {
+const EnumEditor1 = (props:{cluster:ClusterDelegate,obj:object,name:string}) => {
+  let {cluster, obj, name} = props
   const [value,setValue] = useState(cluster.getPropertyValue(obj,name))
-  const context = useContext(PopupManagerContext)
+  const context = useContext(PopupManagerContext) as any
   let EnumItemRenderer = cluster.getRendererForEnumProperty(obj,name,value)
   if(!EnumItemRenderer) EnumItemRenderer = StandardEnumRenderer
 
   let selectedRenderedValue = <EnumItemRenderer object={obj} name={name} value={value}/>
 
-  function open(e) {
+  function open(e:MouseEvent) {
     context.show(<EnumPicker
       object={obj}
     cluster={cluster}
     name={name}
     Renderer={EnumItemRenderer}
-    onSelect={(val)=>{
+    onSelect={(val:any)=>{
       setValue(val)
       context.hide()
       cluster.setPropertyValue(obj,name,val)
     }}
     />, e.target)
   }
+  // @ts-ignore
   return <button onClick={open}>{selectedRenderedValue}</button>
 }
 
@@ -209,8 +236,16 @@ const EnumPicker = ({object, name, onSelect, cluster, Renderer}) => {
   return <VBox className="popup-menu">{items}</VBox>
 }
 
+type PropSheetProps = {
+  provider:TreeItemProvider
+}
+type PropSheetState = {
+  selection:any,
+}
 
-export default class PropSheet extends Component {
+export class PropSheet extends Component<PropSheetProps,PropSheetState> {
+  private h2: () => void;
+  private hand: (s) => void;
   constructor(props) {
     super(props)
     this.state = {
@@ -228,20 +263,22 @@ export default class PropSheet extends Component {
     this.props.provider.off(TREE_ITEM_PROVIDER.PROPERTY_CHANGED,this.h2)
   }
   render() {
-    const item = selMan.getSelection()
-    const prov = this.props.provider
-    let clusters = prov.getPropertyClusters(item)
-    return <div className="prop-wrapper">{Object.keys(clusters).map(key => {
-        return <PropSection key={key} title={key} cluster={clusters[key]} prov={prov} item={item}/>
-      })}</div>
+    // const item = selMan.getSelection()
+    // const prov = this.props.provider
+    // let clusters = prov.getPropertyClusters(item)
+    // return <div className="prop-wrapper">{Object.keys(clusters).map(key => {
+    //     return <PropSection key={key} title={key} cluster={clusters[key]} prov={prov} item={item}/>
+    //   })}</div>
+    return <div>prop sheet stuff here</div>
   }
-  renderIndeterminate(prop, i) {
+  renderIndeterminate(prop) {
     if(prop.isIndeterminate()) {
       return <i key={prop.getKey()+'-indeterminate'} className="icon fa fa-exclamation-circle"/>
     } else {
       return ""
     }
   }
+  /*
   calculateProps() {
     const items = selMan.getFullSelection()
     const first = items[0]
@@ -260,6 +297,7 @@ export default class PropSheet extends Component {
       return multi
     });
   }
+   */
   calculateGroups(props) {
     const group_defs = props.filter(p => p.getType() === TYPES.GROUP)
     group_defs.forEach(def => {
@@ -272,7 +310,7 @@ export default class PropSheet extends Component {
 }
 
 
-class PropSection extends Component {
+/*class PropSection extends Component {
   render() {
     return <div className="prop-sheet">
       <header>{this.props.title}</header>
@@ -294,7 +332,7 @@ class PropSection extends Component {
     return <PropEditor key={key+'-editor-'+item.id} propKey={key} provider={this.props.provider} item={item} cluster={cluster}/>
   }
 }
-
+*/
 //return items from A that are also in B
 function calculateIntersection(A,B) {
   return  A.filter((pa)=> B.find((pb)=>pa.key===pb.key))
@@ -302,7 +340,10 @@ function calculateIntersection(A,B) {
 
 
 class MultiPropProxy {
-  constructor(provider,key) {
+  private provider: TreeItemProvider;
+  private key: string;
+  private subs: PropProxy[];
+  constructor(provider:TreeItemProvider,key:string) {
     this.provider = provider
     this.key = key
     this.subs = []
@@ -339,7 +380,10 @@ class MultiPropProxy {
 
 
 class PropProxy {
-  constructor(provider, item, def) {
+  private provider: TreeItemProvider;
+  private item: TreeItem;
+  private def: any;
+  constructor(provider:TreeItemProvider, item:TreeItem, def:any) {
     this.provider = provider
     this.item = item
     this.def = def

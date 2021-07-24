@@ -1,11 +1,19 @@
-import React, { Component } from 'react'
-import selMan, { SELECTION_MANAGER } from './SelectionManager'
-import { TREE_ITEM_PROVIDER } from './TreeItemProvider'
+import React, { useEffect, useState } from "react";
+import selMan from './SelectionManager'
 // @ts-ignore
 import { PopupManagerContext, VBox } from 'appy-comps'
 import { Spacer } from './GridEditorApp'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import {
+  faCoffee,
+  IconName,
+  IconPrefix,
+  faCaretDown,
+  faCaretRight
+} from "@fortawesome/free-solid-svg-icons";
 
-import '../css/treetable.css'
+import './treetable.css'
+import { TREE_ITEM_PROVIDER, TreeItem, TreeItemProvider } from "./TreeItemProvider";
 
 const ContextMenu = (props: { menu: any }) => {
   return (
@@ -57,11 +65,11 @@ function DragBars(props: {
 function TreeTableItem(props: {
   depth: number
   node: any
-  provider: any
-  onDragStart: any
-  onDragOver: any
-  onDragEnd: any
-  onDrop: any
+  provider: TreeItemProvider
+  // onDragStart: any
+  // onDragOver: any
+  // onDragEnd: any
+  // onDrop: any
 }) {
   const onSelect = (e: any) => {
     if (e.shiftKey) {
@@ -77,7 +85,7 @@ function TreeTableItem(props: {
     selMan.setSelection(props.node)
     if (props.provider.calculateContextMenu) {
       const menu = props.provider.calculateContextMenu(props.node)
-      context.show(<ContextMenu menu={menu} />, e.target)
+      // context.show(<ContextMenu menu={menu} />, e.target)
     }
   }
 
@@ -88,19 +96,19 @@ function TreeTableItem(props: {
   }
 
   const onDragStart = (e: any) => {
-    props.onDragStart(e, props.node)
+    // props.onDragStart(e, props.node)
   }
 
   const onDragOver = (e: any) => {
-    props.onDragOver(e, props.node)
+    // props.onDragOver(e, props.node)
   }
 
   const onDragEnd = (e: any) => {
-    props.onDragEnd(e, props.node)
+    // props.onDragEnd(e, props.node)
   }
 
   const onDrop = (e: any) => {
-    props.onDrop(e, props.node)
+    // props.onDrop(e, props.node)
   }
 
   let cls = 'tree-node'
@@ -119,14 +127,18 @@ function TreeTableItem(props: {
         <button
           className='fa fa-caret-down fa-fw'
           onClick={toggleItemCollapsed}
-        />
+        >
+          <FontAwesomeIcon icon={faCaretDown}/>
+        </button>
       )
     } else {
       arrow = (
         <button
           className='fa fa-caret-right fa-fw'
           onClick={toggleItemCollapsed}
-        />
+        >
+          <FontAwesomeIcon icon={faCaretRight}/>
+        </button>
       )
     }
   } else {
@@ -159,21 +171,29 @@ function TreeTableItem(props: {
     </div>
   )
 }
-TreeTableItem.contextType = PopupManagerContext
+// TreeTableItem.contextType = PopupManagerContext
 
-interface ConstructorParams {
-  props: any
-}
+export function TreeTable(props: { provider: TreeItemProvider; root: TreeItem }): JSX.Element {
+  const [dropTarget] = useState(null as any)
+  const [selection] = useState(null as any)
+  const [dragTarget] = useState(null as any)
+  const [internalDrag] = useState(false)
+  const [root, setRoot] = useState(props.root)
+  const [count, setCount] = useState(0)
+  // console.log('tree table root is',props.root)
 
-function TreeTable(props:{}) {
-    // this.state = {
-    //   root: this.props.root,
-    //   dropTarget: null,
-    //   selection: null,
-    //   dragTarget: null,
-    //   internalDrag: false
-    // }
-
+  useEffect(() => {
+    let listener = (item:TreeItem) => {
+      // console.log("setting the root")
+      setRoot(props.provider.getSceneRoot())
+      setCount(count+1)
+    }
+    props.provider.on(TREE_ITEM_PROVIDER.EXPANDED_CHANGED,listener)
+    return () => {
+        props.provider.off(TREE_ITEM_PROVIDER.EXPANDED_CHANGED, listener)
+        // selMan.off(SELECTION_MANAGER.CHANGED, this.other_listener)
+    }
+  })
   // componentDidMount() {
   //   this.listener = this.props.provider.on(
   //     TREE_ITEM_PROVIDER.EXPANDED_CHANGED,
@@ -284,37 +304,40 @@ function TreeTable(props:{}) {
   //   // var data = e.dataTransfer.getData("text/html");
   //   // console.log('the dropped data is',data)
   // }
+
+
   const generateChildren = (root, chs, depth) => {
-    const prov = this.props.provider
+    const prov = props.provider
     chs.push({ node: root, depth: depth })
     if (!prov.hasChildren(root)) return
     if (!prov.isExpanded(root)) return
     prov.getChildren(root).forEach((child) => {
-      this.generateChildren(child, chs, depth + 1)
+      generateChildren(child, chs, depth + 1)
     })
   }
 
-    if (!this.state.root) return <ul>no root yet</ul>
-    const children = []
-    this.generateChildren(this.state.root, children, 0)
-    return (
-      <ul className='tree-table'>
-        {children.map((info, i) => {
-          return (
-            <TreeTableItem
-              key={i}
-              node={info.node}
-              depth={info.depth}
-              provider={this.props.provider}
-              selection={this.state.selection}
-              onDragStart={this.onDragStart}
-              onDragOver={this.onDragOver}
-              onDragEnd={this.onDragEnd}
-              onDrop={this.onDrop}
-            />
-          )
-        })}
-      </ul>
-    )
-
+  // if (!this.state.root) return <ul>no root yet</ul>
+  const children: any[] = []
+  generateChildren(props.root, children, 0)
+  // console.log("rendered children are",children)
+  // return <div>tree table here</div>
+  return (
+    <ul className='tree-table'>
+      {children.map((info, i) => {
+        return (
+          <TreeTableItem
+            key={i}
+            node={info.node}
+            depth={info.depth}
+            provider={props.provider}
+            // selection={selection}
+            // onDragStart={onDragStart}
+            // onDragOver={onDragOver}
+            // onDragEnd={onDragEnd}
+            // onDrop={onDrop}
+          />
+        )
+      })}
+    </ul>
+  )
 }
