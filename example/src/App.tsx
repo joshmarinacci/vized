@@ -76,6 +76,22 @@ function LoadButton(props: { provider: any }) {
   return <button onClick={load} title={'load last project'}>last</button>
 }
 
+function PNGButton(props: { provider: any }) {
+  let SM = useContext(StorageManagerContext) as StorageManager
+  const doit = () => {
+    let canvas = document.createElement('canvas')
+    canvas.width = 100
+    canvas.height = 100
+    let c = canvas.getContext('2d') as CanvasRenderingContext2D
+    c.fillStyle = 'white'
+    c.fillRect(0,0,100,100)
+    c.fillStyle = 'red'
+    c.fillRect(20,20,20,20)
+    SM.canvasToPNGBlob(canvas).then(blob => SM.forcePNGDownload(blob,'export'))
+  }
+  return <button onClick={doit} title={'load last project'}>PNG</button>
+}
+
 export class RectDocApp extends Component<Props, State> {
   constructor({ props }: { props: any }) {
     super(props)
@@ -98,6 +114,7 @@ export class RectDocApp extends Component<Props, State> {
         <ExportButton provider={this.props.provider}/>
         <SaveButton provider={this.props.provider}/>
         <LoadButton provider={this.props.provider}/>
+        <PNGButton provider={this.props.provider}/>
       </div>
 
       <Resizer onMouseDown={this.resizeLeft}/>

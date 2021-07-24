@@ -43,6 +43,23 @@ export class StorageManager {
     return null
   }
 
+  public async canvasToPNGBlob(canvas:HTMLCanvasElement) {
+    return new Promise<Blob>((res,rej)=>{
+      canvas.toBlob((blob) => {
+        return blob ? res(blob):rej()
+      })
+    })
+  }
+  public forcePNGDownload(blob,filename) {
+    let url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.setAttribute("href",     url);
+    link.setAttribute("download", filename);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  }
+
 }
 
 export const StorageManagerContext = React.createContext(new StorageManager())
