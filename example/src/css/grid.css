@@ -18,7 +18,7 @@ body {
 }
 
 .resizer {
-    background-color: red;
+    background-color: transparent;
     cursor: crosshair;
     width: 8px;
     height: 100%;

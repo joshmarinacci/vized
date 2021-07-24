@@ -171,7 +171,6 @@ function TreeTableItem(props: {
     </div>
   )
 }
-// TreeTableItem.contextType = PopupManagerContext
 
 export function TreeTable(props: { provider: TreeItemProvider; root: TreeItem }): JSX.Element {
   const [dropTarget] = useState(null as any)
@@ -185,7 +184,6 @@ export function TreeTable(props: { provider: TreeItemProvider; root: TreeItem })
 
   useEffect(() => {
     let listener = (item:TreeItem) => {
-      // console.log("setting the root")
       setRoot(props.provider.getSceneRoot())
       setCount(count+1)
     }
@@ -194,7 +192,6 @@ export function TreeTable(props: { provider: TreeItemProvider; root: TreeItem })
     return () => {
         props.provider.off(TREE_ITEM_PROVIDER.EXPANDED_CHANGED, listener)
       selman.off(SELECTION_MANAGER.CHANGED,listener)
-        // selMan.off(SELECTION_MANAGER.CHANGED, this.other_listener)
     }
   })
   // componentDidMount() {

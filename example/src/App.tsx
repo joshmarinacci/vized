@@ -3,9 +3,17 @@ import React, { Component, useContext, useEffect, useRef } from "react";
 import "./css/grid.css"
 import "./css/treetable.css"
 import "./css/propsheet.css"
+import "./css/components.css"
 import {TreeTable, SelectionManager, SelectionManagerContext, PropSheet, SELECTION_MANAGER, TREE_ITEM_PROVIDER, TreeItemProvider} from "vized"
 // @ts-ignore
 import {PopupContainer, Spacer} from 'appy-comps'
+
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import {
+  faCaretRight, faCaretLeft
+} from "@fortawesome/free-solid-svg-icons";
+
 
 const selMan = new SelectionManager()
 type Props = {
@@ -71,11 +79,15 @@ export class RectDocApp extends Component<Props, State> {
 
       <Resizer onMouseDown={this.resizeLeft}/>
       <div className="toolbar">
-        <button onClick={this.toggleLeftPane}>toggle left</button>
+        <button onClick={this.toggleLeftPane}>
+          <FontAwesomeIcon icon={faCaretLeft}/>
+          </button>
         <Spacer/>
         <label>status bar</label>
         <Spacer/>
-        <button onClick={this.toggleRightPane}>toggle right</button>
+        <button onClick={this.toggleRightPane}>
+          <FontAwesomeIcon icon={faCaretRight}/>
+        </button>
       </div>
       <Resizer onMouseDown={this.resizeRight}/>
       <PopupContainer/>
