@@ -5,7 +5,7 @@ import {HBox, PopupManager, PopupManagerContext, VBox} from 'appy-comps'
 import { SELECTION_MANAGER, SelectionManagerContext } from "./SelectionManager";
 // @ts-ignore
 import HSLUVColorPicker from "./HSLUVColorPicker";
-import { TreeItemProvider, TREE_ITEM_PROVIDER, TreeItem, Cluster } from "./TreeItemProvider";
+import { TreeItemProvider, TREE_ITEM_PROVIDER, TreeItem } from "./TreeItemProvider";
 
 import "./css/propsheet.css"
 
@@ -18,28 +18,63 @@ export const TYPES = {
   GROUP:'group',
 }
 
-export class ClusterDelegate {
-  private propsArray: any[];
-  private propsMap: {};
-  private propKeys: any[];
-  private provider: TreeItemProvider;
-  private renderers: {};
-  // @ts-ignore
-  constructor(provider:TreeItemProvider,key:string, json:object) {
-    this.propsArray = []
-    this.propsMap = {}
+/*
+PropDef describes a single property
+PropGroup is a list of prop defs
+PropCluster is a set of PropGroups
+ */
+type NumberHints = {
+  incrementValue:number,
+  min?:number,
+  max?:number,
+}
+type NoHints = {}
+export type PropDef = {
+  key:string,
+  name:string,
+  type:string,
+  renderer?:any,
+  default?:any,
+  live?:boolean,
+  locked?:boolean,
+  hints?:NumberHints|NoHints,
+  values?:any[],
+}
+export type PropGroup = PropDef[]
+export type PropCluster = Map<string,PropGroup>
+
+export function makeFromDef(cd:PropCluster, override:any):TreeItem {
+  const obj = {}
+  Array.from(cd.values()).forEach((grp)=>{
+    grp.forEach(def => {
+      if(override.hasOwnProperty(def.key)) {
+        obj[def.key] = override[def.key]
+      } else {
+        obj[def.key] = def.default
+      }
+    })
+  })
+  return obj as TreeItem
+}
+
+// @ts-ignore
+class ClusterDelegate {
+  // private propsArray: PropDef[];
+  private readonly propsMap: Map<string,PropDef>;
+  private readonly propKeys: any[];
+  private readonly provider: TreeItemProvider;
+  private readonly renderers: Map<string,any>;
+  constructor(provider:TreeItemProvider, cluster:PropCluster) {
+    // this.propsArray = []
+    this.propsMap = new Map<string, PropDef>()
     this.propKeys = []
     this.provider = provider
-    this.renderers = {}
-    Object.keys(json).forEach(key => {
-      const def = json[key]
-      def.key = key
-      this.propsArray.push(def)
-      this.propsMap[def.key] = def
-      this.propKeys.push(key)
-      if(def.type === TYPES.ENUM) {
-        this.renderers[def.key] = def.renderer
-      }
+    this.renderers = new Map<string, any>()
+    Array.from(cluster.values()).forEach((group:PropGroup) => {
+      group.forEach(def => {
+        this.propsMap[def.key] = def
+        this.propKeys.push(def.key)
+      })
     })
   }
   getPropertyKeys(item:TreeItem):string[] {
@@ -92,54 +127,86 @@ export class ClusterDelegate {
 }
 
 // @ts-ignore
-const StandardEnumRenderer = (props:{object:object, key:string, value:any}) => {
+const StandardEnumRenderer = (props:{object:TreeItem, key:string, value:any}) => {
   return <span>{props.value}</span>
 }
-type PropEditorProps = {
-  cluster:any,
-  item:TreeItem,
-  propKey:string,
-  provider:TreeItemProvider,
-}
-class PropEditor extends Component<PropEditorProps, {}> {
-  render() {
-    const c = this.props.cluster
-    const it = this.props.item
-    const key = this.props.propKey
-    if(c.isPropertyLocked(it,key)) return <i>{c.getPropertyValue(it,key)}</i>
-    if(c.getPropertyType(it,key) === TYPES.BOOLEAN) return <BooleanEditor1 cluster={c} obj={it} name={key}/>
-    if(c.getPropertyType(it,key) === TYPES.NUMBER)  return <NumberEditor1  cluster={c} obj={it} name={key}/>
-    if(c.getPropertyType(it,key) === TYPES.STRING)  return <StringEditor1  cluster={c} obj={it} name={key}/>
-    if(c.getPropertyType(it,key) === TYPES.ENUM)    return <EnumEditor1    cluster={c} obj={it} name={key}/>
-    return <b>{c.getPropertyType(it,key)}:{c.getPropertyValue(it,key)}</b>
-  }
+// type PropEditorProps = {
+//   cluster:PropGroup,
+//   item:TreeItem,
+//   propKey:string,
+//   provider:TreeItemProvider,
+// }
+function PropEditor(props:{provider:TreeItemProvider, item:TreeItem, def:PropDef}) {
+  let key = props.def.key
+  let def = props.def
+  let item = props.item
+  if(props.def.locked) return <i>{props.item[key]}</i>
+  if(props.def.type === TYPES.BOOLEAN) return <BooleanEditor1 def={props.def} obj={props.item} provider={props.provider}/>
+  if(props.def.type === TYPES.NUMBER) return <NumberEditor1 def={def} obj={item} provider={props.provider}/>
+  if(props.def.type === TYPES.STRING) return <StringEditor1 provider={props.provider} obj={item} def={def}/>
+  if(props.def.type === TYPES.ENUM)   return <EnumEditor1 provider={props.provider} item={item} def={def}/>
+  return <b>{def.type}:{getItemValue(def,item)}</b>
 }
 
-const NumberEditor1 = (props:{cluster:ClusterDelegate,obj:TreeItem,name:string}) => {
-  let {cluster, obj, name} = {...props}
-  const [value,setValue] = useState(cluster.getPropertyValue(obj,name))
+function getItemValue(def: PropDef, obj: TreeItem) {
+  return obj[def.key]
+}
+function getRendererForEnumProperty(def: PropDef, obj: TreeItem) {
+  return def.renderer
+}
+
+function setItemValue(provider: TreeItemProvider, def: PropDef, obj: TreeItem, value: any) {
+  const oldValue = obj[def.key]
+  obj[def.key] = value
+  provider.fire(TREE_ITEM_PROVIDER.PROPERTY_CHANGED,{
+    provider: provider,
+    child:obj,
+    propKey:def.key,
+    oldValue:oldValue,
+    newValue:value
+  })
+}
+
+function getPropertyEnumValues(def: PropDef, item: TreeItem) {
+  return def.values
+}
+
+
+function isPropertyLive(def: PropDef, obj: TreeItem) {
+  return def.live
+}
+
+
+
+const NumberEditor1 = (props:{def:PropDef,obj:TreeItem, provider:TreeItemProvider}) => {
+  let {def, obj} = props
+  const [value,setValue] = useState(obj[def.key])
   let step = 1
-  if(cluster.hasHints(obj,name)) {
-    const hints = cluster.getHints(obj,name)
+  if(def.hints) {
+    const hints = def.hints as NumberHints
     if('incrementValue' in hints) step = hints.incrementValue
   }
   function setObjectValue(v:any, offset=0) {
     if(!isNaN(parseFloat(v))) {
       v = parseFloat(v)
       v += offset
-      if(cluster.hasHints(obj,name)) {
-        const hints = cluster.getHints(obj, name)
-        if('min' in hints) v = Math.max(v,hints.min)
-        if('max' in hints) v = Math.min(v,hints.max)
+      if(def.hints) {
+        const hints = def.hints as NumberHints
+        if('min' in hints) { // @ts-ignore
+          v = Math.max(v,hints.min)
+        }
+        if('max' in hints) { // @ts-ignore
+          v = Math.min(v,hints.max)
+        }
       }
       setValue(v)
-      cluster.setPropertyValue(obj, name, v)
+      setItemValue(props.provider,def,obj,v)
     }
   }
   return <input type='number' value={value} step={step}
   onChange={(e)=> {
     setValue(e.target.value)
-    if(cluster.isPropertyLive(obj,name)) setObjectValue(e.target.value)
+    if(isPropertyLive(def,obj)) setObjectValue(e.target.value)
   }}
   // onKeyDown={(e:KeyboardEvent)=>{
   //   if(e.key === 'ArrowUp' && e.shiftKey) {
@@ -158,93 +225,88 @@ const NumberEditor1 = (props:{cluster:ClusterDelegate,obj:TreeItem,name:string})
   />
 }
 
-const BooleanEditor1 = (props:{cluster:ClusterDelegate,obj:any,name:string}) => {
-  let {cluster, obj, name} = props
-  const [value,setValue] = useState(cluster.getPropertyValue(obj,name))
+const BooleanEditor1 = (props:{def:PropDef, obj:TreeItem, provider:TreeItemProvider}) => {
+  let {def, obj, provider} = props
+  const [value,setValue] = useState(obj[def.key])
   return <input type='checkbox' checked={value}
   onChange={(e)=>{
     setValue(e.target.checked)
-    cluster.setPropertyValue(obj,name,e.target.checked)
+    setItemValue(provider,def,obj,e.target.checked)
   }}/>
-
 }
 
-const StringEditor1 = (props:{cluster:ClusterDelegate,obj:any,name:string})=>{
-  let {cluster, obj, name} = props
-  const pv = cluster.getPropertyValue(obj,name)
+const StringEditor1 = (props:{
+  provider:TreeItemProvider,
+  obj:TreeItem,
+  def:PropDef,
+  })=>{
+  let {obj,provider, def} = props
+  const pv = getItemValue(def,obj)
   const [value,setValue] = useState(pv)
   return <input type='string'
-  value={value}
-  onChange={(e)=>{
-    setValue(e.target.value)
-    if(cluster.isPropertyLive(obj,name)) {
-      cluster.setPropertyValue(obj, name, e.target.value)
-    }
-  }}
-  onKeyPress={(e)=>{
-    if(e.charCode === 13) {
-      cluster.setPropertyValue(obj,name,value)
-    }
-  }}
-  onBlur={()=>{
-    cluster.setPropertyValue(obj,name,value)
-  }}
+                value={value}
+                onChange={(e)=>{
+                  setValue(e.target.value)
+                  if(isPropertyLive(def,obj)) {
+                    setItemValue(provider,def,obj, e.target.value)
+                  }
+                }}
+                onKeyPress={(e)=>{
+                  if(e.charCode === 13) {
+                    setItemValue(provider,def,obj, value)
+                  }
+                }}
+                onBlur={()=> setItemValue(provider,def,obj, value)}
   />
 }
 
-const EnumEditor1 = (props:{cluster:ClusterDelegate,obj:TreeItem,name:string}) => {
-  let {cluster, obj, name} = props
-  const [value,setValue] = useState(cluster.getPropertyValue(obj,name))
-  const context = useContext(PopupManagerContext) as any
-  let EnumItemRenderer = cluster.getRendererForEnumProperty(obj,name,value)
+
+const EnumEditor1 = (props:{def:PropDef,item:TreeItem,provider:TreeItemProvider}) => {
+  let {def, item,provider} = props
+  const [value,setValue] = useState(getItemValue(def,item))
+  const PM = useContext(PopupManagerContext) as any
+  let EnumItemRenderer = getRendererForEnumProperty(def,item)
   if(!EnumItemRenderer) EnumItemRenderer = StandardEnumRenderer
 
-  let selectedRenderedValue = <EnumItemRenderer object={obj} name={name} value={value}/>
+  let selectedRenderedValue = <EnumItemRenderer object={item} name={name} value={value}/>
 
   function open(e:MouseEvent) {
-    context.show(<EnumPicker
-      object={obj}
-    cluster={cluster}
-    name={name}
-    Renderer={EnumItemRenderer}
-    onSelect={(val:any)=>{
-      setValue(val)
-      context.hide()
-      cluster.setPropertyValue(obj,name,val)
-    }}
+    console.log("opening picker")
+    PM.show(<EnumPicker
+      item={item}
+      def={def}
+      Renderer={EnumItemRenderer}
+      onSelect={(val:any)=>{
+        setValue(val)
+        PM.hide()
+        setItemValue(provider,def,item,val)
+      }}
     />, e.target)
   }
   // @ts-ignore
   return <button onClick={open}>{selectedRenderedValue}</button>
 }
 
-const EnumPicker = ({object, name, onSelect, cluster, Renderer}) => {
-  const values = cluster.getPropertyEnumValues(object,name)
-  const items = values.map(val=>
+
+function EnumPicker (props:{def:PropDef,item:TreeItem, onSelect:any, Renderer:any}) {
+  const {item, def, onSelect, Renderer} = props
+  const values = getPropertyEnumValues(def,item)
+  const items = values?.map(val=>
     <HBox
       key={val}
   onClick={(e)=>onSelect(val)}>
   {/*<b>{val}</b>*/}
-  <Renderer object={object} name={name} value={val}/>
+  <Renderer object={item} name={name} value={val}/>
   </HBox>
 )
   return <VBox className="popup-menu">{items}</VBox>
 }
 
-
-type PropSheetProps = {
-  provider:TreeItemProvider
-}
-type PropSheetState = {
-  selection:any,
-}
-
-
 export function PropSheet(props:{provider:TreeItemProvider}) {
   let selMan = useContext(SelectionManagerContext)
   const item = selMan.getSelection()
   const prov = props.provider
-  let clusters = prov.getPropertyClusters(item)
+  let cluster = prov.getPropertyClusters(item)
   const [selection, setSelection] = useState(selMan.getSelection())
   useEffect(() => {
     let hand = (s) => {
@@ -256,8 +318,10 @@ export function PropSheet(props:{provider:TreeItemProvider}) {
     }
   })
 
-  return <div className="prop-wrapper">{Array.from(clusters.keys()).map(key => {
-      return <PropSection key={key} title={key} cluster={clusters.get(key) as ClusterDelegate} prov={prov} item={item}/>
+  console.log("rendering prop sheet with item",item,cluster)
+
+  return <div className="prop-wrapper">{Array.from(cluster.entries()).map(([key,pg]) => {
+      return <PropSection key={key} title={key} cluster={pg} prov={prov} item={item}/>
     })}</div>
 
 
@@ -327,14 +391,14 @@ export function PropSheet(props:{provider:TreeItemProvider}) {
   // }
 }
 
-function PropSection(props:{cluster:ClusterDelegate, title:string, prov:TreeItemProvider, item:TreeItem}) {
+function PropSection(props:{cluster:PropGroup, title:string, prov:TreeItemProvider, item:TreeItem}) {
   let {item, prov, cluster} = props
   return <div className={"prop-sheet"}>
     <header>{props.title}</header>
-    {props.cluster.getPropertyKeys(props.item).map(key => {
+    {props.cluster.map(def => {
       return [
-        <label key={key+'-label'}>{key}</label>,
-        <PropEditor key={key+'-editor-'+item.id} propKey={key} provider={prov} item={item} cluster={cluster}/>
+        <label key={def.key+'-label'}>{def.key}</label>,
+        <PropEditor key={def.key+'-editor-'+item.id} provider={prov} item={item} def={def}/>
       ]
     })}
   </div>

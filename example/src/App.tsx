@@ -6,7 +6,7 @@ import "./css/propsheet.css"
 import "./css/components.css"
 import {TreeTable, SelectionManager, SelectionManagerContext, PropSheet, SELECTION_MANAGER, TREE_ITEM_PROVIDER, TreeItemProvider} from "vized"
 // @ts-ignore
-import {PopupContainer, Spacer} from 'appy-comps'
+import {PopupContainer, Spacer, Popup, PopupManagerContext, PopupManager} from 'appy-comps'
 
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -16,6 +16,7 @@ import {
 
 
 const selMan = new SelectionManager()
+const PM = new PopupManager()
 type Props = {
   provider:any,
 }
@@ -40,6 +41,8 @@ export class RectDocApp extends Component<Props, State> {
     }
     return (
     <SelectionManagerContext.Provider value={selMan}>
+      <PopupManagerContext.Provider value={PM}>
+
     <div className="grid" style={gridStyle}>
       <div className="toolbar gray">
         <button onClick={() => this.props.provider.save()} title={'save project'}>save</button>
@@ -93,6 +96,7 @@ export class RectDocApp extends Component<Props, State> {
       <PopupContainer/>
 
     </div>
+      </PopupManagerContext.Provider>
   </SelectionManagerContext.Provider>)
 
   }

@@ -1,7 +1,7 @@
 // import { setQuery } from './utils'
 // import Selection from './SelectionManager'
 
-import { ClusterDelegate } from "./PropSheet";
+import { PropCluster } from "./PropSheet";
 
 export const TREE_ITEM_PROVIDER = {
   EXPANDED_CHANGED: 'EXPANDED_CHANGED',
@@ -58,7 +58,6 @@ export type TreeItem = {
   children:TreeItem[],
 }
 
-export type Cluster = Map<string,ClusterDelegate>;
 
 interface TreeItemProviderInterface {
   on(type: string, cb: Callback): void
@@ -84,8 +83,8 @@ interface TreeItemProviderInterface {
   // ================ properties ==================
   setPropertyValue(item:TreeItem, def:any, value:any): void
   setPropertyValueByName(child:TreeItem, name:string, value:any): void
-  getProperties(item:TreeItem): void
-  getPropertyClusters(item:TreeItem):Cluster
+  // getProperties(item:TreeItem): void
+  getPropertyClusters(item:TreeItem):PropCluster
 
   // ================ doc def stuff
   getDocId(): string
@@ -333,7 +332,7 @@ export class TreeItemProvider implements TreeItemProviderInterface {
   }
   getChildren = (item:TreeItem) => item.children
 
-  getPropertyClusters(item: TreeItem):Cluster {
+  getPropertyClusters(item: TreeItem):PropCluster {
     throw new Error("getPropertyClusters not defined")
   }
 }
