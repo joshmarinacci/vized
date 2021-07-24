@@ -1,9 +1,11 @@
+import React from "react";
+
 export const SELECTION_MANAGER = {
   CHANGED: 'CHANGED',
   DROP_TARGET_CHANGED: 'DROP_TARGET'
 }
 
-class SelectionManager {
+export class SelectionManager {
   private listeners: {}
   private selected: any[]
   private dropTarget: null
@@ -94,4 +96,4 @@ class SelectionManager {
   }
 }
 
-export default new SelectionManager()
+export const SelectionManagerContext = React.createContext(new SelectionManager())

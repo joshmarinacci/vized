@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from "react";
-import selMan from './SelectionManager'
+import React, { useContext, useEffect, useState } from "react";
+import { SELECTION_MANAGER, SelectionManagerContext } from "./SelectionManager";
 // @ts-ignore
 import { PopupManagerContext, VBox } from 'appy-comps'
 import { Spacer } from './GridEditorApp'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
-  faCoffee,
   IconName,
   IconPrefix,
   faCaretDown,
@@ -64,13 +63,14 @@ function DragBars(props: {
 
 function TreeTableItem(props: {
   depth: number
-  node: any
+  node: TreeItem
   provider: TreeItemProvider
   // onDragStart: any
   // onDragOver: any
   // onDragEnd: any
   // onDrop: any
 }) {
+  const selMan = useContext(SelectionManagerContext)
   const onSelect = (e: any) => {
     if (e.shiftKey) {
       selMan.addToSelection(props.node)
@@ -181,6 +181,7 @@ export function TreeTable(props: { provider: TreeItemProvider; root: TreeItem })
   const [root, setRoot] = useState(props.root)
   const [count, setCount] = useState(0)
   // console.log('tree table root is',props.root)
+  let selman = useContext(SelectionManagerContext)
 
   useEffect(() => {
     let listener = (item:TreeItem) => {
@@ -189,8 +190,10 @@ export function TreeTable(props: { provider: TreeItemProvider; root: TreeItem })
       setCount(count+1)
     }
     props.provider.on(TREE_ITEM_PROVIDER.EXPANDED_CHANGED,listener)
+    selman.on(SELECTION_MANAGER.CHANGED,listener)
     return () => {
         props.provider.off(TREE_ITEM_PROVIDER.EXPANDED_CHANGED, listener)
+      selman.off(SELECTION_MANAGER.CHANGED,listener)
         // selMan.off(SELECTION_MANAGER.CHANGED, this.other_listener)
     }
   })

@@ -1,11 +1,11 @@
-import React, {Component, useState, useContext} from 'react';
+import React, { Component, useState, useContext, useEffect } from "react";
 // @ts-ignore
 import {HBox, PopupManager, PopupManagerContext, VBox} from 'appy-comps'
 
-import selMan, {SELECTION_MANAGER} from "./SelectionManager";
+import { SELECTION_MANAGER, SelectionManagerContext } from "./SelectionManager";
 // @ts-ignore
 import HSLUVColorPicker from "./HSLUVColorPicker";
-import { TreeItemProvider, TREE_ITEM_PROVIDER, TreeItem } from "./TreeItemProvider";
+import { TreeItemProvider, TREE_ITEM_PROVIDER, TreeItem, Cluster } from "./TreeItemProvider";
 
 import "./propsheet.css"
 
@@ -42,22 +42,19 @@ export class ClusterDelegate {
       }
     })
   }
-  // @ts-ignore
-  getPropertyKeys(item:object) {
+  getPropertyKeys(item:TreeItem):string[] {
     return this.propKeys
   }
-  getPropertyValue(item:object,key:string) {
+  getPropertyValue(item:TreeItem,key:string):any {
     return item[key]
   }
   getPropertyDefaultValue(key:string) {
     return this.propsMap[key].default
   }
-  // @ts-ignore
-  getPropertyType(item,key:string) {
+  getPropertyType(item:TreeItem,key:string) {
     return this.propsMap[key].type
   }
-  // @ts-ignore
-  isPropertyLocked(item:object,key:string) {
+  isPropertyLocked(item:TreeItem,key:string) {
     return this.propsMap[key].locked
   }
   // @ts-ignore
@@ -65,7 +62,7 @@ export class ClusterDelegate {
     return this.propsMap[key].live
   }
   // @ts-ignore
-  getPropertyEnumValues(item,key:string) {
+  getPropertyEnumValues(item:TreeItem,key:string):any[] {
     return this.propsMap[key].values
   }
   // @ts-ignore
@@ -73,7 +70,7 @@ export class ClusterDelegate {
     return this.propsMap[key].renderer
   }
   // @ts-ignore
-  setPropertyValue(item,key:string,value) {
+  setPropertyValue(item:TreeItem,key:string,value):void {
     console.log("setting value to",value)
     const oldValue = item[key]
     item[key] = value
@@ -85,12 +82,10 @@ export class ClusterDelegate {
       newValue:value
     })
   }
-  // @ts-ignore
   hasHints(item,key:string) {
     if(this.propsMap[key].hints) return true
     return false
   }
-  // @ts-ignore
   getHints(item,key:string) {
     return this.propsMap[key].hints
   }
@@ -102,7 +97,7 @@ const StandardEnumRenderer = (props:{object:object, key:string, value:any}) => {
 }
 type PropEditorProps = {
   cluster:any,
-  item:object,
+  item:TreeItem,
   propKey:string,
   provider:TreeItemProvider,
 }
@@ -120,7 +115,7 @@ class PropEditor extends Component<PropEditorProps, {}> {
   }
 }
 
-const NumberEditor1 = (props:{cluster:ClusterDelegate,obj:object,name:string}) => {
+const NumberEditor1 = (props:{cluster:ClusterDelegate,obj:TreeItem,name:string}) => {
   let {cluster, obj, name} = {...props}
   const [value,setValue] = useState(cluster.getPropertyValue(obj,name))
   let step = 1
@@ -197,7 +192,7 @@ const StringEditor1 = (props:{cluster:ClusterDelegate,obj:any,name:string})=>{
   />
 }
 
-const EnumEditor1 = (props:{cluster:ClusterDelegate,obj:object,name:string}) => {
+const EnumEditor1 = (props:{cluster:ClusterDelegate,obj:TreeItem,name:string}) => {
   let {cluster, obj, name} = props
   const [value,setValue] = useState(cluster.getPropertyValue(obj,name))
   const context = useContext(PopupManagerContext) as any
@@ -236,6 +231,7 @@ const EnumPicker = ({object, name, onSelect, cluster, Renderer}) => {
   return <VBox className="popup-menu">{items}</VBox>
 }
 
+
 type PropSheetProps = {
   provider:TreeItemProvider
 }
@@ -243,41 +239,63 @@ type PropSheetState = {
   selection:any,
 }
 
-export class PropSheet extends Component<PropSheetProps,PropSheetState> {
-  private h2: () => void;
-  private hand: (s) => void;
-  constructor(props) {
-    super(props)
-    this.state = {
-      selection:null
+
+export function PropSheet(props:{provider:TreeItemProvider}) {
+  let selMan = useContext(SelectionManagerContext)
+  const item = selMan.getSelection()
+  const prov = props.provider
+  let clusters = prov.getPropertyClusters(item)
+  const [selection, setSelection] = useState(selMan.getSelection())
+  useEffect(() => {
+    let hand = (s) => {
+      setSelection(selMan.getSelection())
     }
-  }
-  componentDidMount() {
-    this.h2 = () => this.setState({selection:selMan.getSelection()})
-    this.props.provider.on(TREE_ITEM_PROVIDER.PROPERTY_CHANGED,this.h2)
-    this.hand = (s) => this.setState({selection:selMan.getSelection()})
-    selMan.on(SELECTION_MANAGER.CHANGED, this.hand)
-  }
-  componentWillUnmount() {
-    selMan.off(SELECTION_MANAGER.CHANGED, this.hand);
-    this.props.provider.off(TREE_ITEM_PROVIDER.PROPERTY_CHANGED,this.h2)
-  }
-  render() {
+    selMan.on(SELECTION_MANAGER.CHANGED, hand)
+    return () => {
+      selMan.off(SELECTION_MANAGER.CHANGED,hand)
+    }
+  })
+
+  return <div className="prop-wrapper">{Array.from(clusters.keys()).map(key => {
+      return <PropSection key={key} title={key} cluster={clusters.get(key) as ClusterDelegate} prov={prov} item={item}/>
+    })}</div>
+
+
+// export class PropSheet extends Component<PropSheetProps,PropSheetState> {
+//   private h2: () => void;
+//   private hand: (s) => void;
+//   constructor(props) {
+//     super(props)
+//     this.state = {
+//       selection:null
+//     }
+//   }
+//   componentDidMount() {
+    // this.h2 = () => this.setState({selection:selMan.getSelection()})
+    // this.props.provider.on(TREE_ITEM_PROVIDER.PROPERTY_CHANGED,this.h2)
+    // this.hand = (s) => this.setState({selection:selMan.getSelection()})
+    // selMan.on(SELECTION_MANAGER.CHANGED, this.hand)
+  // }
+  // componentWillUnmount() {
+    // selMan.off(SELECTION_MANAGER.CHANGED, this.hand);
+    // this.props.provider.off(TREE_ITEM_PROVIDER.PROPERTY_CHANGED,this.h2)
+  // }
+  // render() {
     // const item = selMan.getSelection()
     // const prov = this.props.provider
     // let clusters = prov.getPropertyClusters(item)
     // return <div className="prop-wrapper">{Object.keys(clusters).map(key => {
     //     return <PropSection key={key} title={key} cluster={clusters[key]} prov={prov} item={item}/>
     //   })}</div>
-    return <div>prop sheet stuff here</div>
-  }
-  renderIndeterminate(prop) {
-    if(prop.isIndeterminate()) {
-      return <i key={prop.getKey()+'-indeterminate'} className="icon fa fa-exclamation-circle"/>
-    } else {
-      return ""
-    }
-  }
+    // return <div>prop sheet stuff here</div>
+  // }
+  // renderIndeterminate(prop) {
+  //   if(prop.isIndeterminate()) {
+  //     return <i key={prop.getKey()+'-indeterminate'} className="icon fa fa-exclamation-circle"/>
+  //   } else {
+  //     return ""
+  //   }
+  // }
   /*
   calculateProps() {
     const items = selMan.getFullSelection()
@@ -298,41 +316,29 @@ export class PropSheet extends Component<PropSheetProps,PropSheetState> {
     });
   }
    */
-  calculateGroups(props) {
-    const group_defs = props.filter(p => p.getType() === TYPES.GROUP)
-    group_defs.forEach(def => {
-      const group_keys = def.getGroupKeys()
-      //remove any groups in the group keys of a group def
-      props = props.filter(p => group_keys.indexOf(p.getKey())<0)
-    })
-    return props
-  }
+  // calculateGroups(props) {
+  //   const group_defs = props.filter(p => p.getType() === TYPES.GROUP)
+  //   group_defs.forEach(def => {
+  //     const group_keys = def.getGroupKeys()
+  //     //remove any groups in the group keys of a group def
+  //     props = props.filter(p => group_keys.indexOf(p.getKey())<0)
+  //   })
+  //   return props
+  // }
 }
 
-
-/*class PropSection extends Component {
-  render() {
-    return <div className="prop-sheet">
-      <header>{this.props.title}</header>
-    {
-      this.props.cluster.getPropertyKeys(this.props.item).map(key => {
-        return [
-          <label key={key+'-label'}>{key}</label>,
-          this.renderPropEditor(this.props.cluster,this.props.item,key)
-        ]
-      })
-    }
-    </div>
-  }
-
-  calculateDefs() {
-  }
-
-  renderPropEditor(cluster, item, key) {
-    return <PropEditor key={key+'-editor-'+item.id} propKey={key} provider={this.props.provider} item={item} cluster={cluster}/>
-  }
+function PropSection(props:{cluster:ClusterDelegate, title:string, prov:TreeItemProvider, item:TreeItem}) {
+  let {item, prov, cluster} = props
+  return <div className={"prop-sheet"}>
+    <header>{props.title}</header>
+    {props.cluster.getPropertyKeys(props.item).map(key => {
+      return [
+        <label key={key+'-label'}>{key}</label>,
+        <PropEditor key={key+'-editor-'+item.id} propKey={key} provider={prov} item={item} cluster={cluster}/>
+      ]
+    })}
+  </div>
 }
-*/
 //return items from A that are also in B
 function calculateIntersection(A,B) {
   return  A.filter((pa)=> B.find((pb)=>pa.key===pb.key))

@@ -1,4 +1,4 @@
-import {TreeItemProvider, TreeItem, ClusterDelegate } from "vized";
+import {TreeItemProvider, TreeItem, ClusterDelegate, Cluster } from "vized";
 import React from 'react'
 import {RectDocApp} from './App'
 import { PROP_TYPES } from "vized";
@@ -11,10 +11,12 @@ const ColorValueRenderer = (props:{object:any, key:string, value:any}) => {
   }}>{props.value}</b>
 }
 
-function makeClusterDef(provider:TreeItemProvider,json:object) {
-  const obj = {}
+
+
+function makeClusterDef(provider:TreeItemProvider,json:object):Cluster {
+  const obj = new Map()
   Object.keys(json).map(clusterKey => {
-    obj[clusterKey] = new ClusterDelegate(provider,clusterKey,json[clusterKey])
+    obj.set(clusterKey,new ClusterDelegate(provider,clusterKey,json[clusterKey]))
   })
   return obj
 }
@@ -103,26 +105,27 @@ const SquareDef = {
 
 
 
-// @ts-ignore
-function makeFromDef(clusters, override):TreeItem {
+function makeFromDef(clusters:Cluster, override:any):TreeItem {
   const obj = {}
-  Object.keys(clusters).forEach(cKey => {
-    const cluster = clusters[cKey]
-    cluster.getPropertyKeys().forEach((key:string) => {
-      console.log(key)
+  // @ts-ignore
+  let item:TreeItem = null
+  Array.from(clusters.entries()).forEach(([cKey,cluster])=>{
+    console.log("key is",cKey,cluster)
+    // const cluster:ClusterDelegate = clusters.get(cKey) as ClusterDelegate
+    for(let key of cluster.getPropertyKeys(item)) {
       if(key in override) {
         obj[key] = override[key]
       } else {
         obj[key] = cluster.getPropertyDefaultValue(key)
       }
-    })
+    }
   })
   return obj as TreeItem
 }
 
 export class RectDocEditor extends TreeItemProvider {
-  private squareClusters: {};
-  private groupClusters: {};
+  private squareClusters: Cluster;
+  private groupClusters: Cluster;
   constructor(options:any) {
     super(options)
     this.squareClusters = makeClusterDef(this,SquareDef)
@@ -147,12 +150,12 @@ export class RectDocEditor extends TreeItemProvider {
   getSceneRoot():TreeItem {
     return this.root
   }
-  getPropertyClusters(item:any) {
-    if(item) {
+  getPropertyClusters(item:TreeItem):Cluster {
+    if (item) {
       if (item.type === 'square') return this.squareClusters
       if (item.type === 'group') return this.groupClusters
     }
-    return {}
+    return new Map()
   }
 
   canAddChild(item:TreeItem) {

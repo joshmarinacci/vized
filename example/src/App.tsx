@@ -2,16 +2,12 @@ import 'vized/dist/index.css'
 import React, {Component} from 'react'
 // import "../../css/grid.css"
 import "./grid.css"
-import {TreeTable} from "vized"
-// import PropSheet from '../../src/PropSheet'
+import "./treetable.css"
+import {TreeTable, SelectionManager, SelectionManagerContext, PropSheet} from "vized"
 // @ts-ignore
 import {PopupContainer, Spacer} from 'appy-comps'
-// import SelectionManager, {SELECTION_MANAGER} from '../../src/SelectionManager'
-// import {TREE_ITEM_PROVIDER} from '../../src/TreeItemProvider'
 
-// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-// import { faCoffee } from '@fortawesome/free-solid-svg-icons'
-
+const selman = new SelectionManager()
 type Props = {
   provider:any,
 }
@@ -34,7 +30,9 @@ export class RectDocApp extends Component<Props, State> {
       gridTemplateColumns: `${this.state.leftDivider} 0px 1fr 0px ${this.state.rightDivider}`,
       gridTemplateRows: `2rem 1fr 2rem 0px ${this.state.bottomDivider}`,
     }
-    return <div className="grid" style={gridStyle}>
+    return (
+    <SelectionManagerContext.Provider value={selman}>
+    <div className="grid" style={gridStyle}>
       <div className="toolbar gray">
         <button onClick={() => this.props.provider.save()} title={'save project'}>save</button>
       </div>
@@ -53,7 +51,7 @@ export class RectDocApp extends Component<Props, State> {
 
 
       <div className={'panel high-2'}>
-        <TreeTable root={this.props.provider.getSceneRoot()} provider={this.props.provider}/>
+          <TreeTable root={this.props.provider.getSceneRoot()} provider={this.props.provider}/>
       </div>
 
 
@@ -66,7 +64,7 @@ export class RectDocApp extends Component<Props, State> {
       <Resizer onMouseDown={this.resizeRight}/>
 
       <div className={'panel high-2'} style={{ backgroundColor: '#ecf0f1'}}>
-        {/*<PropSheet provider={this.props.provider}/>*/}
+        <PropSheet provider={this.props.provider}/>
       </div>
 
 
@@ -83,6 +81,7 @@ export class RectDocApp extends Component<Props, State> {
       <PopupContainer/>
 
     </div>
+  </SelectionManagerContext.Provider>)
 
   }
 
