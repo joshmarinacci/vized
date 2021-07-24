@@ -5,7 +5,8 @@ import "./css/treetable.css"
 import "./css/propsheet.css"
 import "./css/components.css"
 import {TreeTable, SelectionManager, SelectionManagerContext, PropSheet, SELECTION_MANAGER, TREE_ITEM_PROVIDER, TreeItemProvider,
-  PopupManager, PopupManagerContext, PopupContainer
+  PopupManager, PopupManagerContext, PopupContainer,
+  StorageManager, StorageManagerContext, Spacer,
 } from "vized"
 // @ts-ignore
 // import {Spacer} from 'appy-comps'
@@ -18,6 +19,7 @@ import {
 import { RectDocEditor } from "./RectDocEditor";
 
 
+const STORAGE = new StorageManager()
 const selMan = new SelectionManager()
 const PM = new PopupManager()
 type Props = {
@@ -35,10 +37,43 @@ export function App() {
   return(
     <SelectionManagerContext.Provider value={selMan}>
       <PopupManagerContext.Provider value={PM}>
-        <RectDocApp  provider={provider}/>
+        <StorageManagerContext.Provider value={STORAGE}>
+          <RectDocApp  provider={provider}/>
+        </StorageManagerContext.Provider>
       </PopupManagerContext.Provider>
     </SelectionManagerContext.Provider>
   )
+}
+
+function ExportButton(props:{provider:TreeItemProvider}) {
+  let SM = useContext(StorageManagerContext) as StorageManager
+  const save = () => {
+    let json = props.provider.save() as object
+    SM.forceJSONDownload(json,'graphics')
+  }
+  return <button onClick={save} title={'save project'}>export</button>
+}
+
+function SaveButton(props:{provider:TreeItemProvider}) {
+  let SM = useContext(StorageManagerContext) as StorageManager
+  const save = () => {
+    let json = props.provider.save() as object
+    SM.saveToLocalStorage(json,'LAST_DOC')
+  }
+  return <button onClick={save} title={'save project'}>save</button>
+}
+
+function LoadButton(props: { provider: any }) {
+  let SM = useContext(StorageManagerContext) as StorageManager
+  const load = () => {
+    let json = SM.loadFromLocalStorage('LAST_DOC')
+    if(json) {
+      props.provider.load(json)
+    } else {
+      console.log("error loading json")
+    }
+  }
+  return <button onClick={load} title={'load last project'}>last</button>
 }
 
 export class RectDocApp extends Component<Props, State> {
@@ -55,11 +90,14 @@ export class RectDocApp extends Component<Props, State> {
       gridTemplateColumns: `${this.state.leftDivider} 0px 1fr 0px ${this.state.rightDivider}`,
       gridTemplateRows: `2rem 1fr 2rem 0px ${this.state.bottomDivider}`,
     }
+
     return (
 
     <div className="grid" style={gridStyle}>
       <div className="toolbar gray">
-        <button onClick={() => this.props.provider.save()} title={'save project'}>save</button>
+        <ExportButton provider={this.props.provider}/>
+        <SaveButton provider={this.props.provider}/>
+        <LoadButton provider={this.props.provider}/>
       </div>
 
       <Resizer onMouseDown={this.resizeLeft}/>
@@ -71,7 +109,7 @@ export class RectDocApp extends Component<Props, State> {
       <Resizer onMouseDown={this.resizeRight}/>
 
       <div className="toolbar gray">
-        <label>My Cool Editor</label>
+        <label>Rectangles</label>
       </div>
 
 
@@ -210,8 +248,3 @@ function RectCanvas(props:{provider:TreeItemProvider}) {
   </div>
 }
 
-export default class Spacer extends Component {
-  render() {
-    return <span style={{flex:1}}></span>
-  }
-}

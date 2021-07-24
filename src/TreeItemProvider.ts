@@ -223,12 +223,12 @@ export class TreeItemProvider implements TreeItemProviderInterface {
   }
 
   save = () => {
-    // console.info('saving', this.getSceneRoot())
-    // const payload_obj = {
-    //   doc: this.getSceneRoot(),
-    //   type: this.getDocType(),
-    //   id: this.getDocId()
-    // }
+    const payload_obj = {
+      doc: this.getSceneRoot(),
+      type: this.getDocType(),
+      id: this.getDocId()
+    }
+    return payload_obj
     // const payload_string = JSON.stringify(payload_obj, (key, value) => {
     //   if (key === 'parent') return undefined
     //   return value
@@ -248,6 +248,10 @@ export class TreeItemProvider implements TreeItemProviderInterface {
     //     this.fire(TREE_ITEM_PROVIDER.SAVED, true)
     //   })
     //   .catch((e) => console.log('error', e))
+  }
+
+  load(obj:any) {
+    this.setDocument(obj.doc,obj.id)
   }
 
   // @ts-ignore

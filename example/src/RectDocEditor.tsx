@@ -155,6 +155,11 @@ export class RectDocEditor extends TreeItemProvider {
     return <label>{item.type} {item.id}</label>
   }
 
+  getDocType() {
+    return "rect-doc-editor"
+  }
+
+
   getApp() {
     return <RectDocApp provider={this}/>
   }

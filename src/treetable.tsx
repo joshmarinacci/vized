@@ -185,44 +185,27 @@ export function TreeTable(props: { provider: TreeItemProvider; root: TreeItem })
   let selman = useContext(SelectionManagerContext)
 
   useEffect(() => {
-    let listener = (item:TreeItem) => {
+    let listener = () => {
       setRoot(props.provider.getSceneRoot())
       setCount(count+1)
     }
     props.provider.on(TREE_ITEM_PROVIDER.EXPANDED_CHANGED,listener)
+    props.provider.on(TREE_ITEM_PROVIDER.STRUCTURE_ADDED,listener)
+    props.provider.on(TREE_ITEM_PROVIDER.STRUCTURE_CHANGED,listener)
+    props.provider.on(TREE_ITEM_PROVIDER.STRUCTURE_REMOVED,listener)
     selman.on(SELECTION_MANAGER.CHANGED,listener)
     return () => {
-        props.provider.off(TREE_ITEM_PROVIDER.EXPANDED_CHANGED, listener)
+      props.provider.off(TREE_ITEM_PROVIDER.EXPANDED_CHANGED, listener)
+      props.provider.off(TREE_ITEM_PROVIDER.STRUCTURE_ADDED,listener)
+      props.provider.off(TREE_ITEM_PROVIDER.STRUCTURE_CHANGED,listener)
+      props.provider.off(TREE_ITEM_PROVIDER.STRUCTURE_REMOVED,listener)
       selman.off(SELECTION_MANAGER.CHANGED,listener)
     }
   })
   // componentDidMount() {
-  //   this.listener = this.props.provider.on(
-  //     TREE_ITEM_PROVIDER.EXPANDED_CHANGED,
-  //     (item) => this.setState({ root: this.props.provider.getSceneRoot() })
-  //   )
-  //   this.props.provider.on(TREE_ITEM_PROVIDER.STRUCTURE_ADDED, (item) =>
-  //     this.setState({ root: this.props.provider.getSceneRoot() })
-  //   )
-  //   this.props.provider.on(TREE_ITEM_PROVIDER.STRUCTURE_CHANGED, (item) =>
-  //     this.setState({ root: this.props.provider.getSceneRoot() })
-  //   )
-  //
-  //   this.other_listener = selMan.on(SELECTION_MANAGER.CHANGED, (sel) =>
-  //     this.setState({ selection: sel })
-  //   )
   //   selMan.on(SELECTION_MANAGER.DROP_TARGET_CHANGED, (sel) =>
   //     this.setState({ dropTarget: selMan.getDropTarget() })
   //   )
-  // }
-
-  // componentWillUnmount() {
-  //   this.props.provider.off(TREE_ITEM_PROVIDER.EXPANDED_CHANGED, this.listener)
-  //   selMan.off(SELECTION_MANAGER.CHANGED, this.other_listener)
-  // }
-  //
-  // componentWillReceiveProps(newProps) {
-  //   if (newProps.root) this.setState({ root: newProps.root })
   // }
 
   // onDragStart = (e, item) => {
@@ -320,9 +303,7 @@ export function TreeTable(props: { provider: TreeItemProvider; root: TreeItem })
 
   // if (!this.state.root) return <ul>no root yet</ul>
   const children: any[] = []
-  generateChildren(props.root, children, 0)
-  // console.log("rendered children are",children)
-  // return <div>tree table here</div>
+  generateChildren(root, children, 0)
   return (
     <ul className='tree-table'>
       {children.map((info, i) => {
