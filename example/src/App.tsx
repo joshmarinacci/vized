@@ -4,15 +4,18 @@ import "./css/grid.css"
 import "./css/treetable.css"
 import "./css/propsheet.css"
 import "./css/components.css"
-import {TreeTable, SelectionManager, SelectionManagerContext, PropSheet, SELECTION_MANAGER, TREE_ITEM_PROVIDER, TreeItemProvider} from "vized"
+import {TreeTable, SelectionManager, SelectionManagerContext, PropSheet, SELECTION_MANAGER, TREE_ITEM_PROVIDER, TreeItemProvider,
+  PopupManager, PopupManagerContext, PopupContainer
+} from "vized"
 // @ts-ignore
-import {PopupContainer, Spacer, Popup, PopupManagerContext, PopupManager} from 'appy-comps'
+// import {Spacer} from 'appy-comps'
 
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faCaretRight, faCaretLeft
 } from "@fortawesome/free-solid-svg-icons";
+import { RectDocEditor } from "./RectDocEditor";
 
 
 const selMan = new SelectionManager()
@@ -25,6 +28,19 @@ type State = {
   rightDivider:string,
   bottomDivider:string,
 }
+
+let provider = new RectDocEditor({})
+
+export function App() {
+  return(
+    <SelectionManagerContext.Provider value={selMan}>
+      <PopupManagerContext.Provider value={PM}>
+        <RectDocApp  provider={provider}/>
+      </PopupManagerContext.Provider>
+    </SelectionManagerContext.Provider>
+  )
+}
+
 export class RectDocApp extends Component<Props, State> {
   constructor({ props }: { props: any }) {
     super(props)
@@ -40,8 +56,6 @@ export class RectDocApp extends Component<Props, State> {
       gridTemplateRows: `2rem 1fr 2rem 0px ${this.state.bottomDivider}`,
     }
     return (
-    <SelectionManagerContext.Provider value={selMan}>
-      <PopupManagerContext.Provider value={PM}>
 
     <div className="grid" style={gridStyle}>
       <div className="toolbar gray">
@@ -94,11 +108,7 @@ export class RectDocApp extends Component<Props, State> {
       </div>
       <Resizer onMouseDown={this.resizeRight}/>
       <PopupContainer/>
-
-    </div>
-      </PopupManagerContext.Provider>
-  </SelectionManagerContext.Provider>)
-
+    </div>)
   }
 
 
@@ -198,4 +208,10 @@ function RectCanvas(props:{provider:TreeItemProvider}) {
             // onMouseMove={this.mouseMove}
     />
   </div>
+}
+
+export default class Spacer extends Component {
+  render() {
+    return <span style={{flex:1}}></span>
+  }
 }

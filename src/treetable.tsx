@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { SELECTION_MANAGER, SelectionManagerContext } from "./SelectionManager";
 // @ts-ignore
-import { PopupManagerContext, VBox } from 'appy-comps'
+// import { PopupManagerContext, VBox } from 'appy-comps'
 import { Spacer } from './GridEditorApp'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
@@ -13,6 +13,8 @@ import {
 
 import './css/treetable.css'
 import { TREE_ITEM_PROVIDER, TreeItem, TreeItemProvider } from "./TreeItemProvider";
+import { PopupManagerContext } from "./util/PopupManager";
+import {HBox,VBox} from "./util/Hbox"
 
 const ContextMenu = (props: { menu: any }) => {
   return (

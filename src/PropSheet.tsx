@@ -1,13 +1,14 @@
 import React, { Component, useState, useContext, useEffect } from "react";
 // @ts-ignore
-import {HBox, PopupManager, PopupManagerContext, VBox} from 'appy-comps'
 
+import {PopupManagerContext, PopupManager} from "./util/PopupManager"
 import { SELECTION_MANAGER, SelectionManagerContext } from "./SelectionManager";
 // @ts-ignore
 import HSLUVColorPicker from "./HSLUVColorPicker";
 import { TreeItemProvider, TREE_ITEM_PROVIDER, TreeItem } from "./TreeItemProvider";
 
 import "./css/propsheet.css"
+import { HBox, VBox } from "./util/Hbox";
 
 export const TYPES = {
   STRING:'string',
@@ -271,7 +272,7 @@ const EnumEditor1 = (props:{def:PropDef,item:TreeItem,provider:TreeItemProvider}
   let selectedRenderedValue = <EnumItemRenderer object={item} name={name} value={value}/>
 
   function open(e:MouseEvent) {
-    console.log("opening picker")
+    console.log("opening picker",e.target,PM)
     PM.show(<EnumPicker
       item={item}
       def={def}

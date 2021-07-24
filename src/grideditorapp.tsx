@@ -1,7 +1,9 @@
 import React, {Component} from 'react'
 // @ts-ignore
-import {PopupManager, VBox, PopupManagerContext} from 'appy-comps'
+// import {PopupManager, VBox, PopupManagerContext} from 'appy-comps'
 import {makePoint} from './utils'
+import { PopupManagerContext } from './util/PopupManager';
+import { VBox } from './util/Hbox';
 
 const GridLayout = (props:{
   showRight: boolean;
