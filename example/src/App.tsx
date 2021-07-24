@@ -1,9 +1,9 @@
 import 'vized/dist/index.css'
-import React, {Component} from 'react'
+import React, { Component, useContext, useEffect, useRef } from "react";
 // import "../../css/grid.css"
 import "./grid.css"
 import "./treetable.css"
-import {TreeTable, SelectionManager, SelectionManagerContext, PropSheet} from "vized"
+import {TreeTable, SelectionManager, SelectionManagerContext, PropSheet, SELECTION_MANAGER, TREE_ITEM_PROVIDER, TreeItemProvider} from "vized"
 // @ts-ignore
 import {PopupContainer, Spacer} from 'appy-comps'
 
@@ -58,7 +58,7 @@ export class RectDocApp extends Component<Props, State> {
       <Resizer onMouseDown={this.resizeLeft}/>
 
       <div className="panel">
-        {/*<RectCanvas provider={this.props.provider}/>*/}
+        <RectCanvas provider={this.props.provider}/>
       </div>
 
       <Resizer onMouseDown={this.resizeRight}/>
@@ -143,43 +143,51 @@ const Resizer = (props:any) => {
   return <div className="resizer" {...props}/>
 }
 
-// @ts-ignore
-type RectCanvasProps = {
-  provider:any,
+function RectCanvas(props:{provider:TreeItemProvider}) {
+  let canvas = useRef<HTMLCanvasElement>(null);
+  let selMan = useContext(SelectionManagerContext)
+  // componentWillMount() {
+  //   console.log('this.props.provider',this.props.provider)
+  //   SelectionManager.on(SELECTION_MANAGER.CHANGED, this.redraw)
+  //   this.props.provider.on(TREE_ITEM_PROVIDER.STRUCTURE_CHANGED, this.redraw)
+  //   this.props.provider.on(TREE_ITEM_PROVIDER.PROPERTY_CHANGED, this.redraw)
+  // }
+  // componentDidMount() {
+  //   this.redraw()
+  // }
+
+  useEffect(() => {
+    if(canvas.current) redraw()
+    selMan.on(SELECTION_MANAGER.CHANGED, redraw)
+    props.provider.on(TREE_ITEM_PROVIDER.PROPERTY_CHANGED, redraw)
+    return () => {
+      selMan.off(SELECTION_MANAGER.CHANGED,redraw)
+      props.provider.off(TREE_ITEM_PROVIDER.PROPERTY_CHANGED, redraw)
+    }
+  })
+  const redraw = () => {
+    if(!canvas.current) return
+    // @ts-ignore
+    let can = canvas.current as HTMLCanvasElement
+    const c = can.getContext('2d') as CanvasRenderingContext2D
+    c.fillStyle = 'white'
+    c.fillRect(0, 0, can.width, can.height)
+    c.save()
+    props.provider.getSceneRoot().children.forEach((ch:any) => {
+      c.fillStyle = ch.color
+      c.fillRect(ch.x,ch.y,ch.w,ch.h)
+    })
+    c.restore()
+  }
+
+  // @ts-ignore
+  return <div className="panel">
+    <canvas style={{border: '1px solid red', width:'300px', height:'300px'}}
+            width={300} height={300} ref={canvas}
+            // onClick={this.onClick}
+            // onMouseDown={this.mouseDown}
+            // onMouseUp={this.mouseUp}
+            // onMouseMove={this.mouseMove}
+    />
+  </div>
 }
-// class RectCanvas extends Component {
-//   componentWillMount() {
-//     console.log('this.props.provider',this.props.provider)
-//     SelectionManager.on(SELECTION_MANAGER.CHANGED, this.redraw)
-//     this.props.provider.on(TREE_ITEM_PROVIDER.STRUCTURE_CHANGED, this.redraw)
-//     this.props.provider.on(TREE_ITEM_PROVIDER.PROPERTY_CHANGED, this.redraw)
-//   }
-//   componentDidMount() {
-//     this.redraw()
-//   }
-//
-//   redraw = (e) => {
-//     if(!this.canvas) return
-//     const c = this.canvas.getContext('2d')
-//     c.fillStyle = 'white'
-//     c.fillRect(0, 0, this.canvas.width, this.canvas.height)
-//     c.save()
-//     this.props.provider.getSceneRoot().children.forEach(ch => {
-//       c.fillStyle = ch.color
-//       c.fillRect(ch.x,ch.y,ch.w,ch.h)
-//     })
-//     c.restore()
-//   }
-//
-//   render() {
-//     return <div className="panel">
-//       <canvas style={{border: '1px solid red', width:'300px', height:'300px'}}
-//               width={300} height={300} ref={(e) => this.canvas = e}
-//               onClick={this.onClick}
-//               onMouseDown={this.mouseDown}
-//               onMouseUp={this.mouseUp}
-//               onMouseMove={this.mouseMove}
-//       />
-//     </div>
-//   }
-// }
