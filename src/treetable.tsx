@@ -11,7 +11,7 @@ import {
   faCaretRight
 } from "@fortawesome/free-solid-svg-icons";
 
-import './treetable.css'
+import './css/treetable.css'
 import { TREE_ITEM_PROVIDER, TreeItem, TreeItemProvider } from "./TreeItemProvider";
 
 const ContextMenu = (props: { menu: any }) => {

@@ -7,7 +7,7 @@ import { SELECTION_MANAGER, SelectionManagerContext } from "./SelectionManager";
 import HSLUVColorPicker from "./HSLUVColorPicker";
 import { TreeItemProvider, TREE_ITEM_PROVIDER, TreeItem, Cluster } from "./TreeItemProvider";
 
-import "./propsheet.css"
+import "./css/propsheet.css"
 
 export const TYPES = {
   STRING:'string',

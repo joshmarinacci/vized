@@ -1,13 +1,13 @@
 import 'vized/dist/index.css'
 import React, { Component, useContext, useEffect, useRef } from "react";
-// import "../../css/grid.css"
-import "./grid.css"
-import "./treetable.css"
+import "./css/grid.css"
+import "./css/treetable.css"
+import "./css/propsheet.css"
 import {TreeTable, SelectionManager, SelectionManagerContext, PropSheet, SELECTION_MANAGER, TREE_ITEM_PROVIDER, TreeItemProvider} from "vized"
 // @ts-ignore
 import {PopupContainer, Spacer} from 'appy-comps'
 
-const selman = new SelectionManager()
+const selMan = new SelectionManager()
 type Props = {
   provider:any,
 }
@@ -31,7 +31,7 @@ export class RectDocApp extends Component<Props, State> {
       gridTemplateRows: `2rem 1fr 2rem 0px ${this.state.bottomDivider}`,
     }
     return (
-    <SelectionManagerContext.Provider value={selman}>
+    <SelectionManagerContext.Provider value={selMan}>
     <div className="grid" style={gridStyle}>
       <div className="toolbar gray">
         <button onClick={() => this.props.provider.save()} title={'save project'}>save</button>
@@ -146,23 +146,16 @@ const Resizer = (props:any) => {
 function RectCanvas(props:{provider:TreeItemProvider}) {
   let canvas = useRef<HTMLCanvasElement>(null);
   let selMan = useContext(SelectionManagerContext)
-  // componentWillMount() {
-  //   console.log('this.props.provider',this.props.provider)
-  //   SelectionManager.on(SELECTION_MANAGER.CHANGED, this.redraw)
-  //   this.props.provider.on(TREE_ITEM_PROVIDER.STRUCTURE_CHANGED, this.redraw)
-  //   this.props.provider.on(TREE_ITEM_PROVIDER.PROPERTY_CHANGED, this.redraw)
-  // }
-  // componentDidMount() {
-  //   this.redraw()
-  // }
 
   useEffect(() => {
     if(canvas.current) redraw()
     selMan.on(SELECTION_MANAGER.CHANGED, redraw)
     props.provider.on(TREE_ITEM_PROVIDER.PROPERTY_CHANGED, redraw)
+    props.provider.on(TREE_ITEM_PROVIDER.STRUCTURE_CHANGED, redraw)
     return () => {
       selMan.off(SELECTION_MANAGER.CHANGED,redraw)
       props.provider.off(TREE_ITEM_PROVIDER.PROPERTY_CHANGED, redraw)
+      props.provider.off(TREE_ITEM_PROVIDER.STRUCTURE_CHANGED, redraw)
     }
   })
   const redraw = () => {
@@ -180,7 +173,6 @@ function RectCanvas(props:{provider:TreeItemProvider}) {
     c.restore()
   }
 
-  // @ts-ignore
   return <div className="panel">
     <canvas style={{border: '1px solid red', width:'300px', height:'300px'}}
             width={300} height={300} ref={canvas}
