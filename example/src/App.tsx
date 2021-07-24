@@ -63,7 +63,7 @@ function SaveButton(props:{provider:TreeItemProvider}) {
   return <button onClick={save} title={'save project'}>save</button>
 }
 
-function LoadButton(props: { provider: any }) {
+function LoadButton(props: { provider: TreeItemProvider }) {
   let SM = useContext(StorageManagerContext) as StorageManager
   const load = () => {
     let json = SM.loadFromLocalStorage('LAST_DOC')
@@ -76,17 +76,13 @@ function LoadButton(props: { provider: any }) {
   return <button onClick={load} title={'load last project'}>last</button>
 }
 
-function PNGButton(props: { provider: any }) {
+function PNGButton(props: { provider: TreeItemProvider }) {
   let SM = useContext(StorageManagerContext) as StorageManager
   const doit = () => {
     let canvas = document.createElement('canvas')
-    canvas.width = 100
-    canvas.height = 100
-    let c = canvas.getContext('2d') as CanvasRenderingContext2D
-    c.fillStyle = 'white'
-    c.fillRect(0,0,100,100)
-    c.fillStyle = 'red'
-    c.fillRect(20,20,20,20)
+    canvas.width = 300
+    canvas.height = 300
+    draw_to_canvas(canvas,props.provider)
     SM.canvasToPNGBlob(canvas).then(blob => SM.forcePNGDownload(blob,'export'))
   }
   return <button onClick={doit} title={'load last project'}>PNG</button>
@@ -224,6 +220,18 @@ const Resizer = (props:any) => {
   return <div className="resizer" {...props}/>
 }
 
+function draw_to_canvas(can:HTMLCanvasElement, provider:TreeItemProvider) {
+  const c = can.getContext('2d') as CanvasRenderingContext2D
+  c.fillStyle = 'white'
+  c.fillRect(0, 0, can.width, can.height)
+  c.save()
+  provider.getSceneRoot().children.forEach((ch:any) => {
+    c.fillStyle = ch.color
+    c.fillRect(ch.x,ch.y,ch.w,ch.h)
+  })
+  c.restore()
+}
+
 function RectCanvas(props:{provider:TreeItemProvider}) {
   let canvas = useRef<HTMLCanvasElement>(null);
   let selMan = useContext(SelectionManagerContext)
@@ -243,15 +251,7 @@ function RectCanvas(props:{provider:TreeItemProvider}) {
     if(!canvas.current) return
     // @ts-ignore
     let can = canvas.current as HTMLCanvasElement
-    const c = can.getContext('2d') as CanvasRenderingContext2D
-    c.fillStyle = 'white'
-    c.fillRect(0, 0, can.width, can.height)
-    c.save()
-    props.provider.getSceneRoot().children.forEach((ch:any) => {
-      c.fillStyle = ch.color
-      c.fillRect(ch.x,ch.y,ch.w,ch.h)
-    })
-    c.restore()
+    draw_to_canvas(can,props.provider)
   }
 
   return <div className="panel">
