@@ -1,5 +1,5 @@
 import 'vized/dist/index.css'
-import React, { Component, useContext, useEffect, useRef } from "react";
+import React, { Component, useContext, useEffect, useRef, MouseEvent } from "react";
 import "./css/grid.css"
 import "./css/treetable.css"
 import "./css/propsheet.css"
@@ -164,31 +164,39 @@ export class RectDocApp extends Component<Props, State> {
 
 
   //event handlers
-  resizeLeft = () => {
+  resizeLeft = (e:MouseEvent<HTMLElement>) => {
+    // @ts-ignore
     window.addEventListener('mousemove',this.resizeLeftWindow)
+    // @ts-ignore
     window.addEventListener('mouseup', this.endResizeLeftWindow)
   }
-  resizeLeftWindow =(e:MouseEvent) => {
+  resizeLeftWindow = (e:MouseEvent<MouseEvent>):any => {
     this.setState({leftDivider:e.clientX+'px'})
   }
-  endResizeLeftWindow = () => {
+  endResizeLeftWindow = (e:MouseEvent<HTMLElement>) => {
+    // @ts-ignore
     window.removeEventListener('mousemove', this.resizeLeftWindow)
+    // @ts-ignore
     window.removeEventListener('mouseup', this.endResizeLeftWindow)
   }
 
 
-  resizeRight = () => {
+  resizeRight = (e:MouseEvent<HTMLElement>) => {
+    // @ts-ignore
     window.addEventListener('mousemove', this.resizeRightWindow)
+    // @ts-ignore
     window.addEventListener('mouseup', this.endResizeRightWindow)
   }
-  resizeRightWindow = (e:MouseEvent)=>{
+  resizeRightWindow = (e:MouseEvent<HTMLElement>)=>{
     // @ts-ignore
     const size = document.querySelector('.grid').getBoundingClientRect()
     this.setState({rightDivider:(size.width-e.clientX)+'px'})
   }
-  // @ts-ignore
-  endResizeRightWindow = (e:MouseEvent) => {
+
+  endResizeRightWindow = (e:MouseEvent<HTMLElement>) => {
+    // @ts-ignore
     window.removeEventListener('mousemove', this.resizeRightWindow)
+    // @ts-ignore
     window.removeEventListener('mouseup', this.endResizeRightWindow)
   }
 
@@ -232,6 +240,20 @@ function draw_to_canvas(can:HTMLCanvasElement, provider:TreeItemProvider) {
   c.restore()
 }
 
+class Point {
+  public x: number;
+  public y: number;
+  constructor(x:number,y:number) {
+    this.x = x
+    this.y = y
+  }
+}
+// @ts-ignore
+function cavnas_to_mouse(e: MouseEvent):Point {
+  // let rect = e.target.getClientBounds()
+  return new Point(e.clientX, e.clientY)
+}
+//
 function RectCanvas(props:{provider:TreeItemProvider}) {
   let canvas = useRef<HTMLCanvasElement>(null);
   let selMan = useContext(SelectionManagerContext)
@@ -254,13 +276,14 @@ function RectCanvas(props:{provider:TreeItemProvider}) {
     draw_to_canvas(can,props.provider)
   }
 
+  const mouseDown = (e:MouseEvent<HTMLCanvasElement>) => {
+    let pt = cavnas_to_mouse(e)
+    console.log("mouse down",pt)
+  }
   return <div className="panel">
     <canvas style={{border: '1px solid red', width:'300px', height:'300px'}}
             width={300} height={300} ref={canvas}
-            // onClick={this.onClick}
-            // onMouseDown={this.mouseDown}
-            // onMouseUp={this.mouseUp}
-            // onMouseMove={this.mouseMove}
+            onMouseDown={mouseDown}
     />
   </div>
 }
