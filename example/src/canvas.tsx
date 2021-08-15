@@ -1,17 +1,28 @@
-import React, { useContext, useEffect, useRef, MouseEvent } from "react";
-import {SelectionManagerContext, SELECTION_MANAGER, TREE_ITEM_PROVIDER, TreeItemProvider,
-
-
+import React, { useContext, useEffect, useRef, MouseEvent, useState } from "react";
+import {
+  SelectionManagerContext,
+  SELECTION_MANAGER, TREE_ITEM_PROVIDER,
+  TreeItemProvider,
+  SelectionManager,
 } from "vized"
 
-function draw_to_canvas(can:HTMLCanvasElement, provider:TreeItemProvider) {
+function draw_to_canvas(can: HTMLCanvasElement, provider:TreeItemProvider, scale: number, selMan: SelectionManager) {
   const c = can.getContext('2d') as CanvasRenderingContext2D
   c.fillStyle = 'white'
   c.fillRect(0, 0, can.width, can.height)
   c.save()
+  c.scale(scale,scale)
   provider.getSceneRoot().children.forEach((ch:any) => {
     c.fillStyle = ch.color
     c.fillRect(ch.x,ch.y,ch.w,ch.h)
+    if(selMan.isSelected(ch)) {
+      c.lineWidth = 3
+      c.strokeStyle = 'red'
+      c.strokeRect(ch.x,ch.y,ch.w,ch.h)
+      c.lineWidth = 1
+      c.strokeStyle = 'black'
+      c.strokeRect(ch.x,ch.y,ch.w,ch.h)
+    }
   })
   c.restore()
 }
@@ -23,16 +34,35 @@ class Point {
     this.x = x
     this.y = y
   }
+
+  divideScalar(scale: number) {
+    return new Point(this.x/scale,this.y/scale)
+  }
 }
 // @ts-ignore
-function cavnas_to_mouse(e: MouseEvent):Point {
+function canvas_to_point(e: MouseEvent, scale:number):Point {
+  // @ts-ignore
+  let rect = e.target.getBoundingClientRect()
   // let rect = e.target.getClientBounds()
-  return new Point(e.clientX, e.clientY)
+  return new Point(e.clientX-rect.x, e.clientY-rect.y).divideScalar(scale)
+}
+
+function rect_contains(ch: any, pt: Point) {
+  if(pt.x < ch.x) return false
+  if(pt.x > ch.x + ch.w) return false
+  if(pt.y < ch.y) return false
+  if(pt.y > ch.y + ch.h) return false
+  return true
+}
+
+function find_node_at_pt(provider: TreeItemProvider, pt: Point):any[] {
+  return provider.getSceneRoot().children.filter((ch:any) => rect_contains(ch,pt))
 }
 
 export function RectCanvas(props:{provider:TreeItemProvider}) {
   let canvas = useRef<HTMLCanvasElement>(null);
   let selMan = useContext(SelectionManagerContext)
+  let [zoom] = useState(1)
 
   useEffect(() => {
     if(canvas.current) redraw()
@@ -45,20 +75,25 @@ export function RectCanvas(props:{provider:TreeItemProvider}) {
       props.provider.off(TREE_ITEM_PROVIDER.STRUCTURE_CHANGED, redraw)
     }
   })
+  let scale = Math.pow(2,zoom)
+
   const redraw = () => {
     if(!canvas.current) return
     // @ts-ignore
     let can = canvas.current as HTMLCanvasElement
-    draw_to_canvas(can,props.provider)
+    draw_to_canvas(can,props.provider,scale, selMan)
   }
 
   const mouseDown = (e:MouseEvent<HTMLCanvasElement>) => {
-    let pt = cavnas_to_mouse(e)
-    console.log("mouse down",pt)
+    let pt = canvas_to_point(e,scale)
+    let nodes = find_node_at_pt(props.provider,pt)
+    if(nodes.length > 0) {
+      selMan.setSelection(nodes[0])
+    }
   }
   return <div className="panel">
-    <canvas style={{border: '1px solid red', width:'300px', height:'300px'}}
-    width={300} height={300} ref={canvas}
+    <canvas style={{border: '1px solid red', width:'800px', height:'800px'}}
+    width={800} height={800} ref={canvas}
     onMouseDown={mouseDown}
     />
   </div>
