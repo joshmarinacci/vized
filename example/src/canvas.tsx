@@ -6,12 +6,72 @@ import {
   SelectionManager,
 } from "vized"
 
-function draw_to_canvas(can: HTMLCanvasElement, provider:TreeItemProvider, scale: number, selMan: SelectionManager) {
+class Rect {
+  x: number
+  y: number
+  x2: number
+  y2: number
+  constructor(x: number, y: number, w: number, h: number) {
+    this.x = x
+    this.y = y
+    this.x2 = x+w
+    this.y2 = y+h
+  }
+
+  union(x:number, y:number, w:number, h:number) {
+    this.x = Math.min(x, this.x)
+    this.y = Math.min(y, this.y)
+    this.x2 = Math.max(x+w,this.x2)
+    this.y2 = Math.max(y+h,this.y2)
+  }
+
+  fill(c: CanvasRenderingContext2D, color: string) {
+    c.fillStyle = color
+    c.fillRect(this.x,this.y,this.x2-this.x,this.y2-this.y)
+  }
+
+  width() {
+    return this.x2 - this.x
+  }
+
+  height() {
+    return this.y2 - this.y
+  }
+
+  equal(bounds: Rect) {
+    if(this.x != bounds.x) return false
+    if(this.y != bounds.y) return false
+    if(this.x2 != bounds.x2) return false
+    if(this.y2 != bounds.y2) return false
+    return true
+  }
+}
+
+function calc_scene_bounds(provider: TreeItemProvider):Rect {
+  let bounds = new Rect(0,0,0,0)
+  bounds.x = 0
+  bounds.y = 0
+  bounds.x2 = 100
+  bounds.y2 = 100
+  provider.getSceneRoot().children.forEach((ch:any) => {
+    if(ch.x < bounds.x) bounds.x = ch.x
+    if(ch.x + ch.w > bounds.x2) bounds.x2 = ch.x+ch.w
+    if(ch.y < bounds.y) bounds.y = ch.y
+    if(ch.y + ch.h > bounds.y2) bounds.y2 = ch.y+ch.h
+  })
+  return bounds
+}
+
+function draw_to_canvas(can: HTMLCanvasElement, provider:TreeItemProvider, scale: number, selMan: SelectionManager, bounds:Rect) {
   const c = can.getContext('2d') as CanvasRenderingContext2D
   c.fillStyle = 'white'
-  c.fillRect(0, 0, can.width, can.height)
+  c.fillRect(0, 0, bounds.x2, bounds.y2)
   c.save()
   c.scale(scale,scale)
+  c.translate(-bounds.x,-bounds.y)
+
+  bounds.fill(c,'cyan')
+
   provider.getSceneRoot().children.forEach((ch:any) => {
     c.fillStyle = ch.color
     c.fillRect(ch.x,ch.y,ch.w,ch.h)
@@ -62,7 +122,10 @@ function find_node_at_pt(provider: TreeItemProvider, pt: Point):any[] {
 export function RectCanvas(props:{provider:TreeItemProvider}) {
   let canvas = useRef<HTMLCanvasElement>(null);
   let selMan = useContext(SelectionManagerContext)
-  let [zoom] = useState(1)
+  let [zoom] = useState(0)
+  let [bounds, set_bounds] = useState(new Rect(0,0,10,10))
+  // @ts-ignore
+  let [count, set_count] = useState(0)
 
   useEffect(() => {
     if(canvas.current) redraw()
@@ -74,14 +137,20 @@ export function RectCanvas(props:{provider:TreeItemProvider}) {
       props.provider.off(TREE_ITEM_PROVIDER.PROPERTY_CHANGED, redraw)
       props.provider.off(TREE_ITEM_PROVIDER.STRUCTURE_CHANGED, redraw)
     }
-  })
+  },[selMan,canvas,count])
   let scale = Math.pow(2,zoom)
 
   const redraw = () => {
     if(!canvas.current) return
     // @ts-ignore
     let can = canvas.current as HTMLCanvasElement
-    draw_to_canvas(can,props.provider,scale, selMan)
+    let bds = calc_scene_bounds(props.provider)
+    if(!bds.equal(bounds)) {
+      set_bounds(bds)
+      set_count(count+1)
+    } else {
+      draw_to_canvas(can, props.provider, scale, selMan, bds)
+    }
   }
 
   const mouseDown = (e:MouseEvent<HTMLCanvasElement>) => {
@@ -91,9 +160,13 @@ export function RectCanvas(props:{provider:TreeItemProvider}) {
       selMan.setSelection(nodes[0])
     }
   }
+  // let bds = calc_scene_bounds(props.provider)
+  let w = bounds.width()
+  let h = bounds.height()
+  console.log('new bounds',bounds)
   return <div className="panel">
-    <canvas style={{border: '1px solid red', width:'800px', height:'800px'}}
-    width={800} height={800} ref={canvas}
+    <canvas style={{border: '1px solid red', width:`${w}px`, height:`${h}px`}}
+    width={w} height={h} ref={canvas}
     onMouseDown={mouseDown}
     />
   </div>
