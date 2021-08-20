@@ -163,7 +163,13 @@ export function RectCanvas(props:{provider:TreeItemProvider}) {
     let pt = canvas_to_point(e,scale)
     let nodes = find_node_at_pt(props.provider,pt)
     if(nodes.length > 0) {
-      selMan.setSelection(nodes[0])
+      if(e.shiftKey) {
+        selMan.addToSelection(nodes[0])
+      } else {
+        if(!selMan.isSelected(nodes[0])) selMan.setSelection(nodes[0])
+      }
+    } else {
+      selMan.clearSelection()
     }
     set_mouse_start(pt)
     set_mouse_pressed(true)
