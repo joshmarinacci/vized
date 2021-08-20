@@ -1,4 +1,4 @@
-import {TreeItemProvider, TreeItem, PropCluster, PropDef, PropGroup, PROP_TYPES, makeFromDef } from "vized";
+import {TreeItemProvider, TreeItem, PropCluster, PropDef, PropGroup, PROP_TYPES, makeFromDef, TREE_ITEM_PROVIDER } from "vized";
 import React from 'react'
 import {RectDocApp} from './App'
 
@@ -62,7 +62,7 @@ const GEOM_GROUP:PropGroup = [
   },
 ]
 
-let SquareDef:PropCluster = new Map<string, PropGroup>()
+export const SquareDef:PropCluster = new Map<string, PropGroup>()
 SquareDef.set("base",[
   ID_DEF,
   {
@@ -103,6 +103,10 @@ export class RectDocEditor extends TreeItemProvider {
     this.root = this.makeEmptyRoot(null)
   }
 
+  appendChild(parent:TreeItem, child:TreeItem) {
+    parent.children.push(child)
+    this.fire(TREE_ITEM_PROVIDER.STRUCTURE_ADDED, child)
+  }
   // @ts-ignore
   makeEmptyRoot(doc:any):TreeItem {
     const root = {id:'root',type:'root',children:[], title:"foo"} as TreeItem

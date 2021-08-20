@@ -7,6 +7,7 @@ import "./css/components.css"
 import {TreeTable, SelectionManager, SelectionManagerContext, PropSheet, TreeItemProvider,
   PopupManager, PopupManagerContext, PopupContainer,
   StorageManager, StorageManagerContext, Spacer,
+  makeFromDef,
 } from "vized"
 // @ts-ignore
 // import {Spacer} from 'appy-comps'
@@ -16,7 +17,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faCaretRight, faCaretLeft
 } from "@fortawesome/free-solid-svg-icons";
-import { RectDocEditor } from "./RectDocEditor";
+import { RectDocEditor, SquareDef } from "./RectDocEditor";
 import { RectCanvas } from "./canvas";
 
 
@@ -89,6 +90,17 @@ function PNGButton(props: { provider: TreeItemProvider }) {
   return <button onClick={doit} title={'load last project'}>PNG</button>
 }
 
+function AddChildButton(props:{provider:RectDocEditor}) {
+  const on_click = () => {
+    let root = props.provider.getSceneRoot()
+    if(props.provider.canAddChild(root)) {
+      const square1 = makeFromDef(SquareDef,{id:'sq4',w:50})
+      provider.appendChild(root,square1)
+    }
+  }
+  return <button onClick={on_click} title={'add child'}>add</button>
+}
+
 export class RectDocApp extends Component<Props, State> {
   constructor({ props }: { props: any }) {
     super(props)
@@ -117,7 +129,7 @@ export class RectDocApp extends Component<Props, State> {
       <Resizer onMouseDown={this.resizeLeft}/>
 
       <div className="toolbar gray">
-        {/*<button onClick={(e)=>showAddPopup(e,this.props.provider)}>add</button>*/}
+        <AddChildButton provider={provider}/>
       </div>
 
       <Resizer onMouseDown={this.resizeRight}/>
