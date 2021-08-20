@@ -308,6 +308,9 @@ export function PropSheet(props:{provider:TreeItemProvider}) {
   const item = selMan.getSelection()
   const prov = props.provider
   let cluster = prov.getPropertyClusters(item)
+  // @ts-ignore
+  let [count, set_count] = useState(0)
+  const repaint = () => set_count(count+1)
   const [selection, setSelection] = useState(selMan.getSelection())
   useEffect(() => {
     let hand = (s) => {
@@ -319,7 +322,16 @@ export function PropSheet(props:{provider:TreeItemProvider}) {
     }
   })
 
-  console.log("rendering prop sheet with item",item,cluster)
+  useEffect(() => {
+    let hand = it => {
+      setSelection(selMan.getSelection())
+      repaint()
+    }
+    prov.on(TREE_ITEM_PROVIDER.PROPERTY_CHANGED, hand)
+    return () => {
+      prov.off(TREE_ITEM_PROVIDER.PROPERTY_CHANGED, hand)
+    }
+  })
 
   return <div className="prop-wrapper">{Array.from(cluster.entries()).map(([key,pg]) => {
       return <PropSection key={key} title={key} cluster={pg} prov={prov} item={item}/>

@@ -94,7 +94,9 @@ class Point {
     this.x = x
     this.y = y
   }
-
+  subtract(pt:Point) {
+    return new Point(this.x-pt.x,this.y-pt.y)
+  }
   divideScalar(scale: number) {
     return new Point(this.x/scale,this.y/scale)
   }
@@ -153,21 +155,45 @@ export function RectCanvas(props:{provider:TreeItemProvider}) {
     }
   }
 
+  let [mouse_pressed, set_mouse_pressed] = useState(false)
+  let [mouse_start, set_mouse_start] = useState(new Point(0,0))
+  let [offsets, set_offsets] = useState([] as Point[])
+
   const mouseDown = (e:MouseEvent<HTMLCanvasElement>) => {
     let pt = canvas_to_point(e,scale)
     let nodes = find_node_at_pt(props.provider,pt)
     if(nodes.length > 0) {
       selMan.setSelection(nodes[0])
     }
+    set_mouse_start(pt)
+    set_mouse_pressed(true)
+    set_offsets(selMan.getFullSelection().map(it => new Point(it.x,it.y)) as Point[])
+  }
+  const mouseMove = (e:MouseEvent<HTMLCanvasElement>) => {
+    if(mouse_pressed && !selMan.isEmpty()) {
+      let pt = canvas_to_point(e,scale)
+      let diff:Point = pt.subtract(mouse_start)
+      selMan.getFullSelection().forEach((it,i) => {
+        it.x = offsets[i].x + diff.x
+        it.y = offsets[i].y + diff.y
+        props.provider.fire(TREE_ITEM_PROVIDER.PROPERTY_CHANGED, it)
+      })
+    }
+  }
+
+  const mouseUp = (e:MouseEvent<HTMLCanvasElement>) => {
+    set_mouse_pressed(false)
+    set_mouse_start(new Point(0,0))
   }
   // let bds = calc_scene_bounds(props.provider)
   let w = bounds.width()
   let h = bounds.height()
-  console.log('new bounds',bounds)
   return <div className="panel">
     <canvas style={{border: '1px solid red', width:`${w}px`, height:`${h}px`}}
     width={w} height={h} ref={canvas}
-    onMouseDown={mouseDown}
+      onMouseDown={mouseDown}
+      onMouseMove={mouseMove}
+      onMouseUp={mouseUp}
     />
   </div>
 }
