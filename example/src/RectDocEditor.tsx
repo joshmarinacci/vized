@@ -107,6 +107,10 @@ export class RectDocEditor extends TreeItemProvider {
     parent.children.push(child)
     this.fire(TREE_ITEM_PROVIDER.STRUCTURE_ADDED, child)
   }
+  deleteChild(child:TreeItem):void {
+    this.root.children = this.root.children.filter(n => n !== child)
+    this.fire(TREE_ITEM_PROVIDER.STRUCTURE_REMOVED, child)
+  }
   // @ts-ignore
   makeEmptyRoot(doc:any):TreeItem {
     const root = {id:'root',type:'root',children:[], title:"foo"} as TreeItem
@@ -172,11 +176,16 @@ export class RectDocEditor extends TreeItemProvider {
   calculateContextMenu(item:TreeItem) {
     const cmds = []
     cmds.push({
+      title:'delete',
+      icon:'delete',
+      fun:() => this.deleteChild(item)
+    })
+    cmds.push({divider: true})
+    cmds.push({
       title:'do thing',
       icon:"boo",
       fun:()=>console.log("doing a function")
     })
-    cmds.push({divider: true})
     return cmds
   }
 }

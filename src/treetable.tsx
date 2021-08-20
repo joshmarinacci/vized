@@ -80,15 +80,14 @@ function TreeTableItem(props: {
       selMan.setSelection(props.node)
     }
   }
+  const pm = useContext(PopupManagerContext)
 
   const onContextMenu = (e: any) => {
     e.preventDefault()
     e.stopPropagation()
     selMan.setSelection(props.node)
-    if (props.provider.calculateContextMenu) {
-      const menu = props.provider.calculateContextMenu(props.node)
-      // context.show(<ContextMenu menu={menu} />, e.target)
-    }
+    const menu = props.provider.calculateContextMenu(props.node)
+    pm.show(<ContextMenu menu={menu} />, e.target)
   }
 
   const toggleItemCollapsed = (e: any) => {

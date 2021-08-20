@@ -76,7 +76,7 @@ interface TreeItemProviderInterface {
 
   // ========= Tree View support =========
   isExpanded(item: TreeItem): boolean
-  calculateContextMenu(item:TreeItem): void
+  calculateContextMenu(item:TreeItem): any[]
   toggleItemCollapsed(item:TreeItem): void
   getRendererForItem(item:TreeItem): any
 
@@ -144,7 +144,7 @@ export class TreeItemProvider implements TreeItemProviderInterface {
     findParent(node: TreeItem): TreeItem {
         throw new Error("Method not implemented.")
     }
-    calculateContextMenu(item: TreeItem): void {
+    calculateContextMenu(item: TreeItem): any[] {
         throw new Error("Method not implemented.")
     }
     getRendererForItem(item: TreeItem) {

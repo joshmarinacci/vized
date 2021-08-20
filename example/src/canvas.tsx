@@ -133,11 +133,15 @@ export function RectCanvas(props:{provider:TreeItemProvider}) {
     if(canvas.current) redraw()
     selMan.on(SELECTION_MANAGER.CHANGED, redraw)
     props.provider.on(TREE_ITEM_PROVIDER.PROPERTY_CHANGED, redraw)
+    props.provider.on(TREE_ITEM_PROVIDER.STRUCTURE_ADDED, redraw)
     props.provider.on(TREE_ITEM_PROVIDER.STRUCTURE_CHANGED, redraw)
+    props.provider.on(TREE_ITEM_PROVIDER.STRUCTURE_REMOVED, redraw)
     return () => {
       selMan.off(SELECTION_MANAGER.CHANGED,redraw)
       props.provider.off(TREE_ITEM_PROVIDER.PROPERTY_CHANGED, redraw)
+      props.provider.off(TREE_ITEM_PROVIDER.STRUCTURE_ADDED, redraw)
       props.provider.off(TREE_ITEM_PROVIDER.STRUCTURE_CHANGED, redraw)
+      props.provider.off(TREE_ITEM_PROVIDER.STRUCTURE_REMOVED, redraw)
     }
   },[selMan,canvas,count])
   let scale = Math.pow(2,zoom)
