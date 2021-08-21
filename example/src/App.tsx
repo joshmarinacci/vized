@@ -1,5 +1,5 @@
 import 'vized/dist/index.css'
-import React, { Component, useContext, MouseEvent } from "react";
+import React, { Component, useContext, MouseEvent, ReactNode } from "react";
 import "./css/grid.css"
 import "./css/treetable.css"
 import "./css/propsheet.css"
@@ -93,6 +93,10 @@ function AddChildButton(props:{provider:RectDocEditor}) {
   return <button onClick={on_click} title={'add child'}>add</button>
 }
 
+function SelectedButton(props: { onClick: () => void, selected: boolean, children: ReactNode }) {
+  return <button onClick={props.onClick} className={props.selected?"selected":""}>{props.children}</button>
+}
+
 export class RectDocApp extends Component<Props, State> {
   constructor({ props }: { props: any }) {
     super(props)
@@ -123,8 +127,8 @@ export class RectDocApp extends Component<Props, State> {
 
       <div className="toolbar gray">
         <AddChildButton provider={provider}/>
-        <button onClick={()=> this.setState({tool:'selection-tool'})}>select</button>
-        <button onClick={()=> this.setState({tool:'move-tool'})}>move</button>
+        <SelectedButton onClick={()=> this.setState({tool:'selection-tool'})} selected={this.state.tool==='selection-tool'}>select</SelectedButton>
+        <SelectedButton onClick={()=> this.setState({tool:'move-tool'})} selected={this.state.tool === 'move-tool'}>move</SelectedButton>
       </div>
 
       <Resizer onMouseDown={this.resizeRight}/>

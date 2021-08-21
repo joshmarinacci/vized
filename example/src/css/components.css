@@ -14,8 +14,12 @@ button:hover, .button:hover {
     background-color: #888;
 }
 
+button.selected {
+  background-color: red;
+}
+
 .toolbar button {
-    width: 1.5rem;
+    /*width: 1.5rem;*/
 }
 
 .button b {
@@ -41,7 +45,7 @@ button:hover, .button:hover {
     font-weight: bold;
 }
 .toolbar button {
-    border: 0px solid black;
+    border: 1px solid black;
     font-size: 1rem;
     border-radius: 0.5rem;
 }
