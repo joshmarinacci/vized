@@ -117,6 +117,7 @@ export function RectCanvas(props:{provider:RectDocEditor, tool:string}) {
   let selMan = useContext(SelectionManagerContext)
   let [zoom] = useState(0)
   let [bounds, set_bounds] = useState(new Rect(0,0,10,10))
+  let [page] = useState(new Rect(0,0,800,800))
   let [offset, set_offset] = useState(new Point(10,10))
   let [count, set_count] = useState(0)
 
@@ -143,13 +144,13 @@ export function RectCanvas(props:{provider:RectDocEditor, tool:string}) {
   const redraw = () => {
     if(!canvas.current) return
     let can = canvas.current as HTMLCanvasElement
-    let scene_bounds = calc_scene_bounds(props.provider)
+    // let scene_bounds = calc_scene_bounds(props.provider)
     let bds = new Rect(0,0,can.clientWidth, can.clientHeight)
     if(!bds.equal(bounds)) {
       set_bounds(bds)
       set_count(count+1)
     } else {
-      draw_to_canvas(can, props.provider, scale, selMan, bds, scene_bounds, offset)
+      draw_to_canvas(can, props.provider, scale, selMan, bds, page, offset)
     }
   }
 

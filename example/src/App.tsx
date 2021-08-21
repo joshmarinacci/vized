@@ -7,7 +7,7 @@ import "./css/components.css"
 import {TreeTable, SelectionManager, SelectionManagerContext, TreeItemProvider,
   PopupManager, PopupManagerContext, PopupContainer,
   StorageManager, StorageManagerContext, Spacer,
-  makeFromDef
+  makeFromDef, genID,
 } from "vized"
 
 
@@ -18,7 +18,6 @@ import {
 import { RectDocEditor, SquareDef } from "./RectDocEditor";
 import { RectCanvas } from "./canvas";
 import { PropSheet } from "./propsheet2";
-
 
 const STORAGE = new StorageManager()
 const selMan = new SelectionManager()
@@ -94,7 +93,7 @@ function AddChildButton(props:{provider:RectDocEditor}) {
   const on_click = () => {
     let root = props.provider.getSceneRoot()
     if(props.provider.canAddChild(root)) {
-      const square1 = makeFromDef(SquareDef,{id:'sq4',w:50})
+      const square1 = makeFromDef(SquareDef,{id:genID('square_'),w:50})
       provider.appendChild(root,square1)
     }
   }
