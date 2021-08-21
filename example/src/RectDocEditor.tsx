@@ -17,6 +17,13 @@ const ID_DEF:PropDef = {
   locked:true,
   key: "id",
 }
+const TITLE_DEF:PropDef = {
+  type:PROP_TYPES.STRING,
+  name:'Title',
+  locked:false,
+  key:'title',
+  default:''
+}
 
 const GEOM_GROUP:PropGroup = [
   {
@@ -66,13 +73,14 @@ const GEOM_GROUP:PropGroup = [
 export const SquareDef:PropCluster = new Map<string, PropGroup>()
 SquareDef.set("base",[
   ID_DEF,
+  TITLE_DEF,
   {
     type: PROP_TYPES.STRING,
     name: 'type',
     locked: true,
     key: 'type',
     default:'square',
-  }
+  },
 ])
 SquareDef.set("geom",GEOM_GROUP)
 SquareDef.set("style",[
@@ -90,11 +98,7 @@ SquareDef.set("style",[
 const RootDef:PropCluster = new Map<string, PropGroup>()
 RootDef.set("base",[
   ID_DEF,
-  {
-   key:'title',
-    name:'title',
-    type:PROP_TYPES.STRING
-  }
+  TITLE_DEF,
 ])
 
 
@@ -112,7 +116,7 @@ class RDEObjectDelegate implements ObjectDelegate {
       return ['id','title','type']
     }
     if(this.item.type === 'square') {
-      return ['id','type','x','y','w','h','color']
+      return ['id','title','type','x','y','w','h','color']
     }
     return ['id'];
   }
@@ -191,6 +195,11 @@ class RDEObjectDelegate implements ObjectDelegate {
     return SquareDef.get('style')[0].values as any[]
   }
 
+  getPropLinkTargetTitle(target:TreeItem): string {
+    //@ts-ignore
+    return target.id + " : " + target.title
+  }
+
 }
 
 class NullObjectDelegate implements ObjectDelegate {
@@ -241,6 +250,10 @@ class NullObjectDelegate implements ObjectDelegate {
 
   setPropLinkTarget(item:TreeItem, name: string, target:TreeItem): void {
   }
+
+  getPropLinkTargetTitle(id:TreeItem): string {
+    return "";
+  }
 }
 
 export class RectDocEditor extends TreeItemProvider {
@@ -260,9 +273,9 @@ export class RectDocEditor extends TreeItemProvider {
   // @ts-ignore
   makeEmptyRoot(doc:any):TreeItem {
     const root = {id:'root',type:'root',children:[], title:"foo"} as TreeItem
-    const square1 = makeFromDef(SquareDef,{id:'sq1',w:50})
+    const square1 = makeFromDef(SquareDef,{id:'sq1',w:50, title:'master'})
     root.children.push(square1)
-    const square2 = makeFromDef(SquareDef,{id:'sq2',x:150,y:20,w:30,h:30,color:'red'})
+    const square2 = makeFromDef(SquareDef,{id:'sq2',x:150,y:20,w:30,h:30,color:'red',title:'bar'})
     root.children.push(square2)
     const square3 = makeFromDef(SquareDef,{id:'sq3',x:30,y:220,w:30,h:30,color:'green'})
     root.children.push(square3)
@@ -347,7 +360,8 @@ export class RectDocEditor extends TreeItemProvider {
 
 
   getRendererForItem(item:TreeItem) {
-    return <label>{item.type} {item.id}</label>
+    // @ts-ignore
+    return <label>{item.type} {item.id}:{item.title}</label>
   }
 
   getDocType() {
@@ -370,13 +384,15 @@ export class RectDocEditor extends TreeItemProvider {
       })
     }
     if(item === this.root) {
-      cmds.push({
-        title:'add square',
-        fun:() =>  this.appendChild(this.root, makeFromDef(SquareDef,{id:genID('square_'),w:50}))
-      })
+      cmds.push({ title:'add square', fun:() =>  this.add_square()})
     }
     // cmds.push({divider: true})
     return cmds
+  }
+
+
+  add_square() {
+    this.appendChild(this.root, makeFromDef(SquareDef,{id:genID('square_'),w:50}))
   }
 }
 

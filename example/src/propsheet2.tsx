@@ -24,6 +24,7 @@ export interface ObjectDelegate {
   removePropLink(item: TreeItem, name: string): void;
   getPossibleLinkTargets(item: TreeItem, name: string): TreeItem[];
   setPropLinkTarget(item: TreeItem, name: string, target: TreeItem): void;
+  getPropLinkTargetTitle(id: TreeItem): string;
 }
 
 function NumberEditor(props: { item: TreeItem, delegate: ObjectDelegate, name:string, disabled:boolean }) {
@@ -101,7 +102,7 @@ function LinkPicker(props: { item:TreeItem, name: string, delegate: ObjectDelega
     return <button key={i} onClick={()=>{
       delegate.setPropLinkTarget(item, name, target)
       PM.hide()
-    }}>{target.id}</button>
+    }}>{delegate.getPropLinkTargetTitle(target)}</button>
   })
   return <div className={'vbox'}>
     {items}

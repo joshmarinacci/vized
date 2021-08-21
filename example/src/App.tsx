@@ -7,7 +7,6 @@ import "./css/components.css"
 import {TreeTable, SelectionManager, SelectionManagerContext, TreeItemProvider,
   PopupManager, PopupManagerContext, PopupContainer,
   StorageManager, StorageManagerContext, Spacer,
-  makeFromDef, genID,
 } from "vized"
 
 
@@ -15,7 +14,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faCaretRight, faCaretLeft
 } from "@fortawesome/free-solid-svg-icons";
-import { RectDocEditor, SquareDef } from "./RectDocEditor";
+import { RectDocEditor} from "./RectDocEditor";
 import { RectCanvas } from "./canvas";
 import { PropSheet } from "./propsheet2";
 
@@ -90,13 +89,7 @@ function PNGButton(props: { provider: TreeItemProvider }) {
 }
 
 function AddChildButton(props:{provider:RectDocEditor}) {
-  const on_click = () => {
-    let root = props.provider.getSceneRoot()
-    if(props.provider.canAddChild(root)) {
-      const square1 = makeFromDef(SquareDef,{id:genID('square_'),w:50})
-      provider.appendChild(root,square1)
-    }
-  }
+  const on_click = () => props.provider.add_square()
   return <button onClick={on_click} title={'add child'}>add</button>
 }
 
