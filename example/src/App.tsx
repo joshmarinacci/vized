@@ -29,6 +29,8 @@ type State = {
   rightDivider:string,
   bottomDivider:string,
   tool:string,
+  grid:boolean,
+  zoom:number,
 }
 
 let provider = new RectDocEditor({})
@@ -105,6 +107,8 @@ export class RectDocApp extends Component<Props, State> {
       rightDivider: '250px',
       bottomDivider:'0px',
       tool:'selection-tool',
+      grid:true,
+      zoom:0,
     }
   }
   render() {
@@ -129,6 +133,10 @@ export class RectDocApp extends Component<Props, State> {
         <AddChildButton provider={provider}/>
         <SelectedButton onClick={()=> this.setState({tool:'selection-tool'})} selected={this.state.tool==='selection-tool'}>select</SelectedButton>
         <SelectedButton onClick={()=> this.setState({tool:'move-tool'})} selected={this.state.tool === 'move-tool'}>move</SelectedButton>
+        <SelectedButton onClick={()=> this.setState({grid:!this.state.grid})} selected={this.state.grid === true}>grid</SelectedButton>
+        <button onClick={()=> this.setState({zoom:this.state.zoom-1})}> - </button>
+        <label>{this.state.zoom}</label>
+        <button onClick={()=> this.setState({zoom:this.state.zoom+1})}> + </button>
       </div>
 
       <Resizer onMouseDown={this.resizeRight}/>
@@ -146,7 +154,7 @@ export class RectDocApp extends Component<Props, State> {
       <Resizer onMouseDown={this.resizeLeft}/>
 
       <div className="panel">
-        <RectCanvas provider={this.props.provider} tool={this.state.tool}/>
+        <RectCanvas provider={this.props.provider} tool={this.state.tool} grid={this.state.grid} zoom={this.state.zoom}/>
       </div>
 
       <Resizer onMouseDown={this.resizeRight}/>

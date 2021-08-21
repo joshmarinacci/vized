@@ -82,13 +82,29 @@ function calc_scene_bounds(provider: TreeItemProvider):Rect {
 
 function draw_to_canvas(can: HTMLCanvasElement, provider:RectDocEditor,
                         scale: number, selMan: SelectionManager,
-                        bounds:Rect, page:Rect, offset:Point) {
+                        bounds:Rect, page:Rect, offset:Point, grid:boolean) {
   const c = can.getContext('2d') as CanvasRenderingContext2D
   bounds.fill(c,'#cccccc')
   c.save()
   c.scale(scale,scale)
   c.translate(-bounds.x + offset.x,-bounds.y + offset.y)
   page.fill(c,'white')
+
+  if(grid) {
+    c.strokeStyle = 'black'
+    c.beginPath()
+    for(let x=0; x<page.x2; x+=32) {
+      c.moveTo(x, 0)
+      c.lineTo(x, page.y2)
+    }
+    for(let y=0; y<page.y2; y+=32) {
+      c.moveTo( 0,y)
+      c.lineTo(page.x2,y)
+    }
+    c.stroke()
+  }
+
+
   provider.getSceneRoot().children.forEach((ch:any) => {
     c.fillStyle = provider.getColorValue(ch)
     let bds = provider.getBoundsValue(ch)
@@ -112,10 +128,9 @@ function find_node_at_pt(provider: RectDocEditor, pt: Point):any[] {
   return provider.getSceneRoot().children.filter((ch:any) => provider.getBoundsValue(ch).contains(pt))
 }
 
-export function RectCanvas(props:{provider:RectDocEditor, tool:string}) {
+export function RectCanvas(props:{provider:RectDocEditor, tool:string, grid:boolean, zoom:number}) {
   let canvas = useRef<HTMLCanvasElement>(null);
   let selMan = useContext(SelectionManagerContext)
-  let [zoom] = useState(0)
   let [bounds, set_bounds] = useState(new Rect(0,0,10,10))
   let [page] = useState(new Rect(0,0,800,800))
   let [offset, set_offset] = useState(new Point(10,10))
@@ -135,11 +150,11 @@ export function RectCanvas(props:{provider:RectDocEditor, tool:string}) {
       props.provider.off(TREE_ITEM_PROVIDER.STRUCTURE_CHANGED, redraw)
       props.provider.off(TREE_ITEM_PROVIDER.STRUCTURE_REMOVED, redraw)
     }
-  },[selMan,canvas,count])
+  },[selMan,canvas,count,props.grid,props.zoom])
 
   const pm = useContext(PopupManagerContext)
 
-  let scale = Math.pow(2,zoom)
+  let scale = Math.pow(2,props.zoom)
 
   const redraw = () => {
     if(!canvas.current) return
@@ -150,7 +165,7 @@ export function RectCanvas(props:{provider:RectDocEditor, tool:string}) {
       set_bounds(bds)
       set_count(count+1)
     } else {
-      draw_to_canvas(can, props.provider, scale, selMan, bds, page, offset)
+      draw_to_canvas(can, props.provider, scale, selMan, bds, page, offset, props.grid)
     }
   }
 
