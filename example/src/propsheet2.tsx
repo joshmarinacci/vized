@@ -4,10 +4,10 @@ import {
   TreeItemProvider,
   SELECTION_MANAGER,
   TreeItem,
+  PopupManagerContext,
 } from "vized";
 
-
-export type PropType = 'string' | 'number' | 'boolean'
+export type PropType = 'string' | 'number' | 'boolean' | 'enum'
 
 export interface ObjectDelegate {
   propkeys(item:TreeItem): string[];
@@ -17,6 +17,8 @@ export interface ObjectDelegate {
   setPropValue(item:TreeItem, name:string, value:any): void;
   isPropEditable(item: TreeItem, name: string): Boolean;
   valueToString(item: TreeItem, name: string): string;
+  getRendererForEnumProperty(item: TreeItem, name: string): any;
+  getPropertyEnumValues(item: TreeItem, name: string): any[];
 }
 
 function NumberEditor(props: { item: TreeItem, delegate: ObjectDelegate, name:string }) {
@@ -62,7 +64,7 @@ function NumberEditor(props: { item: TreeItem, delegate: ObjectDelegate, name:st
       props.delegate.setPropValue(props.item,props.name,num)
     }
   }
-  return <input type='number' value={vv} onChange={updateValue}/>
+  return <input type='number' value={vv} onChange={updateValue}  className={'editor'}/>
 }
 
 
@@ -76,7 +78,51 @@ function StringEditor(props: { item: TreeItem, name: string, delegate: ObjectDel
     svv(str)
     props.delegate.setPropValue(props.item,props.name,str)
   }
-  return <input type='input' value={vv} onChange={updateValue}/>
+  return <input type='input' value={vv} onChange={updateValue} className={'editor'}/>
+}
+
+function StandardEnumRenderer(props:{object:TreeItem, key:string, value:any}) {
+  return <span>{props.value}</span>
+}
+
+
+// function HBox({ ...rest }):JSX.Element {
+//   return <div {...rest} className={'hbox'} />
+// }
+
+function EnumPicker (props:{delegate:ObjectDelegate,item:TreeItem, name:string, onSelect:any, Renderer:any}) {
+  const {item, delegate, onSelect, Renderer, name} = props
+  const values = delegate.getPropertyEnumValues(item,name)
+  const items = values.map((val:any)=>
+    <div className={'hbox fill'}
+      key={val}
+      onClick={(e:any)=>onSelect(val)}>
+      <Renderer object={item} name={name} value={val}/>
+    </div>
+  )
+  return <div className="popup-menu vbox">{items}</div>
+}
+
+function EnumEditor(props: { item: TreeItem, name: string, delegate: ObjectDelegate }) {
+  const {item,name, delegate} = {...props}
+  // @ts-ignore
+  const [value,setValue] = useState(()=> delegate.getPropValue(item,name))
+  const PM = useContext(PopupManagerContext) as any
+  let EnumItemRenderer = delegate.getRendererForEnumProperty(item,name)
+  if(!EnumItemRenderer) EnumItemRenderer = StandardEnumRenderer
+  let selectedRenderedValue = <EnumItemRenderer object={item} name={name} value={value}/>
+
+  function updateValue(val:any):void {
+    setValue(val)
+    delegate.setPropValue(item,name,val)
+    PM.hide()
+  }
+
+  function open(e:MouseEvent) {
+    PM.show(<EnumPicker delegate={delegate} item={item} name={name} Renderer={EnumItemRenderer} onSelect={updateValue}/>, e.target)
+  }
+  // @ts-ignore
+  return <button onClick={open}  className={'editor enum-value'}>{selectedRenderedValue}</button>
 }
 
 export function PropSheet(props:{provider:TreeItemProvider, }) {
@@ -120,6 +166,7 @@ export function PropSheet(props:{provider:TreeItemProvider, }) {
     if(del.isPropEditable(item,name)) {
       if(type === 'number') pe = <NumberEditor key={`${id}-${name}-editor`} delegate={del} item={item} name={name}/>
       if(type === 'string') pe = <StringEditor key={`${id}-${name}-editor`} delegate={del} item={item} name={name}/>
+      if(type === 'enum') pe =   <EnumEditor   key={`${id}-${name}-editor`} delegate={del} item={item} name={name}/>
     } else {
       pe = <label key={`${id}-${name}-value`} className={'value'}>{del.valueToString(item,name)}</label>
     }

@@ -126,6 +126,9 @@
     border-radius: 0.25rem;
 }
 
+.prop-sheet .enum-value {
+  padding:0;
+}
 
 
 

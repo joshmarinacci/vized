@@ -2,13 +2,12 @@ import {TreeItemProvider, TreeItem, PropCluster, PropDef, PropGroup, PROP_TYPES,
 import React from 'react'
 import {RectDocApp} from './App'
 import { ObjectDelegate, PropType } from "./propsheet2";
+import "./css/components.css"
 
 const ColorValueRenderer = (props:{object:any, key:string, value:any}) => {
-  return <b style={{
+  return <div className={'color-value'} style={{
     backgroundColor:props.value,
-      border:'black',
-      padding: '0.5em',
-  }}>{props.value}</b>
+  }}><b className={'text'}>{props.value}</b></div>
 }
 
 const ID_DEF:PropDef = {
@@ -82,7 +81,7 @@ SquareDef.set("style",[
     type:PROP_TYPES.ENUM,
     live:false,
     default: 'blue',
-    values:['red','green','blue'],
+    values:['red','green','blue','yellow'],
     renderer: ColorValueRenderer,
   }
 ])
@@ -137,6 +136,7 @@ class RDEObjectDelegate implements ObjectDelegate {
     if(key === 'y') return 'number'
     if(key === 'w') return 'number'
     if(key === 'h') return 'number'
+    if(key === 'color') return 'enum'
     return 'string'
   }
 
@@ -152,6 +152,15 @@ class RDEObjectDelegate implements ObjectDelegate {
   valueToString(item:TreeItem, name: string): string {
     if(item[name]) return item[name].toString()
     return "???";
+  }
+
+  getRendererForEnumProperty(item:TreeItem, name: string): any {
+    return ColorValueRenderer
+  }
+
+  getPropertyEnumValues(item:TreeItem, name: string): any[] {
+    // @ts-ignore
+    return SquareDef.get('style')[0].values as any[]
   }
 
 }
@@ -181,6 +190,14 @@ class NullObjectDelegate implements ObjectDelegate {
 
   valueToString(item:TreeItem, name: string): string {
     return "";
+  }
+
+  getRendererForEnumProperty(item:TreeItem, name: string): any {
+    return ColorValueRenderer
+  }
+
+  getPropertyEnumValues(item:TreeItem, name: string): any[] {
+    return [];
   }
 }
 

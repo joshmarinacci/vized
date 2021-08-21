@@ -194,3 +194,38 @@ https://flatuicolors.com/palette/defo
 
 
 
+.hbox {
+  border: 1px solid black;
+  display: flex;
+  flex-direction: row;
+}
+
+.vbox {
+  border: 0px solid blue;
+  display: flex;
+  flex-direction: column;
+}
+
+.fill {
+  justify-content: stretch;
+}
+.fill > * {
+  flex:1.0;
+}
+
+
+.color-value {
+  border: 1px solid black;
+  padding: 0.25em;
+  margin: 0;
+  color: black;
+  text-align: center;
+}
+.color-value .text {
+  background-color: white;
+  color: black;
+  text-align: center;
+  padding: 0.125em;
+  border-radius: 0.25em;
+  margin:0;
+}
