@@ -10,7 +10,7 @@ import {
 } from "vized"
 import { RectDocEditor } from "./RectDocEditor";
 
-class Rect {
+export class Rect {
   x: number
   y: number
   x2: number
@@ -33,6 +33,11 @@ class Rect {
     c.fillStyle = color
     c.fillRect(this.x,this.y,this.x2-this.x,this.y2-this.y)
   }
+  stroke(c: CanvasRenderingContext2D, color: string, lineWidth:number) {
+    c.lineWidth = lineWidth
+    c.fillStyle = color
+    c.strokeRect(this.x,this.y,this.x2-this.x,this.y2-this.y)
+  }
 
   width() {
     return this.x2 - this.x
@@ -48,6 +53,14 @@ class Rect {
     if(this.x2 != bounds.x2) return false
     if(this.y2 != bounds.y2) return false
     return true
+  }
+
+  contains(pt: Point) {
+      if(pt.x < this.x) return false
+      if(pt.x > this.x2) return false
+      if(pt.y < this.y) return false
+      if(pt.y > this.y2) return false
+      return true
   }
 }
 
@@ -78,14 +91,11 @@ function draw_to_canvas(can: HTMLCanvasElement, provider:RectDocEditor,
   page.fill(c,'white')
   provider.getSceneRoot().children.forEach((ch:any) => {
     c.fillStyle = provider.getColorValue(ch)
-    c.fillRect(ch.x,ch.y,ch.w,ch.h)
+    let bds = provider.getBoundsValue(ch)
+    bds.fill(c,provider.getColorValue(ch))
     if(selMan.isSelected(ch)) {
-      c.lineWidth = 3
-      c.strokeStyle = 'red'
-      c.strokeRect(ch.x,ch.y,ch.w,ch.h)
-      c.lineWidth = 1
-      c.strokeStyle = 'black'
-      c.strokeRect(ch.x,ch.y,ch.w,ch.h)
+      bds.stroke(c,'red',3)
+      bds.stroke(c,'black',1)
     }
   })
   c.restore()
@@ -98,16 +108,8 @@ function canvas_to_point(e: MouseEvent, scale:number, offset:Point):Point {
   return new Point(e.clientX-rect.x-offset.x, e.clientY-rect.y-offset.y).divide(scale)
 }
 
-function rect_contains(ch: any, pt: Point) {
-  if(pt.x < ch.x) return false
-  if(pt.x > ch.x + ch.w) return false
-  if(pt.y < ch.y) return false
-  if(pt.y > ch.y + ch.h) return false
-  return true
-}
-
-function find_node_at_pt(provider: TreeItemProvider, pt: Point):any[] {
-  return provider.getSceneRoot().children.filter((ch:any) => rect_contains(ch,pt))
+function find_node_at_pt(provider: RectDocEditor, pt: Point):any[] {
+  return provider.getSceneRoot().children.filter((ch:any) => provider.getBoundsValue(ch).contains(pt))
 }
 
 export function RectCanvas(props:{provider:RectDocEditor, tool:string}) {

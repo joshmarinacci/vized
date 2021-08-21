@@ -3,6 +3,7 @@ import React from 'react'
 import {RectDocApp} from './App'
 import { ObjectDelegate, PropType } from "./propsheet2";
 import "./css/components.css"
+import { Rect } from "./canvas";
 
 const ColorValueRenderer = (props:{object:any, key:string, value:any}) => {
   return <div className={'color-value'} style={{
@@ -116,7 +117,7 @@ class RDEObjectDelegate implements ObjectDelegate {
     return ['id'];
   }
 
-  isPropLinked(item:TreeItem, key:string): Boolean {
+  isPropLinked(item:TreeItem, key:string): boolean {
     if(this.item['_links']) {
       if(this.item['_links'][key]) {
         // console.log("linked from",this.item['_links'][key])
@@ -125,7 +126,7 @@ class RDEObjectDelegate implements ObjectDelegate {
     }
     return false;
   }
-  isPropEditable(item:TreeItem, name: string): Boolean {
+  isPropEditable(item:TreeItem, name: string): boolean {
     if(name === 'type') return false
     if(name === 'id') return false
     return true;
@@ -153,6 +154,33 @@ class RDEObjectDelegate implements ObjectDelegate {
     if(item[name]) return item[name].toString()
     return "???";
   }
+  getLinkedValueToString(item:TreeItem, name: string): string {
+    let links = this.item['_links']
+    if(links && links[name]) {
+      let master = this.ed.getSceneRoot().children.find(ch => ch.id === links[name])
+      if(master) return this.valueToString(master,name)
+    }
+    return "???";
+  }
+
+  removePropLink(item:TreeItem, name: string): void {
+    let links = item['_links']
+    if(links && links[name]) {
+      links[name] = undefined
+      this.ed.fire(TREE_ITEM_PROVIDER.PROPERTY_CHANGED,item)
+    }
+  }
+
+  setPropLinkTarget(item:TreeItem, name:string, target:TreeItem):void {
+    if(!item['_links']) item['_links'] = {}
+    let links = item['_links']
+    links[name] = target.id
+    this.ed.fire(TREE_ITEM_PROVIDER.PROPERTY_CHANGED,item)
+  }
+  getPossibleLinkTargets(item:TreeItem, name: string): TreeItem[] {
+    let targets = this.ed.getSceneRoot().children.filter(ch => ch.id !== item.id)
+    return targets
+  }
 
   getRendererForEnumProperty(item:TreeItem, name: string): any {
     return ColorValueRenderer
@@ -170,7 +198,7 @@ class NullObjectDelegate implements ObjectDelegate {
     return [];
   }
 
-  isPropLinked(item:TreeItem, key: string): Boolean {
+  isPropLinked(item:TreeItem, key: string): boolean {
     return false;
   }
 
@@ -184,7 +212,7 @@ class NullObjectDelegate implements ObjectDelegate {
   setPropValue(item:TreeItem, name: string, value: any): void {
   }
 
-  isPropEditable(item:TreeItem, name: string): Boolean {
+  isPropEditable(item:TreeItem, name: string): boolean {
     return false;
   }
 
@@ -198,6 +226,20 @@ class NullObjectDelegate implements ObjectDelegate {
 
   getPropertyEnumValues(item:TreeItem, name: string): any[] {
     return [];
+  }
+
+  getLinkedValueToString(item:TreeItem, name: string): string {
+    return "";
+  }
+
+  removePropLink(item:TreeItem, name: string): void {
+  }
+
+  getPossibleLinkTargets(item:TreeItem, name: string): TreeItem[] {
+    return [];
+  }
+
+  setPropLinkTarget(item:TreeItem, name: string, target:TreeItem): void {
   }
 }
 
@@ -242,6 +284,27 @@ export class RectDocEditor extends TreeItemProvider {
     }
     return ch.color
   }
+
+  getNumberValue(ch: TreeItem, name: string):number {
+    let links = ch['_links']
+    if(links && links[name]) {
+      let master = this.root.children.find(c => c.id === links[name])
+      if(master) { // @ts-ignore
+        return master[name] as number
+      }
+    }
+    return ch[name]
+  }
+
+  getBoundsValue(ch: any):Rect {
+    return new Rect(
+      this.getNumberValue(ch,'x'),
+      this.getNumberValue(ch,'y'),
+      this.getNumberValue(ch,'w'),
+      this.getNumberValue(ch,'h'),
+    )
+  }
+
 
   getSceneRoot():TreeItem {
     return this.root
