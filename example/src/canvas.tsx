@@ -191,14 +191,44 @@ export function RectCanvas(props:{provider:TreeItemProvider}) {
   const contextMenu = (e:MouseEvent<HTMLCanvasElement>) => {
     e.preventDefault()
     e.stopPropagation()
+    set_mouse_pressed(false)
     // let sel = selMan.getFullSelection()
     if(!selMan.isEmpty()) {
       let pt = canvas_to_point(e,1)
       // @ts-ignore
       const rect = e.target.getBoundingClientRect();
       pt.y -= rect.height
-      let node = selMan.getSelection()
-      const menu = props.provider.calculateContextMenu(node)
+      // let node = selMan.getSelection()
+      let menu:any[] = []
+      if(!selMan.isEmpty()) {
+        let nodes:any[] = selMan.getFullSelection()
+        menu.push({
+          title: 'delete',
+          icon: 'delete',
+          fun: () => nodes.forEach(item => props.provider.deleteChild(item))
+        })
+        if(nodes.length >=  2) {
+          menu.push({
+            title:'horizontal align',
+            fun:() => {
+              let it = nodes[0]
+              let center = new Point(it.x+it.w/2,it.y)
+              nodes.forEach(it => it.x = center.x - it.w/2)
+              props.provider.fire(TREE_ITEM_PROVIDER.PROPERTY_CHANGED, it)
+            }
+          })
+          menu.push({
+            title:'vertical align',
+            fun:() => {
+              let it = nodes[0]
+              let center = new Point(it.x,it.y+it.h/2)
+              nodes.forEach(it => it.y = center.y - it.h/2)
+              props.provider.fire(TREE_ITEM_PROVIDER.PROPERTY_CHANGED, it)
+            }
+          })
+        }
+      }
+      // const menu = props.provider.calculateContextMenu(node)
       pm.show(<ContextMenu menu={menu} />, e.target, pt)
     }
   }
