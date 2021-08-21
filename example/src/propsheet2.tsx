@@ -7,7 +7,7 @@ import {
 } from "vized";
 
 
-export type PropType = 'string' | 'number' | boolean
+export type PropType = 'string' | 'number' | 'boolean'
 
 export interface ObjectDelegate {
   propkeys(item:TreeItem): string[];
@@ -20,6 +20,7 @@ export interface ObjectDelegate {
 }
 
 function NumberEditor(props: { item: TreeItem, delegate: ObjectDelegate, name:string }) {
+    console.log('rendering number editor')
     // let {def, obj} = props
     // const [value,setValue] = useState(obj[def.key])
     // let step = 1
@@ -106,20 +107,21 @@ export function PropSheet(props:{provider:TreeItemProvider, }) {
 
   return <div className="prop-sheet">{del.propkeys(item).map((name:string) => {
     let type = del.getPropType(item,name)
+    let id = item.id
 
-    let lab = <label key={name+'-label'} className={'label'}>{name}</label>
+    let lab = <label key={`${id}-${name}-label`} className={'label'}>{name}</label>
 
-    let link = <button key={name+'-linked'} className={'link'}>[ ]</button>
+    let link = <button key={`${id}-${name}-linked`} className={'link'}>[ ]</button>
     if(del.isPropLinked(item,name)) {
-      link = <button key={name+'-linked'} className={'link'}>[x]</button>
+      link = <button key={`${id}-${name}-linked`} className={'link'}>[x]</button>
     }
 
-    let pe = <label key={name+'-editor'}>---</label>
+    let pe = <label key={`${id}-${name}-editor`}>---</label>
     if(del.isPropEditable(item,name)) {
-      if(type === 'number') pe = <NumberEditor key={name+'-editor'} delegate={del} item={item} name={name}/>
-      if(type === 'string') pe = <StringEditor key={name+'-editor'} delegate={del} item={item} name={name}/>
+      if(type === 'number') pe = <NumberEditor key={`${id}-${name}-editor`} delegate={del} item={item} name={name}/>
+      if(type === 'string') pe = <StringEditor key={`${id}-${name}-editor`} delegate={del} item={item} name={name}/>
     } else {
-      pe = <label key={name+'-value'} className={'value'}>{del.valueToString(item,name)}</label>
+      pe = <label key={`${id}-${name}-value`} className={'value'}>{del.valueToString(item,name)}</label>
     }
 
     return [lab,link,pe]
