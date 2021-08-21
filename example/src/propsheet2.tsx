@@ -163,7 +163,7 @@ export function PropSheet(props:{provider:TreeItemProvider, }) {
     }
 
     let pe = <label key={`${id}-${name}-editor`}>---</label>
-    if(del.isPropEditable(item,name)) {
+    if(del.isPropEditable(item,name) && !del.isPropLinked(item,name)) {
       if(type === 'number') pe = <NumberEditor key={`${id}-${name}-editor`} delegate={del} item={item} name={name}/>
       if(type === 'string') pe = <StringEditor key={`${id}-${name}-editor`} delegate={del} item={item} name={name}/>
       if(type === 'enum') pe =   <EnumEditor   key={`${id}-${name}-editor`} delegate={del} item={item} name={name}/>

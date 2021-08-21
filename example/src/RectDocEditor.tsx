@@ -232,6 +232,16 @@ export class RectDocEditor extends TreeItemProvider {
     root.children.push(child_square)
     return root
   }
+  getColorValue(ch: any) {
+    let links = ch['_links']
+    if(links && links.color) {
+      let master = this.root.children.find(c => c.id === links.color)
+      if(master) { // @ts-ignore
+        return master.color
+      }
+    }
+    return ch.color
+  }
 
   getSceneRoot():TreeItem {
     return this.root

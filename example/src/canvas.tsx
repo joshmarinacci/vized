@@ -8,6 +8,7 @@ import {
   PopupManagerContext,
   Point
 } from "vized"
+import { RectDocEditor } from "./RectDocEditor";
 
 class Rect {
   x: number
@@ -66,7 +67,7 @@ function calc_scene_bounds(provider: TreeItemProvider):Rect {
   return bounds
 }
 
-function draw_to_canvas(can: HTMLCanvasElement, provider:TreeItemProvider,
+function draw_to_canvas(can: HTMLCanvasElement, provider:RectDocEditor,
                         scale: number, selMan: SelectionManager,
                         bounds:Rect, page:Rect, offset:Point) {
   const c = can.getContext('2d') as CanvasRenderingContext2D
@@ -76,7 +77,7 @@ function draw_to_canvas(can: HTMLCanvasElement, provider:TreeItemProvider,
   c.translate(-bounds.x + offset.x,-bounds.y + offset.y)
   page.fill(c,'white')
   provider.getSceneRoot().children.forEach((ch:any) => {
-    c.fillStyle = ch.color
+    c.fillStyle = provider.getColorValue(ch)
     c.fillRect(ch.x,ch.y,ch.w,ch.h)
     if(selMan.isSelected(ch)) {
       c.lineWidth = 3
@@ -109,7 +110,7 @@ function find_node_at_pt(provider: TreeItemProvider, pt: Point):any[] {
   return provider.getSceneRoot().children.filter((ch:any) => rect_contains(ch,pt))
 }
 
-export function RectCanvas(props:{provider:TreeItemProvider, tool:string}) {
+export function RectCanvas(props:{provider:RectDocEditor, tool:string}) {
   let canvas = useRef<HTMLCanvasElement>(null);
   let selMan = useContext(SelectionManagerContext)
   let [zoom] = useState(0)
