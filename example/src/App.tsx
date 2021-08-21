@@ -137,6 +137,7 @@ export class RectDocApp extends Component<Props, State> {
         <button onClick={()=> this.setState({zoom:this.state.zoom-1})}> - </button>
         <label>{this.state.zoom}</label>
         <button onClick={()=> this.setState({zoom:this.state.zoom+1})}> + </button>
+        <button onClick={()=>this.props.provider.do_layout()}>layout</button>
       </div>
 
       <Resizer onMouseDown={this.resizeRight}/>

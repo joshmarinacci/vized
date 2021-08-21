@@ -394,5 +394,12 @@ export class RectDocEditor extends TreeItemProvider {
   add_square() {
     this.appendChild(this.root, makeFromDef(SquareDef,{id:genID('square_'),w:50}))
   }
+
+  do_layout() {
+    this.getSceneRoot().children.forEach((ch:any) => {
+      ch.x = 10
+    })
+    this.fire(TREE_ITEM_PROVIDER.STRUCTURE_CHANGED,this.getSceneRoot())
+  }
 }
 
