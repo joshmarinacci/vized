@@ -397,7 +397,8 @@ export class RectDocEditor extends TreeItemProvider {
 
   do_layout() {
     this.getSceneRoot().children.forEach((ch:any) => {
-      ch.x = 10
+      ch.x = Math.round(ch.x/32)*32
+      ch.y = Math.round(ch.y/32)*32
     })
     this.fire(TREE_ITEM_PROVIDER.STRUCTURE_CHANGED,this.getSceneRoot())
   }
