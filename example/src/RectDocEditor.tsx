@@ -1,4 +1,4 @@
-import {TreeItemProvider, TreeItem, PropCluster, PropDef, PropGroup, PROP_TYPES, makeFromDef, TREE_ITEM_PROVIDER } from "vized";
+import {TreeItemProvider, TreeItem, PropCluster, PropDef, PropGroup, PROP_TYPES, makeFromDef, TREE_ITEM_PROVIDER, genID } from "vized";
 import React from 'react'
 import {RectDocApp} from './App'
 
@@ -175,17 +175,20 @@ export class RectDocEditor extends TreeItemProvider {
   // @ts-ignore
   calculateContextMenu(item:TreeItem) {
     const cmds = []
-    cmds.push({
-      title:'delete',
-      icon:'delete',
-      fun:() => this.deleteChild(item)
-    })
-    cmds.push({divider: true})
-    cmds.push({
-      title:'do thing',
-      icon:"boo",
-      fun:()=>console.log("doing a function")
-    })
+    if(item !== this.root) {
+      cmds.push({
+        title: 'delete',
+        icon: 'delete',
+        fun: () => this.deleteChild(item)
+      })
+    }
+    if(item === this.root) {
+      cmds.push({
+        title:'add square',
+        fun:() =>  this.appendChild(this.root, makeFromDef(SquareDef,{id:genID('square_'),w:50}))
+      })
+    }
+    // cmds.push({divider: true})
     return cmds
   }
 }
