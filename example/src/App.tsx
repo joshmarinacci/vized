@@ -7,10 +7,8 @@ import "./css/components.css"
 import {TreeTable, SelectionManager, SelectionManagerContext, PropSheet, TreeItemProvider,
   PopupManager, PopupManagerContext, PopupContainer,
   StorageManager, StorageManagerContext, Spacer,
-  makeFromDef,
+  makeFromDef
 } from "vized"
-// @ts-ignore
-// import {Spacer} from 'appy-comps'
 
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -31,6 +29,7 @@ type State = {
   leftDivider:string,
   rightDivider:string,
   bottomDivider:string,
+  tool:string,
 }
 
 let provider = new RectDocEditor({})
@@ -108,6 +107,7 @@ export class RectDocApp extends Component<Props, State> {
       leftDivider: '250px',
       rightDivider: '250px',
       bottomDivider:'0px',
+      tool:'selection-tool',
     }
   }
   render() {
@@ -130,6 +130,8 @@ export class RectDocApp extends Component<Props, State> {
 
       <div className="toolbar gray">
         <AddChildButton provider={provider}/>
+        <button onClick={()=> this.setState({tool:'selection-tool'})}>select</button>
+        <button onClick={()=> this.setState({tool:'move-tool'})}>move</button>
       </div>
 
       <Resizer onMouseDown={this.resizeRight}/>
@@ -147,7 +149,7 @@ export class RectDocApp extends Component<Props, State> {
       <Resizer onMouseDown={this.resizeLeft}/>
 
       <div className="panel">
-        <RectCanvas provider={this.props.provider}/>
+        <RectCanvas provider={this.props.provider} tool={this.state.tool}/>
       </div>
 
       <Resizer onMouseDown={this.resizeRight}/>

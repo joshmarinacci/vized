@@ -68,12 +68,12 @@ function calc_scene_bounds(provider: TreeItemProvider):Rect {
 
 function draw_to_canvas(can: HTMLCanvasElement, provider:TreeItemProvider,
                         scale: number, selMan: SelectionManager,
-                        bounds:Rect, page:Rect) {
+                        bounds:Rect, page:Rect, offset:Point) {
   const c = can.getContext('2d') as CanvasRenderingContext2D
   bounds.fill(c,'#cccccc')
   c.save()
   c.scale(scale,scale)
-  c.translate(-bounds.x,-bounds.y)
+  c.translate(-bounds.x + offset.x,-bounds.y + offset.y)
   page.fill(c,'white')
   provider.getSceneRoot().children.forEach((ch:any) => {
     c.fillStyle = ch.color
@@ -91,10 +91,10 @@ function draw_to_canvas(can: HTMLCanvasElement, provider:TreeItemProvider,
 }
 
 // @ts-ignore
-function canvas_to_point(e: MouseEvent, scale:number):Point {
+function canvas_to_point(e: MouseEvent, scale:number, offset:Point):Point {
   // @ts-ignore
   let rect = e.target.getBoundingClientRect()
-  return new Point(e.clientX-rect.x, e.clientY-rect.y).divide(scale)
+  return new Point(e.clientX-rect.x-offset.x, e.clientY-rect.y-offset.y).divide(scale)
 }
 
 function rect_contains(ch: any, pt: Point) {
@@ -109,12 +109,12 @@ function find_node_at_pt(provider: TreeItemProvider, pt: Point):any[] {
   return provider.getSceneRoot().children.filter((ch:any) => rect_contains(ch,pt))
 }
 
-export function RectCanvas(props:{provider:TreeItemProvider}) {
+export function RectCanvas(props:{provider:TreeItemProvider, tool:string}) {
   let canvas = useRef<HTMLCanvasElement>(null);
   let selMan = useContext(SelectionManagerContext)
   let [zoom] = useState(0)
   let [bounds, set_bounds] = useState(new Rect(0,0,10,10))
-  // @ts-ignore
+  let [offset, set_offset] = useState(new Point(10,10))
   let [count, set_count] = useState(0)
 
   useEffect(() => {
@@ -139,7 +139,6 @@ export function RectCanvas(props:{provider:TreeItemProvider}) {
 
   const redraw = () => {
     if(!canvas.current) return
-    // @ts-ignore
     let can = canvas.current as HTMLCanvasElement
     let scene_bounds = calc_scene_bounds(props.provider)
     let bds = new Rect(0,0,can.clientWidth, can.clientHeight)
@@ -147,7 +146,7 @@ export function RectCanvas(props:{provider:TreeItemProvider}) {
       set_bounds(bds)
       set_count(count+1)
     } else {
-      draw_to_canvas(can, props.provider, scale, selMan, bds, scene_bounds)
+      draw_to_canvas(can, props.provider, scale, selMan, bds, scene_bounds, offset)
     }
   }
 
@@ -156,7 +155,7 @@ export function RectCanvas(props:{provider:TreeItemProvider}) {
   let [offsets, set_offsets] = useState([] as Point[])
 
   const mouseDown = (e:MouseEvent<HTMLCanvasElement>) => {
-    let pt = canvas_to_point(e,scale)
+    let pt = canvas_to_point(e,scale, offset)
     let nodes = find_node_at_pt(props.provider,pt)
     if(nodes.length > 0) {
       if(e.shiftKey) {
@@ -172,8 +171,14 @@ export function RectCanvas(props:{provider:TreeItemProvider}) {
     set_offsets(selMan.getFullSelection().map(it => new Point(it.x,it.y)) as Point[])
   }
   const mouseMove = (e:MouseEvent<HTMLCanvasElement>) => {
-    if(mouse_pressed && !selMan.isEmpty()) {
-      let pt = canvas_to_point(e,scale)
+    if(props.tool === 'move-tool' && mouse_pressed) {
+      let pt = canvas_to_point(e,scale, new Point(0,0))
+      let diff:Point = pt.minus(mouse_start)
+      set_offset(diff)
+      set_count(count+1)
+    }
+    if(mouse_pressed && props.tool === 'selection-tool' && !selMan.isEmpty()) {
+      let pt = canvas_to_point(e,scale, offset)
       let diff:Point = pt.minus(mouse_start)
       selMan.getFullSelection().forEach((it,i) => {
         it.x = offsets[i].x + diff.x
@@ -193,7 +198,7 @@ export function RectCanvas(props:{provider:TreeItemProvider}) {
     set_mouse_pressed(false)
     // let sel = selMan.getFullSelection()
     if(!selMan.isEmpty()) {
-      let pt = canvas_to_point(e,1)
+      let pt = canvas_to_point(e,1, offset)
       // @ts-ignore
       const rect = e.target.getBoundingClientRect();
       pt.y -= rect.height
