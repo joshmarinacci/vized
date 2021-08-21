@@ -4,7 +4,7 @@ import "./css/grid.css"
 import "./css/treetable.css"
 import "./css/propsheet.css"
 import "./css/components.css"
-import {TreeTable, SelectionManager, SelectionManagerContext, PropSheet, TreeItemProvider,
+import {TreeTable, SelectionManager, SelectionManagerContext, TreeItemProvider,
   PopupManager, PopupManagerContext, PopupContainer,
   StorageManager, StorageManagerContext, Spacer,
   makeFromDef
@@ -17,6 +17,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { RectDocEditor, SquareDef } from "./RectDocEditor";
 import { RectCanvas } from "./canvas";
+import { PropSheet } from "./propsheet2";
 
 
 const STORAGE = new StorageManager()

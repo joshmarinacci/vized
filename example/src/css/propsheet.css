@@ -32,7 +32,7 @@
     border: 0px solid blue;
     font-size: 8pt;
     display: grid;
-    grid-template-columns: 1fr 3fr;
+    grid-template-columns: 1fr 1fr 3fr;
     grid-template-rows: auto;
 }
 
@@ -44,7 +44,7 @@
     padding: 0.25em;
 }
 
-.prop-sheet label {
+.prop-sheet .label {
     padding: 0.25rem;
     border: 0px solid red;
     align-self: start;
@@ -53,7 +53,11 @@
     margin: 0.25rem 0;
     grid-column-start: 1;
 }
-.prop-sheet input, .prop-sheet select, .prop-sheet button {
+.prop-sheet .link {
+  color:red;
+  border:1px solid red;
+}
+.prop-sheet .editor {
     font-size: 100%;
     font-family: sans-serif;
     border: 1px solid #ccc;
@@ -65,6 +69,13 @@
     margin: 0.25rem 0;
     width:100%;
     border-radius: 0.25rem;
+}
+.prop-sheet .value {
+  padding: 0.25rem;
+  border: 0px solid red;
+  align-self: start;
+  white-space: nowrap;
+  margin: 0.25rem 0;
 }
 .prop-sheet input:focus {
     border-color:orange;

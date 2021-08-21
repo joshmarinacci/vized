@@ -1,6 +1,7 @@
 import {TreeItemProvider, TreeItem, PropCluster, PropDef, PropGroup, PROP_TYPES, makeFromDef, TREE_ITEM_PROVIDER, genID } from "vized";
 import React from 'react'
 import {RectDocApp} from './App'
+import { ObjectDelegate, PropType } from "./propsheet2";
 
 const ColorValueRenderer = (props:{object:any, key:string, value:any}) => {
   return <b style={{
@@ -97,6 +98,92 @@ RootDef.set("base",[
 ])
 
 
+class RDEObjectDelegate implements ObjectDelegate {
+  // @ts-ignore
+  private ed: RectDocEditor;
+  private item: TreeItem;
+  constructor(p: RectDocEditor,item:TreeItem) {
+    this.ed = p
+    this.item = item
+  }
+
+  propkeys(): string[] {
+    if(this.item.type === 'root') {
+      return ['id','title','type']
+    }
+    if(this.item.type === 'square') {
+      return ['id','type','x','y','w','h','color']
+    }
+    return ['id'];
+  }
+
+  isPropLinked(item:TreeItem, key:string): Boolean {
+    if(this.item['_links']) {
+      if(this.item['_links'][key]) {
+        // console.log("linked from",this.item['_links'][key])
+        return true
+      }
+    }
+    return false;
+  }
+  isPropEditable(item:TreeItem, name: string): Boolean {
+    if(name === 'type') return false
+    if(name === 'id') return false
+    return true;
+  }
+
+  getPropType(item:TreeItem, key: string): PropType {
+    if(key === 'x') return 'number'
+    if(key === 'y') return 'number'
+    if(key === 'w') return 'number'
+    if(key === 'h') return 'number'
+    return 'string'
+  }
+
+  getPropValue(item:TreeItem, name: string): any {
+    return item[name]
+  }
+
+  setPropValue(item:TreeItem, name: string, value: any): void {
+    item[name] = value
+    this.ed.fire(TREE_ITEM_PROVIDER.PROPERTY_CHANGED,item)
+  }
+
+  valueToString(item:TreeItem, name: string): string {
+    if(item[name]) return item[name].toString()
+    return "???";
+  }
+
+}
+
+class NullObjectDelegate implements ObjectDelegate {
+  propkeys(): string[] {
+    return [];
+  }
+
+  isPropLinked(item:TreeItem, key: string): Boolean {
+    return false;
+  }
+
+  getPropType(item:TreeItem, key: string): PropType {
+    return 'string'
+  }
+
+  getPropValue(item:TreeItem, name: string): any {
+  }
+
+  setPropValue(item:TreeItem, name: string, value: any): void {
+  }
+
+  isPropEditable(item:TreeItem, name: string): Boolean {
+    return false;
+  }
+
+  valueToString(item:TreeItem, name: string): string {
+    return "";
+  }
+}
+
 export class RectDocEditor extends TreeItemProvider {
   constructor(options:any) {
     super(options)
@@ -120,11 +207,21 @@ export class RectDocEditor extends TreeItemProvider {
     root.children.push(square2)
     const square3 = makeFromDef(SquareDef,{id:'sq3',x:30,y:220,w:30,h:30,color:'green'})
     root.children.push(square3)
+    const child_square = makeFromDef(SquareDef,{id:'sq4',x:50,y:50,w:20,h:100, color:'teal'})
+    child_square['_links'] = {
+      color:square3.id,
+    }
+    console.log(child_square)
+    root.children.push(child_square)
     return root
   }
 
   getSceneRoot():TreeItem {
     return this.root
+  }
+  getObjectDelegate(item:TreeItem):ObjectDelegate {
+    if(!item) return new NullObjectDelegate()
+    return new RDEObjectDelegate(this,item)
   }
   // @ts-ignore
   getPropertyClusters(item:TreeItem):PropCluster {

@@ -83,7 +83,6 @@ interface TreeItemProviderInterface {
   // ================ properties ==================
   setPropertyValue(item:TreeItem, def:any, value:any): void
   setPropertyValueByName(child:TreeItem, name:string, value:any): void
-  // getProperties(item:TreeItem): void
   getPropertyClusters(item:TreeItem):PropCluster
 
   // ================ doc def stuff
@@ -154,9 +153,6 @@ export class TreeItemProvider implements TreeItemProviderInterface {
         throw new Error("Method not implemented.")
     }
     setPropertyValueByName(child: TreeItem, name: string, value: any): void {
-        throw new Error("Method not implemented.")
-    }
-    getProperties(item: TreeItem): void {
         throw new Error("Method not implemented.")
     }
     getDocType(): string {
