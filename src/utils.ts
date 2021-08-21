@@ -76,9 +76,9 @@ export function POST_JSON(path, payload) {
 }
  */
 
-class Point {
+export class Point {
   x: number
-  private y: number
+  y: number
   constructor(x: number, y: number) {
     this.x = x
     this.y = y

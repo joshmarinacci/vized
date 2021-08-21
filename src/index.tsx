@@ -1,5 +1,5 @@
 import React from 'react'
-export {TreeTable} from './treetable'
+export {TreeTable, ContextMenu} from './treetable'
 export {Dialog} from './Dialog'
 export {ToggleButton, MenuPopup, GridEditorApp} from "./grideditorapp"
 // export QRCanvas from "./QRCanvas"
@@ -12,5 +12,5 @@ export {PopupManager, PopupManagerContext} from "./util/PopupManager"
 export {Spacer} from "./util/common"
 export {StorageManager, StorageManagerContext} from "./util/storage"
 
-export {toQueryString, makePoint, setQuery, parseOptions, on, genID, genAlphaID} from "./utils"
+export {toQueryString, makePoint, setQuery, parseOptions, on, genID, genAlphaID, Point} from "./utils"
 

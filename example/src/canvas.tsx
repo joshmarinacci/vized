@@ -4,6 +4,9 @@ import {
   SELECTION_MANAGER, TREE_ITEM_PROVIDER,
   TreeItemProvider,
   SelectionManager,
+  ContextMenu,
+  PopupManagerContext,
+  Point
 } from "vized"
 
 class Rect {
@@ -87,26 +90,12 @@ function draw_to_canvas(can: HTMLCanvasElement, provider:TreeItemProvider, scale
   c.restore()
 }
 
-class Point {
-  public x: number;
-  public y: number;
-  constructor(x:number,y:number) {
-    this.x = x
-    this.y = y
-  }
-  subtract(pt:Point) {
-    return new Point(this.x-pt.x,this.y-pt.y)
-  }
-  divideScalar(scale: number) {
-    return new Point(this.x/scale,this.y/scale)
-  }
-}
 // @ts-ignore
 function canvas_to_point(e: MouseEvent, scale:number):Point {
   // @ts-ignore
   let rect = e.target.getBoundingClientRect()
   // let rect = e.target.getClientBounds()
-  return new Point(e.clientX-rect.x, e.clientY-rect.y).divideScalar(scale)
+  return new Point(e.clientX-rect.x, e.clientY-rect.y).divide(scale)
 }
 
 function rect_contains(ch: any, pt: Point) {
@@ -144,6 +133,9 @@ export function RectCanvas(props:{provider:TreeItemProvider}) {
       props.provider.off(TREE_ITEM_PROVIDER.STRUCTURE_REMOVED, redraw)
     }
   },[selMan,canvas,count])
+
+  const pm = useContext(PopupManagerContext)
+
   let scale = Math.pow(2,zoom)
 
   const redraw = () => {
@@ -182,7 +174,7 @@ export function RectCanvas(props:{provider:TreeItemProvider}) {
   const mouseMove = (e:MouseEvent<HTMLCanvasElement>) => {
     if(mouse_pressed && !selMan.isEmpty()) {
       let pt = canvas_to_point(e,scale)
-      let diff:Point = pt.subtract(mouse_start)
+      let diff:Point = pt.minus(mouse_start)
       selMan.getFullSelection().forEach((it,i) => {
         it.x = offsets[i].x + diff.x
         it.y = offsets[i].y + diff.y
@@ -195,6 +187,21 @@ export function RectCanvas(props:{provider:TreeItemProvider}) {
     set_mouse_pressed(false)
     set_mouse_start(new Point(0,0))
   }
+
+  const contextMenu = (e:MouseEvent<HTMLCanvasElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    // let sel = selMan.getFullSelection()
+    if(!selMan.isEmpty()) {
+      let pt = canvas_to_point(e,1)
+      // @ts-ignore
+      const rect = e.target.getBoundingClientRect();
+      pt.y -= rect.height
+      let node = selMan.getSelection()
+      const menu = props.provider.calculateContextMenu(node)
+      pm.show(<ContextMenu menu={menu} />, e.target, pt)
+    }
+  }
   // let bds = calc_scene_bounds(props.provider)
   let w = bounds.width()
   let h = bounds.height()
@@ -204,6 +211,7 @@ export function RectCanvas(props:{provider:TreeItemProvider}) {
       onMouseDown={mouseDown}
       onMouseMove={mouseMove}
       onMouseUp={mouseUp}
+            onContextMenu={contextMenu}
     />
   </div>
 }

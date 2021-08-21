@@ -2,6 +2,7 @@
  * Created by josh on 11/29/16.
  */
 import React from 'react'
+import { Point } from "../utils";
 
 export class PopupManager {
   private shows: any[];
@@ -13,8 +14,8 @@ export class PopupManager {
     this.hides = []
     this.id = "id_"+Math.floor(Math.random()*100000)
   }
-  show(comp:any, owner:any) {
-    this.shows.forEach(cb=>cb(comp,owner));
+  show(comp:any, owner:any, off?:Point) {
+    this.shows.forEach(cb=>cb(comp,owner, off));
   }
   hide() {
     this.hides.forEach(cb=>cb());

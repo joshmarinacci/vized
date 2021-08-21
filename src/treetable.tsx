@@ -16,7 +16,7 @@ import { TREE_ITEM_PROVIDER, TreeItem, TreeItemProvider } from "./TreeItemProvid
 import { PopupManagerContext } from "./util/PopupManager";
 import {HBox,VBox} from "./util/Hbox"
 
-const ContextMenu = (props: { menu: any }) => {
+export const ContextMenu = (props: { menu: any }) => {
   return (
     <PopupManagerContext.Consumer>
       {(pm: any) => (

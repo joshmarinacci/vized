@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import {PopupManagerContext} from './PopupManager';
+import { Point } from "../utils";
 
 export function PopupContainer({}) {
   console.log("making a popup container")
@@ -9,23 +10,27 @@ export function PopupContainer({}) {
   const [comp, setComp] = useState(null)
   const [showing, setShowing] = useState(false)
   const [owner, setOwner] = useState(null)
-  const [offset, setOffset] = useState(0)
+  const [offset, setOffset] = useState(new Point(0,0))
 
   useEffect(() => {
     // @ts-ignore
-    PM.onShow((comp:any, owner:any)=>{
+    PM.onShow((comp:any, owner:any, off?:Point)=>{
       setComp(comp)
       setShowing(true)
       setOwner(owner)
+      if(off) setOffset(off)
       setTimeout(()=>{
         const rect = wrapper.current?.getBoundingClientRect();
         if(!rect) return
-        const extent = rect.top + rect.height;
+        let extent = rect.top + rect.height;
+        if(off) {
+          extent += off.x
+        }
         const max = window.innerHeight;
         if(extent > max) {
               console.log("too far, move it up");
-              setOffset(-(extent-max))
-          }
+              setOffset(new Point(0,extent-max))
+        }
       },25);
     });
     PM.onHide(()=>{
@@ -37,7 +42,7 @@ export function PopupContainer({}) {
   const clickScrim = () =>{
     setComp(null)
     setShowing(false)
-    setOffset(0)
+    setOffset(new Point(0,0))
   }
 
   let x = 200;
@@ -45,8 +50,8 @@ export function PopupContainer({}) {
   if(owner) {
     // @ts-ignore
     const rect = owner.getBoundingClientRect();
-    x = rect.left;
-    y = rect.top + rect.height + offset;
+    x = rect.left + offset.x;
+    y = rect.top + rect.height + offset.y;
   }
   return <div style={{
     position:'fixed',
