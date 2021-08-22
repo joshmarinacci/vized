@@ -182,6 +182,15 @@ export function RectCanvas(props:{provider:RectDocEditor, tool:string, grid:bool
       } else {
         if(!selMan.isSelected(nodes[0])) selMan.setSelection(nodes[0])
       }
+      if(e.altKey) {
+        if(e.shiftKey) {
+          let new_nodes = props.provider.do_duplicate_linked(nodes[0], false)
+          selMan.setSelection(new_nodes)
+        } else {
+          let new_nodes = props.provider.do_duplicate(nodes[0], false)
+          selMan.setSelection(new_nodes)
+        }
+      }
     } else {
       selMan.clearSelection()
     }
@@ -232,11 +241,11 @@ export function RectCanvas(props:{provider:RectDocEditor, tool:string, grid:bool
         })
         menu.push({
           title:`duplicate`,
-          fun: () => nodes.forEach(item => props.provider.do_duplicate(item))
+          fun: () => nodes.forEach(item => props.provider.do_duplicate(item,true))
         })
         menu.push({
           title:`duplicate linked`,
-          fun: () => nodes.forEach(item => props.provider.do_duplicate_linked(item))
+          fun: () => nodes.forEach(item => props.provider.do_duplicate_linked(item,true))
         })
         if(nodes.length >=  2) {
           menu.push({

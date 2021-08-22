@@ -403,33 +403,45 @@ export class RectDocEditor extends TreeItemProvider {
     this.fire(TREE_ITEM_PROVIDER.STRUCTURE_CHANGED,this.getSceneRoot())
   }
 
-  do_duplicate(item: TreeItem) {
+  do_duplicate(item: TreeItem, move:boolean):TreeItem {
     let cln:any = {}
     Object.entries(item).forEach(([key,value])=>{
       cln[key] = value
+      if(key === 'title') {
+        cln[key] = value + ' copy'
+      }
     })
     cln.id = genID("square_")
-    cln.x += 20
-    cln.y += 20
+    if(move) {
+      cln.x += 20
+      cln.y += 20
+    }
     this.getSceneRoot().children.push(cln as TreeItem)
     this.fire(TREE_ITEM_PROVIDER.STRUCTURE_CHANGED,this.getSceneRoot())
+    return cln
   }
 
-  do_duplicate_linked(item: any) {
+  do_duplicate_linked(item: any, move:boolean):TreeItem {
     let cln:any = {
       _links:{}
     }
     Object.entries(item).forEach(([key,value])=>{
       cln[key] = value
-      if(key !== 'x' && key !== 'y') {
+      if(key === 'title') {
+        cln[key] = value + ' copy'
+      }
+      if(key !== 'x' && key !== 'y' && key !== 'title') {
         cln._links[key] = item.id
       }
     })
     cln.id = genID("square_")
-    cln.x += 20
-    cln.y += 20
+    if(move) {
+      cln.x += 20
+      cln.y += 20
+    }
     this.getSceneRoot().children.push(cln as TreeItem)
     this.fire(TREE_ITEM_PROVIDER.STRUCTURE_CHANGED,this.getSceneRoot())
+    return cln
   }
 }
 
