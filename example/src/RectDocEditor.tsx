@@ -402,5 +402,34 @@ export class RectDocEditor extends TreeItemProvider {
     })
     this.fire(TREE_ITEM_PROVIDER.STRUCTURE_CHANGED,this.getSceneRoot())
   }
+
+  do_duplicate(item: TreeItem) {
+    let cln:any = {}
+    Object.entries(item).forEach(([key,value])=>{
+      cln[key] = value
+    })
+    cln.id = genID("square_")
+    cln.x += 20
+    cln.y += 20
+    this.getSceneRoot().children.push(cln as TreeItem)
+    this.fire(TREE_ITEM_PROVIDER.STRUCTURE_CHANGED,this.getSceneRoot())
+  }
+
+  do_duplicate_linked(item: any) {
+    let cln:any = {
+      _links:{}
+    }
+    Object.entries(item).forEach(([key,value])=>{
+      cln[key] = value
+      if(key !== 'x' && key !== 'y') {
+        cln._links[key] = item.id
+      }
+    })
+    cln.id = genID("square_")
+    cln.x += 20
+    cln.y += 20
+    this.getSceneRoot().children.push(cln as TreeItem)
+    this.fire(TREE_ITEM_PROVIDER.STRUCTURE_CHANGED,this.getSceneRoot())
+  }
 }
 

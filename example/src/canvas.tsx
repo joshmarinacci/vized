@@ -230,6 +230,14 @@ export function RectCanvas(props:{provider:RectDocEditor, tool:string, grid:bool
           icon: 'delete',
           fun: () => nodes.forEach(item => props.provider.deleteChild(item))
         })
+        menu.push({
+          title:`duplicate`,
+          fun: () => nodes.forEach(item => props.provider.do_duplicate(item))
+        })
+        menu.push({
+          title:`duplicate linked`,
+          fun: () => nodes.forEach(item => props.provider.do_duplicate_linked(item))
+        })
         if(nodes.length >=  2) {
           menu.push({
             title:'horizontal align',
