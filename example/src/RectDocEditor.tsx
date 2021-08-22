@@ -4,6 +4,9 @@ import {RectDocApp} from './App'
 import { ObjectDelegate, PropType } from "./propsheet2";
 import "./css/components.css"
 import { Rect } from "./canvas";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSquare } from "@fortawesome/free-solid-svg-icons/faSquare";
+import { faMehBlank } from "@fortawesome/free-solid-svg-icons/faMehBlank";
 
 const ColorValueRenderer = (props:{object:any, key:string, value:any}) => {
   return <div className={'color-value'} style={{
@@ -277,9 +280,9 @@ export class RectDocEditor extends TreeItemProvider {
     root.children.push(square1)
     const square2 = makeFromDef(SquareDef,{id:'sq2',x:150,y:20,w:30,h:30,color:'red',title:'bar'})
     root.children.push(square2)
-    const square3 = makeFromDef(SquareDef,{id:'sq3',x:30,y:220,w:30,h:30,color:'green'})
+    const square3 = makeFromDef(SquareDef,{id:'sq3',x:30,y:220,w:30,h:30,color:'green', title:'green'})
     root.children.push(square3)
-    const child_square = makeFromDef(SquareDef,{id:'sq4',x:50,y:50,w:20,h:100, color:'teal'})
+    const child_square = makeFromDef(SquareDef,{id:'sq4',x:50,y:50,w:20,h:100, color:'teal',title:"teal"})
     child_square['_links'] = {
       color:square3.id,
     }
@@ -360,8 +363,10 @@ export class RectDocEditor extends TreeItemProvider {
 
 
   getRendererForItem(item:TreeItem) {
-    // @ts-ignore
-    return <label>{item.type} {item.id}:{item.title}</label>
+    let icon = <FontAwesomeIcon icon={faMehBlank}/>
+    if (item.type === 'square')  icon = <FontAwesomeIcon icon={faSquare} />
+    let title = (item as any).title
+    return <label> {icon} {title}</label>
   }
 
   getDocType() {
