@@ -7,7 +7,8 @@ import {
   PropGroup,
   TREE_ITEM_PROVIDER,
   TreeItem,
-  TreeItemProvider
+  TreeItemProvider,
+  Point,
 } from "vized";
 import React from "react";
 import { RectDocApp } from "./App";
@@ -17,6 +18,7 @@ import { Rect } from "./canvas";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSquare } from "@fortawesome/free-solid-svg-icons/faSquare";
 import { faMehBlank } from "@fortawesome/free-solid-svg-icons/faMehBlank";
+
 
 const ColorValueRenderer = (props:{object:any, key:string, value:any}) => {
   return <div className={'color-value'} style={{
@@ -468,6 +470,45 @@ export class RectDocEditor extends TreeItemProvider {
     this.getSceneRoot().children.push(cln as TreeItem)
     this.fire(TREE_ITEM_PROVIDER.STRUCTURE_CHANGED,this.getSceneRoot())
     return cln
+  }
+
+
+  calculateCanvasContextMenu(nodes:any[]):any[] {
+    let menu = []
+    menu.push({
+      title: 'delete',
+      icon: 'delete',
+      fun: () => nodes.forEach(item => this.deleteChild(item))
+    })
+    menu.push({
+      title:`duplicate`,
+      fun: () => nodes.forEach(item => this.do_duplicate(item,true))
+    })
+    menu.push({
+      title:`duplicate linked`,
+      fun: () => nodes.forEach(item => this.do_duplicate_linked(item,true))
+    })
+    if(nodes.length >=  2) {
+      menu.push({
+        title:'horizontal align',
+        fun:() => {
+          let it = nodes[0]
+          let center = new Point(it.x+it.w/2,it.y)
+          nodes.forEach(it => it.x = center.x - it.w/2)
+          this.fire(TREE_ITEM_PROVIDER.PROPERTY_CHANGED, it)
+        }
+      })
+      menu.push({
+        title:'vertical align',
+        fun:() => {
+          let it = nodes[0]
+          let center = new Point(it.x,it.y+it.h/2)
+          nodes.forEach(it => it.y = center.y - it.h/2)
+          this.fire(TREE_ITEM_PROVIDER.PROPERTY_CHANGED, it)
+        }
+      })
+    }
+    return menu
   }
 }
 
