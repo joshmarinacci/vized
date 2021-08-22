@@ -30,17 +30,38 @@ export interface ObjectDelegate {
 function NumberEditor(props: { item: TreeItem, delegate: ObjectDelegate, name:string, disabled:boolean }) {
   let {item, name, delegate, disabled} = {...props}
   const [value, setValue] = useState(()=> delegate.getPropValue(item,name))
-  function updateValue(e:ChangeEvent<HTMLInputElement>):void {
-    let str = e.target.value
+  function updateValue(str:string,offset:number) {
+    // setValue(str)
     let num = parseFloat(str)
-    if(Number.isNaN(num)) {
-      setValue(str)
+    if(!Number.isNaN(num)) {
+      num += offset
+      delegate.setPropValue(item,name,num)
+      setValue(""+num)
     } else {
       setValue(str)
-      delegate.setPropValue(item,name,num)
     }
   }
-  return <input type='number' value={value} onChange={updateValue}  className={'editor'} disabled={disabled}/>
+
+  // @ts-ignore
+  function onKeyDown(e:KeyboardEvent<HTMLInputElement>) {
+    if(e.key === 'ArrowUp' && e.shiftKey) {
+      e.preventDefault()
+      updateValue(e.target.value,10)
+    }
+    if(e.key === 'ArrowDown' && e.shiftKey) {
+      e.preventDefault()
+      updateValue(e.target.value,-10)
+    }
+  }
+
+  return <input type='number'
+                value={value}
+                className={'editor'}
+                disabled={disabled}
+                onChange={(e)=>{
+                  updateValue(e.target.value,0)
+                }}
+                onKeyDown={onKeyDown}/>
 }
 
 
