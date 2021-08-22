@@ -84,6 +84,11 @@ function draw_to_canvas(can: HTMLCanvasElement, provider:RectDocEditor,
                         scale: number, selMan: SelectionManager,
                         bounds:Rect, page:Rect, offset:Point, grid:boolean) {
   const c = can.getContext('2d') as CanvasRenderingContext2D
+  let rect = can.getBoundingClientRect();
+  can.width = rect.width * devicePixelRatio;
+  can.height = rect.height * devicePixelRatio;
+  c.save()
+  c.scale(devicePixelRatio,devicePixelRatio)
   bounds.fill(c,'#cccccc')
   c.save()
   c.scale(scale,scale)
@@ -116,6 +121,7 @@ function draw_to_canvas(can: HTMLCanvasElement, provider:RectDocEditor,
       bds.stroke(c,'black',1)
     }
   })
+  c.restore()
   c.restore()
 }
 
