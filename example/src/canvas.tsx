@@ -10,6 +10,8 @@ import {
 } from "vized"
 import { RectDocEditor } from "./RectDocEditor";
 import "./css/canvas.css"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faAlignCenter } from "@fortawesome/free-solid-svg-icons/faAlignCenter";
 
 export class Rect {
   x: number
@@ -174,7 +176,9 @@ function FloatingNodePanel(props: { visible:boolean, style:any, provider:RectDoc
     'floating-panel': true,
     visible: props.visible
   })} style={props.style}>
-    <button onClick={()=>props.provider.action_horizontal_align(selMan.getFullSelection())}>align horiz</button>
+    <button onClick={()=>props.provider.action_horizontal_align(selMan.getFullSelection())}>
+      <FontAwesomeIcon icon={faAlignCenter}/>
+    </button>
     <button onClick={()=>props.provider.action_vertical_align(selMan.getFullSelection())}>align vert</button>
   </div>
 }
