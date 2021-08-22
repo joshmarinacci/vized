@@ -35,7 +35,7 @@ export class Rect {
   }
   stroke(c: CanvasRenderingContext2D, color: string, lineWidth:number) {
     c.lineWidth = lineWidth
-    c.fillStyle = color
+    c.strokeStyle = color
     c.strokeRect(this.x,this.y,this.x2-this.x,this.y2-this.y)
   }
 
@@ -106,9 +106,11 @@ function draw_to_canvas(can: HTMLCanvasElement, provider:RectDocEditor,
 
 
   provider.getSceneRoot().children.forEach((ch:any) => {
-    c.fillStyle = provider.getColorValue(ch)
+    c.fillStyle = provider.getColorValue(ch,'color')
     let bds = provider.getBoundsValue(ch)
-    bds.fill(c,provider.getColorValue(ch))
+    bds.fill(c,provider.getColorValue(ch,'color'))
+    let bw = provider.getNumberValue(ch,'borderWidth')
+    if(bw > 0) bds.stroke(c,provider.getColorValue(ch,'borderColor'),bw)
     if(selMan.isSelected(ch)) {
       bds.stroke(c,'red',3)
       bds.stroke(c,'black',1)

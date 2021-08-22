@@ -1,8 +1,18 @@
-import {TreeItemProvider, TreeItem, PropCluster, PropDef, PropGroup, PROP_TYPES, makeFromDef, TREE_ITEM_PROVIDER, genID } from "vized";
-import React from 'react'
-import {RectDocApp} from './App'
+import {
+  genID,
+  makeFromDef,
+  PROP_TYPES,
+  PropCluster,
+  PropDef,
+  PropGroup,
+  TREE_ITEM_PROVIDER,
+  TreeItem,
+  TreeItemProvider
+} from "vized";
+import React from "react";
+import { RectDocApp } from "./App";
 import { ObjectDelegate, PropType } from "./propsheet2";
-import "./css/components.css"
+import "./css/components.css";
 import { Rect } from "./canvas";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSquare } from "@fortawesome/free-solid-svg-icons/faSquare";
@@ -92,9 +102,25 @@ SquareDef.set("style",[
     name:'color',
     type:PROP_TYPES.ENUM,
     live:false,
-    default: 'blue',
-    values:['red','green','blue','yellow'],
+    default: 'white',
+    values:['white','red','green','blue','yellow','black'],
     renderer: ColorValueRenderer,
+  },
+  {
+    key:"borderColor",
+    name:"border color",
+    type:PROP_TYPES.ENUM,
+    live:false,
+    default: 'black',
+    values:['white','red','green','blue','yellow','black'],
+    renderer: ColorValueRenderer,
+  },
+  {
+    key:"borderWidth",
+    name:"border width",
+    type:PROP_TYPES.NUMBER,
+    live:false,
+    default:1,
   }
 ])
 
@@ -109,21 +135,30 @@ class RDEObjectDelegate implements ObjectDelegate {
   // @ts-ignore
   private ed: RectDocEditor;
   private item: TreeItem;
+  private def: Map<string,PropGroup>;
+  // @ts-ignore
+  private propmap: Map<string, PropDef>;
+  private _propkeys: string[];
   constructor(p: RectDocEditor,item:TreeItem) {
     this.ed = p
     this.item = item
+
+    this.def = RootDef
+    if (this.item.type === 'square') this.def = SquareDef
+
+    this.propmap = new Map<string,PropDef>()
+    this._propkeys = new Array<string>()
+    this.def.forEach(group => {
+      group.forEach(def => {
+        this.propmap.set(def.key,def)
+        this._propkeys.push(def.key)
+      })
+    })
   }
 
   propkeys(): string[] {
-    if(this.item.type === 'root') {
-      return ['id','title','type']
-    }
-    if(this.item.type === 'square') {
-      return ['id','title','type','x','y','w','h','color']
-    }
-    return ['id'];
+    return this._propkeys
   }
-
   isPropLinked(item:TreeItem, key:string): boolean {
     if(this.item['_links']) {
       if(this.item['_links'][key]) {
@@ -138,25 +173,18 @@ class RDEObjectDelegate implements ObjectDelegate {
     if(name === 'id') return false
     return true;
   }
-
   getPropType(item:TreeItem, key: string): PropType {
-    if(key === 'x') return 'number'
-    if(key === 'y') return 'number'
-    if(key === 'w') return 'number'
-    if(key === 'h') return 'number'
-    if(key === 'color') return 'enum'
+    let def = this.propmap.get(key)
+    if(def) return def.type as PropType
     return 'string'
   }
-
   getPropValue(item:TreeItem, name: string): any {
     return item[name]
   }
-
   setPropValue(item:TreeItem, name: string, value: any): void {
     item[name] = value
     this.ed.fire(TREE_ITEM_PROVIDER.PROPERTY_CHANGED,item)
   }
-
   valueToString(item:TreeItem, name: string): string {
     if(item[name]) return item[name].toString()
     return "???";
@@ -169,7 +197,6 @@ class RDEObjectDelegate implements ObjectDelegate {
     }
     return "???";
   }
-
   removePropLink(item:TreeItem, name: string): void {
     let links = item['_links']
     if(links && links[name]) {
@@ -177,7 +204,6 @@ class RDEObjectDelegate implements ObjectDelegate {
       this.ed.fire(TREE_ITEM_PROVIDER.PROPERTY_CHANGED,item)
     }
   }
-
   setPropLinkTarget(item:TreeItem, name:string, target:TreeItem):void {
     if(!item['_links']) item['_links'] = {}
     let links = item['_links']
@@ -185,24 +211,19 @@ class RDEObjectDelegate implements ObjectDelegate {
     this.ed.fire(TREE_ITEM_PROVIDER.PROPERTY_CHANGED,item)
   }
   getPossibleLinkTargets(item:TreeItem, name: string): TreeItem[] {
-    let targets = this.ed.getSceneRoot().children.filter(ch => ch.id !== item.id)
-    return targets
+    return this.ed.getSceneRoot().children.filter(ch => ch.id !== item.id)
   }
-
   getRendererForEnumProperty(item:TreeItem, name: string): any {
     return ColorValueRenderer
   }
-
   getPropertyEnumValues(item:TreeItem, name: string): any[] {
     // @ts-ignore
-    return SquareDef.get('style')[0].values as any[]
+    return this.propmap.get(name).values
   }
-
   getPropLinkTargetTitle(target:TreeItem): string {
     //@ts-ignore
     return target.id + " : " + target.title
   }
-
 }
 
 class NullObjectDelegate implements ObjectDelegate {
@@ -290,15 +311,15 @@ export class RectDocEditor extends TreeItemProvider {
     root.children.push(child_square)
     return root
   }
-  getColorValue(ch: any) {
+  getColorValue(ch: any, name:string) {
     let links = ch['_links']
-    if(links && links.color) {
-      let master = this.root.children.find(c => c.id === links.color)
+    if(links && links[name]) {
+      let master = this.root.children.find(c => c.id === links[name])
       if(master) { // @ts-ignore
-        return master.color
+        return master[name]
       }
     }
-    return ch.color
+    return ch[name]
   }
 
   getNumberValue(ch: TreeItem, name: string):number {
