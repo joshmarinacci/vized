@@ -87,10 +87,10 @@ function calc_scene_bounds(provider: TreeItemProvider):Rect {
 
 function calc_node_bounds(nodes:any[]):Rect {
   let bounds = new Rect(0,0,0,0)
-  bounds.x = 1000
-  bounds.y = 1000
-  bounds.x2 = 100
-  bounds.y2 = 100
+  bounds.x = 10000
+  bounds.y = 10000
+  bounds.x2 = -1000
+  bounds.y2 = -1000
   nodes.forEach((ch:any) => {
     if(ch.x < bounds.x) bounds.x = ch.x
     if(ch.x + ch.w > bounds.x2) bounds.x2 = ch.x+ch.w
@@ -168,12 +168,14 @@ function toClss(o: any):string{
   return clsses.join(" ")
 }
 
-function FloatingNodePanel(props: { visible:boolean, style:any }) {
+function FloatingNodePanel(props: { visible:boolean, style:any, provider:RectDocEditor }) {
+  let selMan = useContext(SelectionManagerContext)
   return <div className={toClss({
     'floating-panel': true,
     visible: props.visible
   })} style={props.style}>
-    floating panel
+    <button onClick={()=>props.provider.action_horizontal_align(selMan.getFullSelection())}>align horiz</button>
+    <button onClick={()=>props.provider.action_vertical_align(selMan.getFullSelection())}>align vert</button>
   </div>
 }
 
@@ -299,7 +301,9 @@ export function RectCanvas(props:{provider:RectDocEditor, tool:string, grid:bool
   }
 
 
-  let fp = <FloatingNodePanel visible={show_floating_panel} style={{
+  let fp = <FloatingNodePanel
+   provider={props.provider}
+    visible={show_floating_panel} style={{
     left:`${float_position.x}px`,
     top:`${float_position.y}px`,
   }}/>

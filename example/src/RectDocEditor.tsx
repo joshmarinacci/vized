@@ -472,6 +472,19 @@ export class RectDocEditor extends TreeItemProvider {
     return cln
   }
 
+  action_horizontal_align(nodes:any[]):void {
+    let it = nodes[0]
+    let center = new Point(it.x + it.w / 2, it.y)
+    nodes.forEach(it => it.x = center.x - it.w / 2)
+    this.fire(TREE_ITEM_PROVIDER.PROPERTY_CHANGED, it)
+  }
+  action_vertical_align(nodes:any[]):void {
+    let it = nodes[0]
+    let center = new Point(it.x,it.y+it.h/2)
+    nodes.forEach(it => it.y = center.y - it.h/2)
+    this.fire(TREE_ITEM_PROVIDER.PROPERTY_CHANGED, it)
+  }
+
 
   calculateCanvasContextMenu(nodes:any[]):any[] {
     let menu = []
@@ -491,21 +504,11 @@ export class RectDocEditor extends TreeItemProvider {
     if(nodes.length >=  2) {
       menu.push({
         title:'horizontal align',
-        fun:() => {
-          let it = nodes[0]
-          let center = new Point(it.x+it.w/2,it.y)
-          nodes.forEach(it => it.x = center.x - it.w/2)
-          this.fire(TREE_ITEM_PROVIDER.PROPERTY_CHANGED, it)
-        }
+        fun:() => this.action_horizontal_align(nodes)
       })
       menu.push({
         title:'vertical align',
-        fun:() => {
-          let it = nodes[0]
-          let center = new Point(it.x,it.y+it.h/2)
-          nodes.forEach(it => it.y = center.y - it.h/2)
-          this.fire(TREE_ITEM_PROVIDER.PROPERTY_CHANGED, it)
-        }
+        fun:() => this.action_vertical_align(nodes)
       })
     }
     return menu
