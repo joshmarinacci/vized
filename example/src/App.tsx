@@ -107,7 +107,7 @@ export class RectDocApp extends Component<Props, State> {
       rightDivider: '250px',
       bottomDivider:'0px',
       tool:'selection-tool',
-      grid:true,
+      grid:false,
       zoom:0,
     }
   }

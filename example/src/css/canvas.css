@@ -1,0 +1,28 @@
+.canvas-wrapper {
+  border: 1px solid #333;
+  position: relative;
+}
+.main-canvas {
+  box-sizing: border-box;
+  width:100%;
+  height:100%;
+}
+.floating-panel {
+  position: absolute;
+  user-select: none;
+  top: 100px;
+  left: 100px;
+  background-color: #eeeeee;
+  border: 1px solid #ccc;
+  color: black;
+  border-radius: 1rem;
+  padding: 1em;
+  margin: 1em;
+  width: 200px;
+  margin-left: -100px;
+  margin-top: 20px;
+  display: none;
+}
+.floating-panel.visible {
+  display: block;
+}
