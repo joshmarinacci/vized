@@ -513,5 +513,14 @@ export class RectDocEditor extends TreeItemProvider {
     }
     return menu
   }
+
+  deleteChildren(nodes: any[]):void {
+    let childs = this.root.children.slice()
+    nodes.forEach(nd => {
+      childs = childs.filter(n => n.id !== nd.id)
+    })
+    this.root.children = childs
+    this.fire(TREE_ITEM_PROVIDER.STRUCTURE_CHANGED, this.root)
+  }
 }
 

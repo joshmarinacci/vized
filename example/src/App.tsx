@@ -1,5 +1,5 @@
 import 'vized/dist/index.css'
-import React, { Component, useContext, MouseEvent, ReactNode } from "react";
+import React, { Component, useContext, MouseEvent, ReactNode, useEffect } from "react";
 import "./css/grid.css"
 import "./css/treetable.css"
 import "./css/propsheet.css"
@@ -99,6 +99,22 @@ function SelectedButton(props: { onClick: () => void, selected: boolean, childre
   return <button onClick={props.onClick} className={props.selected?"selected":""}>{props.children}</button>
 }
 
+function KeyboardWatcher(props:{provider:RectDocEditor}) {
+  let SM = useContext(SelectionManagerContext)
+  useEffect(()=>{
+    let kbh = (e:KeyboardEvent) => {
+      // console.log("keypress",e.key,e.target)
+      if(e.key === 'Backspace') {
+        props.provider.deleteChildren(SM.getFullSelection())
+        SM.clearSelection()
+      }
+    }
+    document.addEventListener('keypress',kbh)
+    return () => document.removeEventListener('keypress',kbh)
+  })
+  return <div id={'keyboard-watcher'}></div>
+}
+
 export class RectDocApp extends Component<Props, State> {
   constructor({ props }: { props: any }) {
     super(props)
@@ -180,6 +196,7 @@ export class RectDocApp extends Component<Props, State> {
       </div>
       <Resizer onMouseDown={this.resizeRight}/>
       <PopupContainer/>
+      <KeyboardWatcher provider={this.props.provider}/>
     </div>)
   }
 
