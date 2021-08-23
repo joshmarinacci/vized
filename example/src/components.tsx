@@ -4,6 +4,8 @@ import { StorageManagerContext, StorageManager } from "vized";
 import { SelectionManagerContext, TreeItemProvider } from "vized";
 import { PopupManagerContext } from "vized";
 import "./css/components.css"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCaretDown } from "@fortawesome/free-solid-svg-icons";
 
 export function ExportButton(props:{provider:RectDocEditor}) {
   let SM = useContext(StorageManagerContext) as StorageManager
@@ -49,7 +51,9 @@ export function DropdownMenu(props: {provider:RectDocEditor, title:string, child
     PM.show(<div className="popup-menu">{props.children}</div>,e.target)
   }
   // @ts-ignore
-  return <button onClick={open}>{props.title}</button>
+  return <button onClick={open}>{props.title}
+    <FontAwesomeIcon icon={faCaretDown}/>
+  </button>
 }
 
 export function SelectedButton(props: { onClick: () => void, selected: boolean, children: ReactNode }) {
