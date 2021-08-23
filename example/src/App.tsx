@@ -1,11 +1,10 @@
 import 'vized/dist/index.css'
-import React, { Component, useContext, MouseEvent, ReactNode, useEffect } from "react";
+import React, { Component, MouseEvent} from "react";
 import "./css/grid.css"
 import "./css/treetable.css"
 import "./css/propsheet.css"
 import "./css/components.css"
-import {TreeTable, SelectionManager, SelectionManagerContext, TreeItemProvider,
-  PopupManager, PopupManagerContext, PopupContainer,
+import {TreeTable, SelectionManager, SelectionManagerContext, PopupManager, PopupManagerContext, PopupContainer,
   StorageManager, StorageManagerContext, Spacer,
 } from "vized"
 
@@ -17,6 +16,14 @@ import {
 import { RectDocEditor} from "./RectDocEditor";
 import { RectCanvas } from "./canvas";
 import { PropSheet } from "./propsheet2";
+import {
+  AddChildButton,
+  ExportButton,
+  KeyboardWatcher,
+  LoadButton, PNGButton,
+  SaveButton,
+  SelectedButton
+} from "./components";
 
 const STORAGE = new StorageManager()
 const selMan = new SelectionManager()
@@ -47,73 +54,7 @@ export function App() {
   )
 }
 
-function ExportButton(props:{provider:TreeItemProvider}) {
-  let SM = useContext(StorageManagerContext) as StorageManager
-  const save = () => {
-    let json = props.provider.save() as object
-    SM.forceJSONDownload(json,'graphics')
-  }
-  return <button onClick={save} title={'save project'}>export</button>
-}
 
-function SaveButton(props:{provider:TreeItemProvider}) {
-  let SM = useContext(StorageManagerContext) as StorageManager
-  const save = () => {
-    let json = props.provider.save() as object
-    SM.saveToLocalStorage(json,'LAST_DOC')
-  }
-  return <button onClick={save} title={'save project'}>save</button>
-}
-
-function LoadButton(props: { provider: TreeItemProvider }) {
-  let SM = useContext(StorageManagerContext) as StorageManager
-  const load = () => {
-    let json = SM.loadFromLocalStorage('LAST_DOC')
-    if(json) {
-      props.provider.load(json)
-    } else {
-      console.log("error loading json")
-    }
-  }
-  return <button onClick={load} title={'load last project'}>last</button>
-}
-
-function PNGButton(props: { provider: TreeItemProvider }) {
-  let SM = useContext(StorageManagerContext) as StorageManager
-  const doit = () => {
-    let canvas = document.createElement('canvas')
-    canvas.width = 300
-    canvas.height = 300
-    // draw_to_canvas(canvas,props.provider)
-    SM.canvasToPNGBlob(canvas).then(blob => SM.forcePNGDownload(blob,'export'))
-  }
-  return <button onClick={doit} title={'load last project'}>PNG</button>
-}
-
-function AddChildButton(props:{provider:RectDocEditor}) {
-  const on_click = () => props.provider.add_square()
-  return <button onClick={on_click} title={'add child'}>add</button>
-}
-
-function SelectedButton(props: { onClick: () => void, selected: boolean, children: ReactNode }) {
-  return <button onClick={props.onClick} className={props.selected?"selected":""}>{props.children}</button>
-}
-
-function KeyboardWatcher(props:{provider:RectDocEditor}) {
-  let SM = useContext(SelectionManagerContext)
-  useEffect(()=>{
-    let kbh = (e:KeyboardEvent) => {
-      // console.log("keypress",e.key,e.target)
-      if(e.key === 'Backspace') {
-        props.provider.deleteChildren(SM.getFullSelection())
-        SM.clearSelection()
-      }
-    }
-    document.addEventListener('keypress',kbh)
-    return () => document.removeEventListener('keypress',kbh)
-  })
-  return <div id={'keyboard-watcher'}></div>
-}
 
 export class RectDocApp extends Component<Props, State> {
   constructor({ props }: { props: any }) {
