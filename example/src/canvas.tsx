@@ -105,7 +105,7 @@ function calc_node_bounds(nodes:any[]):Rect {
 function draw_to_canvas(can: HTMLCanvasElement, provider:RectDocEditor,
                         scale: number, selMan: SelectionManager,
                         bounds:Rect, page:Rect, offset:Point, grid:boolean,
-                        sel_bounds:Rect,
+                        sel_bounds:Rect, handles:Rect[],
                         ) {
   const c = can.getContext('2d') as CanvasRenderingContext2D
   let rect = can.getBoundingClientRect();
@@ -147,6 +147,9 @@ function draw_to_canvas(can: HTMLCanvasElement, provider:RectDocEditor,
   })
 
   sel_bounds.stroke(c,"red",1)
+  handles.forEach((h:Rect) => {
+    h.stroke(c,'green',1)
+  })
   c.restore()
   c.restore()
 }
@@ -160,6 +163,10 @@ function canvas_to_point(e: MouseEvent, scale:number, offset:Point):Point {
 
 function find_node_at_pt(provider: RectDocEditor, pt: Point):any[] {
   return provider.getSceneRoot().children.filter((ch:any) => provider.getBoundsValue(ch).contains(pt))
+}
+
+function find_handle_at_pt(handles: Handle[], pt: Point):Handle[] {
+  return handles.filter((h:any) => h.contains(pt))
 }
 
 function toClss(o: any):string{
@@ -182,7 +189,21 @@ function FloatingNodePanel(props: { visible:boolean, style:any, provider:RectDoc
     <button onClick={()=>props.provider.action_vertical_align(selMan.getFullSelection())}>align vert</button>
   </div>
 }
-
+class Handle extends Rect {
+  target: any;
+  constructor(x:number,y:number,w:number,h:number,n:any) {
+    super(x,y,w,h);
+    this.target = n
+  }
+  moveTo(pt:Point) {
+    this.x = pt.x-5
+    this.y = pt.y-5
+    this.x2 = this.x+10
+    this.y2 = this.y+10
+    this.target.w = this.x + 5 - this.target.x
+    this.target.h = this.y + 5 - this.target.y
+  }
+}
 export function RectCanvas(props:{provider:RectDocEditor, tool:string, grid:boolean, zoom:number}) {
   let canvas = useRef<HTMLCanvasElement>(null);
   let selMan = useContext(SelectionManagerContext)
@@ -193,16 +214,24 @@ export function RectCanvas(props:{provider:RectDocEditor, tool:string, grid:bool
   let [show_floating_panel, set_show_floating_panel] = useState(false)
   let [float_position, set_float_position] = useState(new Point(0,0))
   let [sel_bounds, set_sel_bounds] = useState(new Rect(0,0,10,10))
+  let [handles, set_handles] = useState([] as Handle[])
 
+  const updateHandles = () => {
+    let sel:any[] = selMan.getFullSelection()
+    set_handles(sel.map((n:any) => {
+      return new Handle(n.x+n.w-5,n.y+n.h-5,10,10,n)
+    }))
+    redraw()
+  }
   useEffect(() => {
     if(canvas.current) redraw()
-    selMan.on(SELECTION_MANAGER.CHANGED, redraw)
+    selMan.on(SELECTION_MANAGER.CHANGED, updateHandles)
     props.provider.on(TREE_ITEM_PROVIDER.PROPERTY_CHANGED, redraw)
     props.provider.on(TREE_ITEM_PROVIDER.STRUCTURE_ADDED, redraw)
     props.provider.on(TREE_ITEM_PROVIDER.STRUCTURE_CHANGED, redraw)
     props.provider.on(TREE_ITEM_PROVIDER.STRUCTURE_REMOVED, redraw)
     return () => {
-      selMan.off(SELECTION_MANAGER.CHANGED,redraw)
+      selMan.off(SELECTION_MANAGER.CHANGED,updateHandles)
       props.provider.off(TREE_ITEM_PROVIDER.PROPERTY_CHANGED, redraw)
       props.provider.off(TREE_ITEM_PROVIDER.STRUCTURE_ADDED, redraw)
       props.provider.off(TREE_ITEM_PROVIDER.STRUCTURE_CHANGED, redraw)
@@ -223,16 +252,23 @@ export function RectCanvas(props:{provider:RectDocEditor, tool:string, grid:bool
       set_bounds(bds)
       set_count(count+1)
     } else {
-      draw_to_canvas(can, props.provider, scale, selMan, bds, page, offset, props.grid, sel_bounds)
+      draw_to_canvas(can, props.provider, scale, selMan, bds, page, offset, props.grid, sel_bounds, handles)
     }
   }
 
   let [mouse_pressed, set_mouse_pressed] = useState(false)
   let [mouse_start, set_mouse_start] = useState(new Point(0,0))
   let [offsets, set_offsets] = useState([] as Point[])
+  let [drag_handle, set_drag_handle] = useState(null as unknown as Handle)
 
   const mouseDown = (e:MouseEvent<HTMLCanvasElement>) => {
     let pt = canvas_to_point(e,scale, offset)
+    let hands = find_handle_at_pt(handles,pt)
+    set_mouse_start(pt)
+    set_mouse_pressed(true)
+    if(hands.length > 0) {
+      return set_drag_handle(hands[0])
+    }
     let nodes = find_node_at_pt(props.provider,pt)
     if(nodes.length > 0) {
       if(e.shiftKey) {
@@ -253,8 +289,6 @@ export function RectCanvas(props:{provider:RectDocEditor, tool:string, grid:bool
       selMan.clearSelection()
       set_show_floating_panel(false)
     }
-    set_mouse_start(pt)
-    set_mouse_pressed(true)
     set_offsets(selMan.getFullSelection().map(it => new Point(it.x,it.y)) as Point[])
     if(selMan.getFullSelection().length >= 2) {
       set_show_floating_panel(true)
@@ -264,6 +298,12 @@ export function RectCanvas(props:{provider:RectDocEditor, tool:string, grid:bool
     }
   }
   const mouseMove = (e:MouseEvent<HTMLCanvasElement>) => {
+    if(drag_handle) {
+      let pt = canvas_to_point(e,scale,offset)
+      drag_handle.moveTo(pt)
+      redraw()
+      return
+    }
     if(props.tool === 'move-tool' && mouse_pressed) {
       let pt = canvas_to_point(e,scale, new Point(0,0))
       let diff:Point = pt.minus(mouse_start)
@@ -276,12 +316,18 @@ export function RectCanvas(props:{provider:RectDocEditor, tool:string, grid:bool
       selMan.getFullSelection().forEach((it,i) => {
         it.x = offsets[i].x + diff.x
         it.y = offsets[i].y + diff.y
-        props.provider.fire(TREE_ITEM_PROVIDER.PROPERTY_CHANGED, it)
+        handles.forEach(h => {
+          if(h.target === it) {
+            h.moveTo(new Point(it.x + it.w, it.y + it.h))
+          }
+        })
       })
+      props.provider.fire(TREE_ITEM_PROVIDER.STRUCTURE_CHANGED, selMan.getFullSelection())
       set_sel_bounds(calc_node_bounds(selMan.getFullSelection()))
     }
   }
   const mouseUp = (e:MouseEvent<HTMLCanvasElement>) => {
+    if(drag_handle) set_drag_handle(null as unknown as Handle)
     set_mouse_pressed(false)
     set_mouse_start(new Point(0,0))
     let sb = calc_node_bounds(selMan.getFullSelection())
