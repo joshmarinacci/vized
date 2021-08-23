@@ -2,27 +2,34 @@ import React, { ReactNode, useContext, useEffect } from "react";
 import { RectDocEditor } from "./RectDocEditor";
 import { StorageManagerContext, StorageManager } from "vized";
 import { SelectionManagerContext, TreeItemProvider } from "vized";
+import { PopupManagerContext } from "vized";
+import "./css/components.css"
 
 export function ExportButton(props:{provider:RectDocEditor}) {
   let SM = useContext(StorageManagerContext) as StorageManager
+  let PM = useContext(PopupManagerContext)
   const save = () => {
     let json = props.provider.save() as object
     SM.forceJSONDownload(json,'graphics')
+    PM.hide()
   }
   return <button onClick={save} title={'save project'}>export</button>
 }
 
 export function SaveButton(props:{provider:TreeItemProvider}) {
   let SM = useContext(StorageManagerContext) as StorageManager
+  let PM = useContext(PopupManagerContext)
   const save = () => {
     let json = props.provider.save() as object
     SM.saveToLocalStorage(json,'LAST_DOC')
+    PM.hide()
   }
   return <button onClick={save} title={'save project'}>save</button>
 }
 
 export function LoadButton(props: { provider: TreeItemProvider }) {
   let SM = useContext(StorageManagerContext) as StorageManager
+  let PM = useContext(PopupManagerContext)
   const load = () => {
     let json = SM.loadFromLocalStorage('LAST_DOC')
     if(json) {
@@ -30,8 +37,19 @@ export function LoadButton(props: { provider: TreeItemProvider }) {
     } else {
       console.log("error loading json")
     }
+    PM.hide()
   }
-  return <button onClick={load} title={'load last project'}>last</button>
+  return <button onClick={load} title={'load last project'}>use last</button>
+}
+
+export function DropdownMenu(props: {provider:RectDocEditor, title:string, children:ReactNode}) {
+  let PM = useContext(PopupManagerContext)
+  // @ts-ignore
+  const open = (e:MouseEvent) => {
+    PM.show(<div className="popup-menu">{props.children}</div>,e.target)
+  }
+  // @ts-ignore
+  return <button onClick={open}>{props.title}</button>
 }
 
 export function SelectedButton(props: { onClick: () => void, selected: boolean, children: ReactNode }) {
@@ -69,4 +87,9 @@ export function PNGButton(props: { provider: TreeItemProvider }) {
 export function AddChildButton(props:{provider:RectDocEditor}) {
   const on_click = () => props.provider.add_square()
   return <button onClick={on_click} title={'add child'}>add</button>
+}
+
+
+export function ButtonGroup(props:{children:ReactNode}) {
+  return <div className={'button-group'}>{props.children}</div>
 }

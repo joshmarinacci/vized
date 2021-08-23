@@ -3,7 +3,6 @@ import React, { Component, MouseEvent} from "react";
 import "./css/grid.css"
 import "./css/treetable.css"
 import "./css/propsheet.css"
-import "./css/components.css"
 import {TreeTable, SelectionManager, SelectionManagerContext, PopupManager, PopupManagerContext, PopupContainer,
   StorageManager, StorageManagerContext, Spacer,
 } from "vized"
@@ -17,7 +16,7 @@ import { RectDocEditor} from "./RectDocEditor";
 import { RectCanvas } from "./canvas";
 import { PropSheet } from "./propsheet2";
 import {
-  AddChildButton,
+  AddChildButton, ButtonGroup, DropdownMenu,
   ExportButton,
   KeyboardWatcher,
   LoadButton, PNGButton,
@@ -71,25 +70,31 @@ export class RectDocApp extends Component<Props, State> {
   render() {
     const gridStyle = {
       gridTemplateColumns: `${this.state.leftDivider} 0px 1fr 0px ${this.state.rightDivider}`,
-      gridTemplateRows: `2rem 1fr 2rem 0px ${this.state.bottomDivider}`,
+      gridTemplateRows: `3rem 1fr 2rem 0px ${this.state.bottomDivider}`,
     }
 
     return (
 
     <div className="grid" style={gridStyle}>
       <div className="toolbar gray">
-        <ExportButton provider={this.props.provider}/>
-        <SaveButton provider={this.props.provider}/>
-        <LoadButton provider={this.props.provider}/>
-        <PNGButton provider={this.props.provider}/>
+        <DropdownMenu provider={this.props.provider} title={"File"}>
+          <ExportButton provider={this.props.provider}/>
+          <SaveButton provider={this.props.provider}/>
+          <LoadButton provider={this.props.provider}/>
+          <PNGButton provider={this.props.provider}/>
+        </DropdownMenu>
+        <DropdownMenu provider={this.props.provider} title={"Objects"}>
+          <AddChildButton provider={provider}/>
+        </DropdownMenu>
       </div>
 
       <Resizer onMouseDown={this.resizeLeft}/>
 
       <div className="toolbar gray">
-        <AddChildButton provider={provider}/>
-        <SelectedButton onClick={()=> this.setState({tool:'selection-tool'})} selected={this.state.tool==='selection-tool'}>select</SelectedButton>
-        <SelectedButton onClick={()=> this.setState({tool:'move-tool'})} selected={this.state.tool === 'move-tool'}>move</SelectedButton>
+        <ButtonGroup>
+          <SelectedButton onClick={()=> this.setState({tool:'selection-tool'})} selected={this.state.tool==='selection-tool'}>select</SelectedButton>
+          <SelectedButton onClick={()=> this.setState({tool:'move-tool'})} selected={this.state.tool === 'move-tool'}>move</SelectedButton>
+        </ButtonGroup>
         <SelectedButton onClick={()=> this.setState({grid:!this.state.grid})} selected={this.state.grid === true}>grid</SelectedButton>
         <button onClick={()=> this.setState({zoom:this.state.zoom-1})}> - </button>
         <label>{this.state.zoom}</label>
