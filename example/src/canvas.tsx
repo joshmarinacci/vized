@@ -102,54 +102,83 @@ function calc_node_bounds(nodes:any[]):Rect {
   return bounds
 }
 
-function draw_to_canvas(can: HTMLCanvasElement, provider:RectDocEditor,
-                        scale: number, selMan: SelectionManager,
-                        bounds:Rect, page:Rect, offset:Point, grid:boolean,
-                        sel_bounds:Rect, handles:Rect[],
-                        ) {
-  const c = can.getContext('2d') as CanvasRenderingContext2D
-  let rect = can.getBoundingClientRect();
-  can.width = rect.width * devicePixelRatio;
-  can.height = rect.height * devicePixelRatio;
-  c.save()
-  c.scale(devicePixelRatio,devicePixelRatio)
-  bounds.fill(c,'#cccccc')
-  c.save()
-  c.scale(scale,scale)
-  c.translate(-bounds.x + offset.x,-bounds.y + offset.y)
-  page.fill(c,'white')
+type DrawingContext = {
+  selection: SelectionManager;
+  canvas:HTMLCanvasElement,
+  provider:RectDocEditor,
+  scale:number,
+  pageBounds:Rect,
+  canvasBounds:Rect,
+  selectionBounds:Rect,
+  offset:Point,
+  handles:Handle[],
+}
 
-  if(grid) {
-    c.strokeStyle = 'black'
-    c.beginPath()
-    for(let x=0; x<page.x2; x+=32) {
-      c.moveTo(x, 0)
-      c.lineTo(x, page.y2)
-    }
-    for(let y=0; y<page.y2; y+=32) {
-      c.moveTo( 0,y)
-      c.lineTo(page.x2,y)
-    }
-    c.stroke()
+function draw_grid_overlay(ctx:DrawingContext,c:CanvasRenderingContext2D):void {
+  c.strokeStyle = 'black'
+  c.beginPath()
+  for(let x=0; x<ctx.pageBounds.x2; x+=32) {
+    c.moveTo(x, 0)
+    c.lineTo(x, ctx.pageBounds.y2)
   }
+  for(let y=0; y<ctx.pageBounds.y2; y+=32) {
+    c.moveTo( 0,y)
+    c.lineTo(ctx.pageBounds.x2,y)
+  }
+  c.stroke()
+}
 
+function draw_handles_overlay(ctx: DrawingContext, c: CanvasRenderingContext2D):void {
+  ctx.handles.forEach((h:Rect) => {
+    h.stroke(c,'green',1)
+  })
+}
 
-  provider.getSceneRoot().children.forEach((ch:any) => {
-    c.fillStyle = provider.getColorValue(ch,'color')
-    let bds = provider.getBoundsValue(ch)
-    bds.fill(c,provider.getColorValue(ch,'color'))
-    let bw = provider.getNumberValue(ch,'borderWidth')
-    if(bw > 0) bds.stroke(c,provider.getColorValue(ch,'borderColor'),bw)
-    if(selMan.isSelected(ch)) {
+function draw_selection_bounds(ctx: DrawingContext, c: CanvasRenderingContext2D):void {
+  ctx.selectionBounds.stroke(c,"red",1)
+}
+
+function draw_page_overlay(ctx: DrawingContext, c: CanvasRenderingContext2D):void {
+  ctx.pageBounds.fill(c,'white')
+}
+
+function draw_shapes(ctx: DrawingContext, c: CanvasRenderingContext2D):void {
+  ctx.provider.getSceneRoot().children.forEach((ch:any) => {
+    c.fillStyle = ctx.provider.getColorValue(ch,'color')
+    let bds = ctx.provider.getBoundsValue(ch)
+    bds.fill(c,ctx.provider.getColorValue(ch,'color'))
+    let bw = ctx.provider.getNumberValue(ch,'borderWidth')
+    if(bw > 0) bds.stroke(c,ctx.provider.getColorValue(ch,'borderColor'),bw)
+    if(ctx.selection.isSelected(ch)) {
       bds.stroke(c,'red',3)
       bds.stroke(c,'black',1)
     }
   })
 
-  sel_bounds.stroke(c,"red",1)
-  handles.forEach((h:Rect) => {
-    h.stroke(c,'green',1)
-  })
+}
+
+function draw_to_canvas(ctx:DrawingContext, grid:boolean) {
+  const c = ctx.canvas.getContext('2d') as CanvasRenderingContext2D
+
+  //canvas background
+  let rect = ctx.canvas.getBoundingClientRect();
+  ctx.canvas.width = rect.width * devicePixelRatio;
+  ctx.canvas.height = rect.height * devicePixelRatio;
+  c.save()
+  c.scale(devicePixelRatio,devicePixelRatio)
+  ctx.canvasBounds.fill(c,'#cccccc')
+
+  //scale to content space
+  c.save()
+  c.scale(ctx.scale,ctx.scale)
+  c.translate(ctx.offset.x-ctx.canvasBounds.x,ctx.offset.y-ctx.canvasBounds.y)
+
+  draw_page_overlay(ctx,c)
+  if(grid) draw_grid_overlay(ctx,c)
+  draw_shapes(ctx,c)
+  draw_selection_bounds(ctx,c)
+  draw_handles_overlay(ctx,c)
+
   c.restore()
   c.restore()
 }
@@ -252,7 +281,18 @@ export function RectCanvas(props:{provider:RectDocEditor, tool:string, grid:bool
       set_bounds(bds)
       set_count(count+1)
     } else {
-      draw_to_canvas(can, props.provider, scale, selMan, bds, page, offset, props.grid, sel_bounds, handles)
+      let ctx:DrawingContext = {
+        canvas:can,
+        provider:props.provider,
+        scale:scale,
+        pageBounds:page,
+        canvasBounds:bds,
+        selectionBounds:sel_bounds,
+        offset:offset,
+        handles:handles,
+        selection:selMan,
+      }
+      draw_to_canvas(ctx, props.grid)
     }
   }
 
