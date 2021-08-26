@@ -87,17 +87,27 @@ function calc_scene_bounds(provider: TreeItemProvider):Rect {
   return bounds
 }
 
+function calc_single_node_bounds(child: any) {
+  if(child.type === 'square') return new Rect(child.x,child.y,child.w,child.h)
+  if(child.type === 'circle') {
+    let r = child.radius
+    return new Rect(child.x-r,child.y-r,r*2,r*2)
+  }
+  return new Rect(0,0,0,0)
+}
+
 function calc_node_bounds(nodes:any[]):Rect {
   let bounds = new Rect(0,0,0,0)
   bounds.x = 10000
   bounds.y = 10000
   bounds.x2 = -1000
   bounds.y2 = -1000
-  nodes.forEach((ch:any) => {
+  nodes.forEach((child:any) => {
+    let ch:Rect = calc_single_node_bounds(child)
     if(ch.x < bounds.x) bounds.x = ch.x
-    if(ch.x + ch.w > bounds.x2) bounds.x2 = ch.x+ch.w
+    if(ch.x2 > bounds.x2) bounds.x2 = ch.x2
     if(ch.y < bounds.y) bounds.y = ch.y
-    if(ch.y + ch.h > bounds.y2) bounds.y2 = ch.y+ch.h
+    if(ch.y2 > bounds.y2) bounds.y2 = ch.y2
   })
   return bounds
 }
@@ -142,19 +152,64 @@ function draw_page_overlay(ctx: DrawingContext, c: CanvasRenderingContext2D):voi
   ctx.pageBounds.fill(c,'white')
 }
 
-function draw_shapes(ctx: DrawingContext, c: CanvasRenderingContext2D):void {
-  ctx.provider.getSceneRoot().children.forEach((ch:any) => {
-    c.fillStyle = ctx.provider.getColorValue(ch,'color')
-    let bds = ctx.provider.getBoundsValue(ch)
-    bds.fill(c,ctx.provider.getColorValue(ch,'color'))
-    let bw = ctx.provider.getNumberValue(ch,'borderWidth')
-    if(bw > 0) bds.stroke(c,ctx.provider.getColorValue(ch,'borderColor'),bw)
-    if(ctx.selection.isSelected(ch)) {
-      bds.stroke(c,'red',3)
-      bds.stroke(c,'black',1)
-    }
-  })
+function draw_square(ctx: DrawingContext, c: CanvasRenderingContext2D, ch: any) {
+  c.fillStyle = ctx.provider.getColorValue(ch, 'color')
+  let bds = ctx.provider.getBoundsValue(ch)
+  bds.fill(c, ctx.provider.getColorValue(ch, 'color'))
+  let bw = ctx.provider.getNumberValue(ch, 'borderWidth')
+  if (bw > 0) bds.stroke(c, ctx.provider.getColorValue(ch, 'borderColor'), bw)
+  if (ctx.selection.isSelected(ch)) {
+    bds.stroke(c, 'red', 3)
+    bds.stroke(c, 'black', 1)
+  }
+}
 
+function draw_group(ctx: DrawingContext, c: CanvasRenderingContext2D, ch: any) {
+  if(ch.type === 'group') {
+    let bds = new Rect(ch.x,ch.y,40,40)
+    bds.stroke(c,'purple',2)
+  }
+  ch.children.forEach((ch:any)=>{
+    if(ch.type === 'square') draw_square(ctx,c,ch)
+    if(ch.type === 'circle') draw_circle(ctx,c,ch)
+    if(ch.type === 'group')  draw_group(ctx,c,ch)
+  })
+}
+
+function draw_circle(ctx: DrawingContext, c: CanvasRenderingContext2D, ch: any) {
+  c.beginPath()
+  c.arc(ch.x,ch.y,ch.radius,0,Math.PI*2)
+  c.closePath()
+  c.fillStyle = ctx.provider.getColorValue(ch, 'color')
+  c.fill()
+  let bw = ctx.provider.getNumberValue(ch, 'borderWidth')
+  if (bw > 0) {
+    c.strokeStyle = ctx.provider.getColorValue(ch, 'borderColor')
+    c.lineWidth = bw
+    c.stroke()
+  }
+  if (ctx.selection.isSelected(ch)) {
+    let r = ch.radius
+    let bds = new Rect(ch.x-r,ch.y-r,r*2,r*2)
+    bds.stroke(c, 'red', 3)
+    bds.stroke(c, 'black', 1)
+  }
+
+}
+
+function draw_shapes(ctx: DrawingContext, c: CanvasRenderingContext2D, root:any):void {
+  root.children.forEach((ch:any) => {
+    if(ch.type === 'square') draw_square(ctx,c,ch)
+    if(ch.type === 'circle') draw_circle(ctx,c,ch)
+    if(ch.type === 'group')  draw_group(ctx,c,ch)
+  })
+}
+
+function draw_group_bounds_overlay(ctx: DrawingContext, c: CanvasRenderingContext2D, root:any) {
+  if(root.type === 'group') {
+    c.fillStyle = 'red'
+    c.fillRect(root.x,root.y,100,100)
+  }
 }
 
 function draw_to_canvas(ctx:DrawingContext, grid:boolean) {
@@ -175,9 +230,10 @@ function draw_to_canvas(ctx:DrawingContext, grid:boolean) {
 
   draw_page_overlay(ctx,c)
   if(grid) draw_grid_overlay(ctx,c)
-  draw_shapes(ctx,c)
+  draw_shapes(ctx,c, ctx.provider.getSceneRoot())
   draw_selection_bounds(ctx,c)
   draw_handles_overlay(ctx,c)
+  draw_group_bounds_overlay(ctx,c,ctx.provider.getSceneRoot())
 
   c.restore()
   c.restore()
@@ -250,6 +306,7 @@ export function RectCanvas(props:{provider:RectDocEditor, tool:string, grid:bool
     set_handles(sel.map((n:any) => {
       return new Handle(n.x+n.w-5,n.y+n.h-5,10,10,n)
     }))
+    set_sel_bounds(calc_node_bounds(selMan.getFullSelection()))
     redraw()
   }
   useEffect(() => {

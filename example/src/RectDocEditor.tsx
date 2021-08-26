@@ -17,7 +17,9 @@ import "./css/components.css";
 import { Rect } from "./canvas";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSquare } from "@fortawesome/free-solid-svg-icons/faSquare";
-import { faMehBlank } from "@fortawesome/free-solid-svg-icons/faMehBlank";
+import { faCircle } from "@fortawesome/free-solid-svg-icons/faCircle";
+import { faLayerGroup } from "@fortawesome/free-solid-svg-icons/faLayerGroup";
+import { faCircleNotch } from "@fortawesome/free-solid-svg-icons/faCircleNotch";
 
 
 const ColorValueRenderer = (props:{object:any, key:string, value:any}) => {
@@ -98,32 +100,116 @@ SquareDef.set("base",[
   },
 ])
 SquareDef.set("geom",GEOM_GROUP)
-SquareDef.set("style",[
+
+const STYLE_GROUP:PropGroup = [
+    {
+      key:"color",
+      name:'color',
+      type:PROP_TYPES.ENUM,
+      live:false,
+      default: 'white',
+      values:['white','red','green','blue','yellow','black'],
+      renderer: ColorValueRenderer,
+    },
+    {
+      key:"borderColor",
+      name:"border color",
+      type:PROP_TYPES.ENUM,
+      live:false,
+      default: 'black',
+      values:['white','red','green','blue','yellow','black'],
+      renderer: ColorValueRenderer,
+    },
+    {
+      key:"borderWidth",
+      name:"border width",
+      type:PROP_TYPES.NUMBER,
+      live:false,
+      default:1,
+    }
+
+]
+SquareDef.set("style",STYLE_GROUP)
+
+export const CircleDef:PropCluster = new Map<string,PropGroup>()
+CircleDef.set("base",[
+  ID_DEF,
+  TITLE_DEF,
   {
-    key:"color",
-    name:'color',
-    type:PROP_TYPES.ENUM,
-    live:false,
-    default: 'white',
-    values:['white','red','green','blue','yellow','black'],
-    renderer: ColorValueRenderer,
+    type: PROP_TYPES.STRING,
+    name: 'type',
+    locked: true,
+    key: 'type',
+    default:'circle',
   },
+])
+CircleDef.set("geom",[
   {
-    key:"borderColor",
-    name:"border color",
-    type:PROP_TYPES.ENUM,
-    live:false,
-    default: 'black',
-    values:['white','red','green','blue','yellow','black'],
-    renderer: ColorValueRenderer,
-  },
-  {
-    key:"borderWidth",
-    name:"border width",
     type:PROP_TYPES.NUMBER,
-    live:false,
-    default:1,
+    key:'x',
+    name:'x',
+    default:0,
+    live:true,
+    hints: {
+      incrementValue:1,
+    }
+  },
+  {
+    key:'y',
+    name:'y',
+    type:PROP_TYPES.NUMBER,
+    live:true,
+    default: 0,
+    hints:{
+      incrementValue:1,
+    }
+  },
+  {
+    type:PROP_TYPES.NUMBER,
+    key:'radius',
+    name:'radius',
+    default:10,
+    live:true,
+    hints: {
+      incrementValue:1,
+    }
+  },
+])
+CircleDef.set("style",STYLE_GROUP)
+
+export const GroupDef:PropCluster = new Map<string, PropGroup>()
+GroupDef.set("base",[
+  ID_DEF,
+  TITLE_DEF,
+  {
+    type: PROP_TYPES.STRING,
+    name: 'type',
+    locked: true,
+    key: 'type',
+    default:'group',
   }
+])
+GroupDef.set("geom",[
+  {
+    type:PROP_TYPES.NUMBER,
+    key:'x',
+    name:'x',
+    default:0,
+    live:true,
+    hints: {
+      incrementValue:1,
+    }
+  },
+  {
+    key:'y',
+    name:'y',
+    type:PROP_TYPES.NUMBER,
+    live:true,
+    default: 0,
+    hints:{
+      incrementValue:1,
+    }
+  },
 ])
 
 const RootDef:PropCluster = new Map<string, PropGroup>()
@@ -147,6 +233,8 @@ class RDEObjectDelegate implements ObjectDelegate {
 
     this.def = RootDef
     if (this.item.type === 'square') this.def = SquareDef
+    if (this.item.type === 'circle') this.def = CircleDef
+    if (this.item.type === 'group') this.def = GroupDef
 
     this.propmap = new Map<string,PropDef>()
     this._propkeys = new Array<string>()
@@ -309,8 +397,17 @@ export class RectDocEditor extends TreeItemProvider {
     child_square['_links'] = {
       color:square3.id,
     }
-    console.log(child_square)
     root.children.push(child_square)
+
+    const child_circle1 = makeFromDef(CircleDef,{id:'cir1',x:200,y:200,radius:20, color:'teal', title:'circle'})
+    root.children.push(child_circle1)
+
+    const group1 = makeFromDef(GroupDef, {id:'grp1', title:"group 1"})
+    group1.children = []
+    root.children.push(group1)
+    const square4 = makeFromDef(SquareDef, {id:'sq5', x:100,y:100,w:20,h:20, color:'blue',title:'child square'})
+    group1.children.push(square4)
+
     return root
   }
   getColorValue(ch: any, name:string) {
@@ -344,7 +441,6 @@ export class RectDocEditor extends TreeItemProvider {
     )
   }
 
-
   getSceneRoot():TreeItem {
     return this.root
   }
@@ -357,6 +453,8 @@ export class RectDocEditor extends TreeItemProvider {
     if (item) {
       if (item.type === 'root') return RootDef
       if (item.type === 'square') return SquareDef
+      if (item.type === 'group') return GroupDef
+      if (item.type === 'circle') return CircleDef
     }
     return new Map()
   }
@@ -386,8 +484,10 @@ export class RectDocEditor extends TreeItemProvider {
 
 
   getRendererForItem(item:TreeItem) {
-    let icon = <FontAwesomeIcon icon={faMehBlank}/>
+    let icon = <FontAwesomeIcon icon={faCircleNotch}/>
     if (item.type === 'square')  icon = <FontAwesomeIcon icon={faSquare} />
+    if (item.type === 'group')  icon = <FontAwesomeIcon icon={faLayerGroup}/>
+    if (item.type === 'circle')  icon = <FontAwesomeIcon icon={faCircle}/>
     let title = (item as any).title
     return <label> {icon} {title}</label>
   }
