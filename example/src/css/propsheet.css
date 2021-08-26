@@ -150,3 +150,19 @@
 /*.scale-editor input[type=number] {*/
 /*    width: 3em;*/
 /*}*/
+
+.prop-sheet .fa-link {
+  padding: 0.25em;
+  margin: 0.25em;
+  align-self: center;
+  justify-self: end;
+  color:#aaaaaa;
+  border-radius: 0.25em;
+}
+.prop-sheet .fa-link:hover {
+  background-color: #666666;
+  color:white;
+}
+.prop-sheet .fa-link.linked {
+  color:black;
+}

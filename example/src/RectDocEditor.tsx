@@ -215,7 +215,6 @@ RootDef.set("base",[
   TITLE_DEF,
 ])
 
-
 const TextboxDef:PropCluster = new Map<string,PropGroup>()
 TextboxDef.set("base",[
   ID_DEF,
@@ -236,6 +235,31 @@ TextboxDef.set("base",[
   }
 ])
 TextboxDef.set("geom",GEOM_GROUP)
+TextboxDef.set("layout",[
+  {
+    key:'fontSize',
+    name:"font size",
+    type:PROP_TYPES.NUMBER,
+    live:false,
+    default:16,
+  },
+  {
+    key:'horizontalAlign',
+    name:'Align H',
+    type:PROP_TYPES.ENUM,
+    live:false,
+    values:["start","center","end"],
+    default:"center",
+  },
+  {
+    key:'verticalAlign',
+    name:'Align V',
+    type:PROP_TYPES.ENUM,
+    live:false,
+    values:["start","center","end"],
+    default:"center",
+  },
+])
 TextboxDef.set("style",[
   {
     key:"color",
@@ -271,13 +295,6 @@ TextboxDef.set("style",[
     live:false,
     default:1,
   },
-  {
-    key:'fontSize',
-    name:"font size",
-    type:PROP_TYPES.NUMBER,
-    live:false,
-    default:16,
-  }
 ])
 
 let TYPE_MAP = new Map<string,Map<string,PropGroup>>()
@@ -452,9 +469,9 @@ export class RectDocEditor extends TreeItemProvider {
     root.children.push(square1)
     const square2 = makeFromDef(SquareDef,{id:'sq2',x:150,y:20,w:30,h:30,color:'red',title:'bar'})
     root.children.push(square2)
-    const square3 = makeFromDef(SquareDef,{id:'sq3',x:30,y:220,w:30,h:30,color:'green', title:'green'})
+    const square3 = makeFromDef(SquareDef,{id:'sq3',x:30,y:220,w:30,h:30,color:'green', title:'source square'})
     root.children.push(square3)
-    const child_square = makeFromDef(SquareDef,{id:'sq4',x:50,y:50,w:20,h:100, color:'teal',title:"teal"})
+    const child_square = makeFromDef(SquareDef,{id:'sq4',x:50,y:50,w:20,h:100, color:'teal',title:"linked color"})
     child_square['_links'] = {
       color:square3.id,
     }

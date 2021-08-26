@@ -7,6 +7,9 @@ import {
   PopupManagerContext,
   TREE_ITEM_PROVIDER,
 } from "vized";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faLink } from "@fortawesome/free-solid-svg-icons/faLink";
+import {toClss} from "./components"
 
 export type PropType = 'string' | 'number' | 'boolean' | 'enum'
 
@@ -125,7 +128,7 @@ function LinkPicker(props: { item:TreeItem, name: string, delegate: ObjectDelega
       PM.hide()
     }}>{delegate.getPropLinkTargetTitle(target)}</button>
   })
-  return <div className={'vbox'}>
+  return <div className={'vbox popup-menu'}>
     {items}
     <button onClick={()=>{
       delegate.removePropLink(item,name)
@@ -142,7 +145,7 @@ function OpenLinkEditorButton(props: { item: TreeItem, name: string, delegate: O
       PM.show(<LinkPicker delegate={delegate} item={item} name={name}/>, e.target)
   }
   // @ts-ignore
-  return <button onClick={open}>{linked?"L":"0"}</button>
+  return <FontAwesomeIcon icon={faLink} onClick={open} className={toClss({linked:linked})}/>
 }
 
 export function PropSheet(props:{provider:TreeItemProvider, }) {
