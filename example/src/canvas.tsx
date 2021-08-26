@@ -1,114 +1,16 @@
-import React, { useContext, useEffect, useRef, MouseEvent, useState } from "react";
+import React, { MouseEvent, useContext, useEffect, useRef, useState } from "react";
 import {
-  SelectionManagerContext,
-  SELECTION_MANAGER, TREE_ITEM_PROVIDER,
-  SelectionManager,
   ContextMenu,
+  Point,
   PopupManagerContext,
-  Point
-} from "vized"
+  SELECTION_MANAGER,
+  SelectionManager,
+  SelectionManagerContext,
+  TREE_ITEM_PROVIDER
+} from "vized";
 import { RectDocEditor } from "./RectDocEditor";
-import "./css/canvas.css"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAlignCenter } from "@fortawesome/free-solid-svg-icons/faAlignCenter";
-
-export class Rect {
-  x: number
-  y: number
-  x2: number
-  y2: number
-  private empty: boolean;
-  constructor(x: number, y: number, w: number, h: number, empty?:boolean) {
-    this.x = x
-    this.y = y
-    this.x2 = x+w
-    this.y2 = y+h
-    this.empty = empty?empty:false
-  }
-
-  union_self(rect:Rect) {
-    if(rect.empty) return
-    // if(this.empty && !rect.empty) {
-    //   this.x = rect.x
-    //   this.y = rect.y
-    //   this.x2 = rect.x2
-    //   this.y2 = rect.y2
-    //   return
-    // }
-    if(rect.x < this.x) {
-      this.x = rect.x
-      this.empty = false
-    }
-    if(rect.y < this.y) {
-      this.y = rect.y
-      this.empty = false
-    }
-    if(rect.x2 > this.x2) {
-      this.x2 = rect.x2
-      this.empty = false
-    }
-    if(rect.y2 > this.y2) {
-      this.y2 = rect.y2
-      this.empty = false
-    }
-  }
-
-  fill(c: CanvasRenderingContext2D, color: string) {
-    c.fillStyle = color
-    c.fillRect(this.x,this.y,this.x2-this.x,this.y2-this.y)
-  }
-  stroke(c: CanvasRenderingContext2D, color: string, lineWidth:number) {
-    c.lineWidth = lineWidth
-    c.strokeStyle = color
-    c.strokeRect(this.x,this.y,this.x2-this.x,this.y2-this.y)
-  }
-
-  width() {
-    return this.x2 - this.x
-  }
-
-  height() {
-    return this.y2 - this.y
-  }
-
-  equal(bounds: Rect) {
-    if(this.x != bounds.x) return false
-    if(this.y != bounds.y) return false
-    if(this.x2 != bounds.x2) return false
-    if(this.y2 != bounds.y2) return false
-    return true
-  }
-
-  contains(pt: Point) {
-      if(pt.x < this.x) return false
-      if(pt.x > this.x2) return false
-      if(pt.y < this.y) return false
-      if(pt.y > this.y2) return false
-      return true
-  }
-
-  bottom_center():Point {
-    return new Point((this.x+this.x2)/2,this.y2)
-  }
-
-  translate(point:Point) {
-    return new Rect(this.x + point.x, this.y + point.y, this.width(),this.height(), this.empty)
-  }
-
-  isEmpty() {
-    return this.empty
-  }
-
-  makeEmpty() {
-    let bounds = new Rect(0,0,0,0)
-    bounds.x = 10000
-    bounds.y = 10000
-    bounds.x2 = -1000
-    bounds.y2 = -1000
-    bounds.empty = true
-    return bounds
-  }
-}
+import "./css/canvas.css";
+import { FloatingNodePanel, Rect } from "./components";
 
 
 type DrawingContext = {
@@ -265,26 +167,6 @@ function find_handle_at_pt(handles: Handle[], pt: Point):Handle[] {
   return handles.filter((h:any) => h.contains(pt))
 }
 
-function toClss(o: any):string{
-  let clsses:string[] = []
-  Object.entries(o).forEach(([key,value])=>{
-    if(value) clsses.push(key)
-  })
-  return clsses.join(" ")
-}
-
-function FloatingNodePanel(props: { visible:boolean, style:any, provider:RectDocEditor }) {
-  let selMan = useContext(SelectionManagerContext)
-  return <div className={toClss({
-    'floating-panel': true,
-    visible: props.visible
-  })} style={props.style}>
-    <button onClick={()=>props.provider.action_horizontal_align(selMan.getFullSelection())}>
-      <FontAwesomeIcon icon={faAlignCenter}/>
-    </button>
-    <button onClick={()=>props.provider.action_vertical_align(selMan.getFullSelection())}>align vert</button>
-  </div>
-}
 class Handle extends Rect {
   target: any;
   constructor(x:number,y:number,w:number,h:number,n:any) {

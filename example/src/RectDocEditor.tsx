@@ -14,12 +14,12 @@ import React from "react";
 import { RectDocApp } from "./App";
 import { ObjectDelegate, PropType } from "./propsheet2";
 import "./css/components.css";
-import { Rect } from "./canvas";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSquare } from "@fortawesome/free-solid-svg-icons/faSquare";
 import { faCircle } from "@fortawesome/free-solid-svg-icons/faCircle";
 import { faLayerGroup } from "@fortawesome/free-solid-svg-icons/faLayerGroup";
 import { faCircleNotch } from "@fortawesome/free-solid-svg-icons/faCircleNotch";
+import { Rect } from "./components";
 
 
 const ColorValueRenderer = (props:{object:any, key:string, value:any}) => {
