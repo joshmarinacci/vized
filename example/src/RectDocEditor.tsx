@@ -405,8 +405,8 @@ export class RectDocEditor extends TreeItemProvider {
     const group1 = makeFromDef(GroupDef, {id:'grp1', title:"group 1"})
     group1.children = []
     root.children.push(group1)
-    const square4 = makeFromDef(SquareDef, {id:'sq5', x:100,y:100,w:20,h:20, color:'blue',title:'child square'})
-    group1.children.push(square4)
+    group1.children.push(makeFromDef(SquareDef, {id:'sq5', x:100,y:100,w:20,h:20, color:'blue',title:'child square'}))
+    group1.children.push(makeFromDef(SquareDef, {id:'sq6', x:150,y:150,w:20,h:20, color:'blue',title:'child square3'}))
 
     return root
   }
@@ -434,8 +434,13 @@ export class RectDocEditor extends TreeItemProvider {
 
   getBoundsValue(ch: any):Rect {
     if(ch.type === 'circle') {
-      let r = ch.radius
-      return new Rect(ch.x-r,ch.y-r,r*2,r*2)
+      let r = this.getNumberValue(ch,'radius')
+      return new Rect(this.getNumberValue(ch,'x')-r,
+        this.getNumberValue(ch,'y')-r,
+        r*2,r*2)
+    }
+    if(ch.type === 'group') {
+      return this.calc_group_bounds_value(ch)
     }
     return new Rect(
       this.getNumberValue(ch,'x'),
@@ -443,6 +448,38 @@ export class RectDocEditor extends TreeItemProvider {
       this.getNumberValue(ch,'w'),
       this.getNumberValue(ch,'h'),
     )
+  }
+
+  calc_node_array_bounds(nodes:any[]):Rect {
+    let bounds = new Rect(0,0,0,0)
+    bounds.x = 10000
+    bounds.y = 10000
+    bounds.x2 = -1000
+    bounds.y2 = -1000
+    nodes.forEach((child:any) => {
+      let ch:Rect = this.getBoundsValue(child)
+      if(ch.x < bounds.x) bounds.x = ch.x
+      if(ch.x2 > bounds.x2) bounds.x2 = ch.x2
+      if(ch.y < bounds.y) bounds.y = ch.y
+      if(ch.y2 > bounds.y2) bounds.y2 = ch.y2
+    })
+    return bounds
+  }
+
+  calc_group_bounds_value(group: any):Rect {
+    let bounds = new Rect(0,0,0,0)
+    bounds.x = 10000
+    bounds.y = 10000
+    bounds.x2 = -1000
+    bounds.y2 = -1000
+    group.children.forEach((child:any) => {
+      let ch:Rect = this.getBoundsValue(child)
+      if(ch.x < bounds.x) bounds.x = ch.x
+      if(ch.x2 > bounds.x2) bounds.x2 = ch.x2
+      if(ch.y < bounds.y) bounds.y = ch.y
+      if(ch.y2 > bounds.y2) bounds.y2 = ch.y2
+    })
+    return bounds
   }
 
   getSceneRoot():TreeItem {

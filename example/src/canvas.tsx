@@ -166,8 +166,12 @@ function draw_square(ctx: DrawingContext, c: CanvasRenderingContext2D, ch: any) 
 
 function draw_group(ctx: DrawingContext, c: CanvasRenderingContext2D, ch: any) {
   if(ch.type === 'group') {
-    let bds = new Rect(ch.x,ch.y,40,40)
-    bds.stroke(c,'purple',2)
+    let bds = ctx.provider.calc_group_bounds_value(ch)
+    bds.stroke(c,'purple',4)
+    if (ctx.selection.isSelected(ch)) {
+      bds.stroke(c, 'red', 3)
+      bds.stroke(c, 'black', 1)
+    }
   }
   ch.children.forEach((ch:any)=>{
     if(ch.type === 'square') draw_square(ctx,c,ch)
@@ -312,7 +316,7 @@ export function RectCanvas(props:{provider:RectDocEditor, tool:string, grid:bool
     set_handles(sel.filter((n:any) => n.type === 'square').map((n:any) => {
       return new Handle(n.x+n.w-5,n.y+n.h-5,10,10,n)
     }))
-    set_sel_bounds(calc_node_bounds(selMan.getFullSelection()))
+    set_sel_bounds(props.provider.calc_node_array_bounds(selMan.getFullSelection()))
     redraw()
   }
   useEffect(() => {
