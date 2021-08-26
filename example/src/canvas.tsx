@@ -65,6 +65,34 @@ function draw_square(ctx: DrawingContext, c: CanvasRenderingContext2D, ch: any) 
   }
 }
 
+function draw_textbox(ctx: DrawingContext, c: CanvasRenderingContext2D, ch: any) {
+  c.fillStyle = ctx.provider.getColorValue(ch, 'color')
+  let bds = ctx.provider.getBoundsValue(ch)
+  bds.fill(c, ctx.provider.getColorValue(ch, 'color'))
+  let bw = ctx.provider.getNumberValue(ch, 'borderWidth')
+  if (bw > 0) bds.stroke(c, ctx.provider.getColorValue(ch, 'borderColor'), bw)
+
+  let txt = ctx.provider.getStringValue(ch,'text')
+  //c.fillStyle = ctx.provider.getColorValue(ch,'color')
+  let metrics = c.measureText(txt)
+  c.save()
+  let center = bds.center()
+  c.translate(center.x,center.y)
+  let rect = new Rect(0,0,-metrics.actualBoundingBoxLeft+metrics.actualBoundingBoxRight,metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent)
+  let cent = new Point(-rect.width()/2,-rect.height()/2)
+  rect.translate_self(cent)
+  rect.stroke(c,'green',1)
+  c.fillStyle = 'black'
+  c.fillText(txt,cent.x,cent.y+metrics.fontBoundingBoxAscent)
+  c.restore()
+
+  if (ctx.selection.isSelected(ch)) {
+    bds.stroke(c, 'red', 3)
+    bds.stroke(c, 'black', 1)
+  }
+}
+
+
 function draw_group(ctx: DrawingContext, c: CanvasRenderingContext2D, ch: any) {
   if(ch.type === 'group') {
     let bds = ctx.provider.calc_group_bounds_value(ch)
@@ -109,6 +137,7 @@ function draw_shapes(ctx: DrawingContext, c: CanvasRenderingContext2D, root:any)
     if(ch.type === 'square') draw_square(ctx,c,ch)
     if(ch.type === 'circle') draw_circle(ctx,c,ch)
     if(ch.type === 'group')  draw_group(ctx,c,ch)
+    if(ch.type === 'textbox') draw_textbox(ctx,c,ch)
   })
 }
 

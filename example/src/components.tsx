@@ -1,12 +1,12 @@
 import React, { ReactNode, useContext, useEffect } from "react";
 import { RectDocEditor } from "./RectDocEditor";
 import {
+  Point,
   PopupManagerContext,
   SelectionManagerContext,
   StorageManager,
   StorageManagerContext,
-  TreeItemProvider,
-  Point
+  TreeItemProvider
 } from "vized";
 import "./css/components.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -204,6 +204,12 @@ export class Rect {
   translate(point: Point) {
     return new Rect(this.x + point.x, this.y + point.y, this.width(), this.height(), this.empty);
   }
+  translate_self(point: Point) {
+    this.x = this.x + point.x
+    this.y = this.y + point.y
+    this.x2 = this.x2 + point.x
+    this.y2 = this.y2 + point.y
+  }
 
   isEmpty() {
     return this.empty;
@@ -218,4 +224,14 @@ export class Rect {
     bounds.empty = true;
     return bounds;
   }
+
+  center():Point {
+    return new Point((this.x+this.x2)/2, (this.y+this.y2)/2)
+  }
 }
+
+export const ColorValueRenderer = (props: { object: any, key: string, value: any }) => {
+  return <div className={"color-value"} style={{
+    backgroundColor: props.value
+  }}><b className={"text"}>{props.value}</b></div>;
+};

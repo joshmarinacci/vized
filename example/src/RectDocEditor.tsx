@@ -1,14 +1,14 @@
 import {
   genID,
   makeFromDef,
+  Point,
   PROP_TYPES,
   PropCluster,
   PropDef,
   PropGroup,
   TREE_ITEM_PROVIDER,
   TreeItem,
-  TreeItemProvider,
-  Point,
+  TreeItemProvider
 } from "vized";
 import React from "react";
 import { RectDocApp } from "./App";
@@ -19,14 +19,9 @@ import { faSquare } from "@fortawesome/free-solid-svg-icons/faSquare";
 import { faCircle } from "@fortawesome/free-solid-svg-icons/faCircle";
 import { faLayerGroup } from "@fortawesome/free-solid-svg-icons/faLayerGroup";
 import { faCircleNotch } from "@fortawesome/free-solid-svg-icons/faCircleNotch";
-import { Rect } from "./components";
+import { ColorValueRenderer, Rect } from "./components";
+import { faSortAlphaDownAlt } from "@fortawesome/free-solid-svg-icons";
 
-
-const ColorValueRenderer = (props:{object:any, key:string, value:any}) => {
-  return <div className={'color-value'} style={{
-    backgroundColor:props.value,
-  }}><b className={'text'}>{props.value}</b></div>
-}
 
 const ID_DEF:PropDef = {
   type: PROP_TYPES.STRING,
@@ -219,6 +214,35 @@ RootDef.set("base",[
 ])
 
 
+const TextboxDef:PropCluster = new Map<string,PropGroup>()
+TextboxDef.set("base",[
+  ID_DEF,
+  TITLE_DEF,
+  {
+    type: PROP_TYPES.STRING,
+    name: 'type',
+    locked: true,
+    key: 'type',
+    default:'textbox',
+  },
+  {
+    type: PROP_TYPES.STRING,
+    name:'text',
+    locked:false,
+    key:'text',
+    default:'empty text'
+  }
+])
+TextboxDef.set("geom",GEOM_GROUP)
+TextboxDef.set("style",STYLE_GROUP)
+
+let TYPE_MAP = new Map<string,Map<string,PropGroup>>()
+TYPE_MAP.set('square',SquareDef)
+TYPE_MAP.set('circle',CircleDef)
+TYPE_MAP.set('group',GroupDef)
+TYPE_MAP.set('textbox',TextboxDef)
+TYPE_MAP.set('root',RootDef)
+
 class RDEObjectDelegate implements ObjectDelegate {
   // @ts-ignore
   private ed: RectDocEditor;
@@ -232,9 +256,7 @@ class RDEObjectDelegate implements ObjectDelegate {
     this.item = item
 
     this.def = RootDef
-    if (this.item.type === 'square') this.def = SquareDef
-    if (this.item.type === 'circle') this.def = CircleDef
-    if (this.item.type === 'group') this.def = GroupDef
+    if(TYPE_MAP.has(this.item.type)) this.def = TYPE_MAP.get(this.item.type) as Map<string,PropGroup>
 
     this.propmap = new Map<string,PropDef>()
     this._propkeys = new Array<string>()
@@ -250,12 +272,7 @@ class RDEObjectDelegate implements ObjectDelegate {
     return this._propkeys
   }
   isPropLinked(item:TreeItem, key:string): boolean {
-    if(this.item['_links']) {
-      if(this.item['_links'][key]) {
-        // console.log("linked from",this.item['_links'][key])
-        return true
-      }
-    }
+    if(this.item['_links'] && this.item['_links'][key]) return true
     return false;
   }
   isPropEditable(item:TreeItem, name: string): boolean {
@@ -408,6 +425,9 @@ export class RectDocEditor extends TreeItemProvider {
     group1.children.push(makeFromDef(SquareDef, {id:'sq5', x:100,y:100,w:20,h:20, color:'blue',title:'child square'}))
     group1.children.push(makeFromDef(SquareDef, {id:'sq6', x:150,y:150,w:20,h:20, color:'blue',title:'child square3'}))
 
+
+    const text1 = makeFromDef(TextboxDef, {id:'tb1', title:'text box'})
+    root.children.push(text1)
     return root
   }
   getColorValue(ch: any, name:string) {
@@ -431,6 +451,18 @@ export class RectDocEditor extends TreeItemProvider {
     }
     return ch[name]
   }
+
+  getStringValue(ch: any, name: string):string {
+    let links = ch['_links']
+    if(links && links[name]) {
+      let master = this.root.children.find(c => c.id === links[name])
+      if(master) { // @ts-ignore
+        return master[name] as string
+      }
+    }
+    return ch[name]
+  }
+
 
   getBoundsValue(ch: any):Rect {
     if(ch.type === 'circle') {
@@ -522,6 +554,7 @@ export class RectDocEditor extends TreeItemProvider {
     if (item.type === 'square')  icon = <FontAwesomeIcon icon={faSquare} />
     if (item.type === 'group')  icon = <FontAwesomeIcon icon={faLayerGroup}/>
     if (item.type === 'circle')  icon = <FontAwesomeIcon icon={faCircle}/>
+    if (item.type === 'textbox')  icon = <FontAwesomeIcon icon={faSortAlphaDownAlt}/>
     let title = (item as any).title
     return <label> {icon} {title}</label>
   }
