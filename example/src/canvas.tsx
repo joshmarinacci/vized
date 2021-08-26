@@ -189,8 +189,7 @@ function draw_circle(ctx: DrawingContext, c: CanvasRenderingContext2D, ch: any) 
     c.stroke()
   }
   if (ctx.selection.isSelected(ch)) {
-    let r = ch.radius
-    let bds = new Rect(ch.x-r,ch.y-r,r*2,r*2)
+    let bds = ctx.provider.getBoundsValue(ch)
     bds.stroke(c, 'red', 3)
     bds.stroke(c, 'black', 1)
   }
@@ -309,7 +308,8 @@ export function RectCanvas(props:{provider:RectDocEditor, tool:string, grid:bool
 
   const updateHandles = () => {
     let sel:any[] = selMan.getFullSelection()
-    set_handles(sel.map((n:any) => {
+    //don't make a handle for anything but squares
+    set_handles(sel.filter((n:any) => n.type === 'square').map((n:any) => {
       return new Handle(n.x+n.w-5,n.y+n.h-5,10,10,n)
     }))
     set_sel_bounds(calc_node_bounds(selMan.getFullSelection()))
