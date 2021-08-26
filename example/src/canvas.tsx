@@ -248,6 +248,7 @@ export function RectCanvas(props:{provider:RectDocEditor, tool:string, grid:bool
       return new Handle(n.x+n.w-5,n.y+n.h-5,10,10,n)
     }))
     set_sel_bounds(props.provider.calc_node_array_bounds(selMan.getFullSelection()))
+    if(selMan.isEmpty()) set_show_floating_panel(false)
     redraw()
   }
   useEffect(() => {
@@ -379,7 +380,7 @@ export function RectCanvas(props:{provider:RectDocEditor, tool:string, grid:bool
       const rect = e.target.getBoundingClientRect();
       pt.y -= rect.height
       let nodes:any[] = selMan.getFullSelection()
-      let menu = props.provider.calculateCanvasContextMenu(nodes)
+      let menu = props.provider.calculateCanvasContextMenu(nodes, selMan)
       pm.show(<ContextMenu menu={menu} />, e.target, pt)
     }
   }

@@ -8,7 +8,8 @@ import {
   PropGroup,
   TREE_ITEM_PROVIDER,
   TreeItem,
-  TreeItemProvider
+  TreeItemProvider,
+  SelectionManager
 } from "vized";
 import React from "react";
 import { RectDocApp } from "./App";
@@ -21,6 +22,7 @@ import { faLayerGroup } from "@fortawesome/free-solid-svg-icons/faLayerGroup";
 import { faCircleNotch } from "@fortawesome/free-solid-svg-icons/faCircleNotch";
 import { ColorValueRenderer, Rect } from "./components";
 import { faSortAlphaDownAlt } from "@fortawesome/free-solid-svg-icons";
+
 
 
 const ID_DEF:PropDef = {
@@ -729,12 +731,15 @@ export class RectDocEditor extends TreeItemProvider {
   }
 
 
-  calculateCanvasContextMenu(nodes:any[]):any[] {
+  calculateCanvasContextMenu(nodes:any[], selMan:SelectionManager):any[] {
     let menu = []
     menu.push({
       title: 'delete',
       icon: 'delete',
-      fun: () => nodes.forEach(item => this.deleteChild(item))
+      fun: () => {
+        nodes.forEach(item => this.deleteChild(item))
+        selMan.clearSelection()
+      }
     })
     menu.push({
       title:`duplicate`,
