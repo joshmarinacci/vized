@@ -17,18 +17,40 @@ export class Rect {
   y: number
   x2: number
   y2: number
-  constructor(x: number, y: number, w: number, h: number) {
+  private empty: boolean;
+  constructor(x: number, y: number, w: number, h: number, empty?:boolean) {
     this.x = x
     this.y = y
     this.x2 = x+w
     this.y2 = y+h
+    this.empty = empty?empty:false
   }
 
-  union(x:number, y:number, w:number, h:number) {
-    this.x = Math.min(x, this.x)
-    this.y = Math.min(y, this.y)
-    this.x2 = Math.max(x+w,this.x2)
-    this.y2 = Math.max(y+h,this.y2)
+  union_self(rect:Rect) {
+    if(rect.empty) return
+    // if(this.empty && !rect.empty) {
+    //   this.x = rect.x
+    //   this.y = rect.y
+    //   this.x2 = rect.x2
+    //   this.y2 = rect.y2
+    //   return
+    // }
+    if(rect.x < this.x) {
+      this.x = rect.x
+      this.empty = false
+    }
+    if(rect.y < this.y) {
+      this.y = rect.y
+      this.empty = false
+    }
+    if(rect.x2 > this.x2) {
+      this.x2 = rect.x2
+      this.empty = false
+    }
+    if(rect.y2 > this.y2) {
+      this.y2 = rect.y2
+      this.empty = false
+    }
   }
 
   fill(c: CanvasRenderingContext2D, color: string) {
@@ -70,7 +92,21 @@ export class Rect {
   }
 
   translate(point:Point) {
-    return new Rect(this.x + point.x, this.y + point.y, this.width(),this.height())
+    return new Rect(this.x + point.x, this.y + point.y, this.width(),this.height(), this.empty)
+  }
+
+  isEmpty() {
+    return this.empty
+  }
+
+  makeEmpty() {
+    let bounds = new Rect(0,0,0,0)
+    bounds.x = 10000
+    bounds.y = 10000
+    bounds.x2 = -1000
+    bounds.y2 = -1000
+    bounds.empty = true
+    return bounds
   }
 }
 
@@ -178,6 +214,7 @@ function draw_group_bounds_overlay(ctx: DrawingContext, c: CanvasRenderingContex
   root.children.forEach((ch:any) => {
     if(ch.type === 'group')  {
       let bds = ctx.provider.getBoundsValue(ch)
+      if(bds.isEmpty()) return
       c.save()
       c.globalAlpha = 0.3
       bds.fill(c,'red')
@@ -207,7 +244,7 @@ function draw_to_canvas(ctx:DrawingContext, grid:boolean, group_overlay:boolean)
   draw_shapes(ctx,c, ctx.provider.getSceneRoot())
   draw_selection_bounds(ctx,c)
   draw_handles_overlay(ctx,c)
-  if(group_overlay)draw_group_bounds_overlay(ctx,c,ctx.provider.getSceneRoot())
+  if(group_overlay) draw_group_bounds_overlay(ctx,c,ctx.provider.getSceneRoot())
 
   c.restore()
   c.restore()

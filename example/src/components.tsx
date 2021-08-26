@@ -87,13 +87,6 @@ export function PNGButton(props: { provider: TreeItemProvider }) {
   }
   return <button onClick={doit} title={'load last project'}>PNG</button>
 }
-
-export function AddChildButton(props:{provider:RectDocEditor}) {
-  const on_click = () => props.provider.add_square()
-  return <button onClick={on_click} title={'add child'}>add</button>
-}
-
-
 export function ButtonGroup(props:{children:ReactNode}) {
   return <div className={'button-group'}>{props.children}</div>
 }

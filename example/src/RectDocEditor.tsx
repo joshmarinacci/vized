@@ -467,17 +467,9 @@ export class RectDocEditor extends TreeItemProvider {
   }
 
   calc_group_bounds_value(group: any):Rect {
-    let bounds = new Rect(0,0,0,0)
-    bounds.x = 10000
-    bounds.y = 10000
-    bounds.x2 = -1000
-    bounds.y2 = -1000
+    let bounds = new Rect(0,0,0,0).makeEmpty()
     group.children.forEach((child:any) => {
-      let ch:Rect = this.getBoundsValue(child)
-      if(ch.x < bounds.x) bounds.x = ch.x
-      if(ch.x2 > bounds.x2) bounds.x2 = ch.x2
-      if(ch.y < bounds.y) bounds.y = ch.y
-      if(ch.y2 > bounds.y2) bounds.y2 = ch.y2
+      bounds.union_self(this.getBoundsValue(child))
     })
     bounds = bounds.translate(new Point(group.x,group.y))
     return bounds
