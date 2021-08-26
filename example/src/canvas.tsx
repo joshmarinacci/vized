@@ -71,46 +71,6 @@ export class Rect {
   }
 }
 
-// @ts-ignore
-function calc_scene_bounds(provider: TreeItemProvider):Rect {
-  let bounds = new Rect(0,0,0,0)
-  bounds.x = 0
-  bounds.y = 0
-  bounds.x2 = 100
-  bounds.y2 = 100
-  provider.getSceneRoot().children.forEach((ch:any) => {
-    if(ch.x < bounds.x) bounds.x = ch.x
-    if(ch.x + ch.w > bounds.x2) bounds.x2 = ch.x+ch.w
-    if(ch.y < bounds.y) bounds.y = ch.y
-    if(ch.y + ch.h > bounds.y2) bounds.y2 = ch.y+ch.h
-  })
-  return bounds
-}
-
-function calc_single_node_bounds(child: any) {
-  if(child.type === 'square') return new Rect(child.x,child.y,child.w,child.h)
-  if(child.type === 'circle') {
-    let r = child.radius
-    return new Rect(child.x-r,child.y-r,r*2,r*2)
-  }
-  return new Rect(0,0,0,0)
-}
-
-function calc_node_bounds(nodes:any[]):Rect {
-  let bounds = new Rect(0,0,0,0)
-  bounds.x = 10000
-  bounds.y = 10000
-  bounds.x2 = -1000
-  bounds.y2 = -1000
-  nodes.forEach((child:any) => {
-    let ch:Rect = calc_single_node_bounds(child)
-    if(ch.x < bounds.x) bounds.x = ch.x
-    if(ch.x2 > bounds.x2) bounds.x2 = ch.x2
-    if(ch.y < bounds.y) bounds.y = ch.y
-    if(ch.y2 > bounds.y2) bounds.y2 = ch.y2
-  })
-  return bounds
-}
 
 type DrawingContext = {
   selection: SelectionManager;
@@ -395,9 +355,9 @@ export function RectCanvas(props:{provider:RectDocEditor, tool:string, grid:bool
       set_show_floating_panel(false)
     }
     set_offsets(selMan.getFullSelection().map(it => new Point(it.x,it.y)) as Point[])
-    if(selMan.getFullSelection().length >= 2) {
+    if(selMan.getFullSelection().length >= 1) {
       set_show_floating_panel(true)
-      let sb = calc_node_bounds(selMan.getFullSelection())
+      let sb = props.provider.calc_node_array_bounds(selMan.getFullSelection())
       set_float_position(sb.bottom_center().floor())
       set_sel_bounds(sb)
     }
@@ -427,14 +387,14 @@ export function RectCanvas(props:{provider:RectDocEditor, tool:string, grid:bool
         })
       })
       props.provider.fire(TREE_ITEM_PROVIDER.STRUCTURE_CHANGED, selMan.getFullSelection())
-      set_sel_bounds(calc_node_bounds(selMan.getFullSelection()))
+      set_sel_bounds(props.provider.calc_node_array_bounds(selMan.getFullSelection()))
     }
   }
   const mouseUp = (e:MouseEvent<HTMLCanvasElement>) => {
     if(drag_handle) set_drag_handle(null as unknown as Handle)
     set_mouse_pressed(false)
     set_mouse_start(new Point(0,0))
-    let sb = calc_node_bounds(selMan.getFullSelection())
+    let sb = props.provider.calc_node_array_bounds(selMan.getFullSelection())
     set_float_position(sb.bottom_center().floor())
     set_sel_bounds(sb)
   }
