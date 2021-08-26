@@ -88,9 +88,9 @@ export class RectDocApp extends Component<Props, State> {
           <PNGButton provider={this.props.provider}/>
         </DropdownMenu>
         <DropdownMenu provider={this.props.provider} title={"Objects"}>
-          <button onClick={() => this.props.provider.add_square()}>+ square</button>
-          <button onClick={() => this.props.provider.add_circle()}>+ circle</button>
-          <button onClick={() => this.props.provider.add_group()}>+ group</button>
+          <button onClick={() => this.props.provider.add_square(selMan.getSelection())}>+ square</button>
+          <button onClick={() => this.props.provider.add_circle(selMan.getSelection())}>+ circle</button>
+          <button onClick={() => this.props.provider.add_group(selMan.getSelection())}>+ group</button>
         </DropdownMenu>
       </div>
 

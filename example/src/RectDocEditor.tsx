@@ -545,24 +545,26 @@ export class RectDocEditor extends TreeItemProvider {
         fun: () => this.deleteChild(item)
       })
     }
-    if(item === this.root) {
-      cmds.push({ title:'add square', fun:() =>  this.add_square()})
+    if(item === this.root || item.type === 'group') {
+      cmds.push({ title:'add square', fun:() =>  this.add_square(item)})
+      cmds.push({ title:'add circle', fun:() =>  this.add_circle(item)})
+      cmds.push({ title:'add group', fun:() =>  this.add_group(item)})
     }
     // cmds.push({divider: true})
     return cmds
   }
 
 
-  add_square() {
-    this.appendChild(this.root, makeFromDef(SquareDef,{id:genID('square_'),w:50,h:50, title:'unnamed square'}))
+  add_square(parent:any) {
+    this.appendChild(parent, makeFromDef(SquareDef,{id:genID('square_'),w:50,h:50, title:'unnamed square'}))
   }
-  add_circle() {
-    this.appendChild(this.root, makeFromDef(CircleDef,{id:genID('square_'),r:30, title:'unnamed circle'}))
+  add_circle(parent:any) {
+    this.appendChild(parent, makeFromDef(CircleDef,{id:genID('square_'),r:30, title:'unnamed circle'}))
   }
-  add_group() {
+  add_group(parent:any) {
     let g = makeFromDef(GroupDef,{id:genID('square_'), title:"unnamed group"})
     g.children = []
-    this.appendChild(this.root, g)
+    this.appendChild(parent, g)
   }
 
   do_layout() {
