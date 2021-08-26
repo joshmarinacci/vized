@@ -299,18 +299,17 @@ export function RectCanvas(props:{provider:RectDocEditor, tool:string, grid:bool
     if(hands.length > 0)  return set_drag_handle(hands[0])
     let nodes = find_node_at_pt(props.provider,pt)
     if(nodes.length > 0) {
+      let last = nodes[nodes.length-1]
       if(e.shiftKey) {
-        selMan.addToSelection(nodes[0])
+        selMan.addToSelection(last)
       } else {
-        if(!selMan.isSelected(nodes[0])) selMan.setSelection(nodes[0])
+        if(!selMan.isSelected(last)) selMan.setSelection(last)
       }
       if(e.altKey) {
         if(e.shiftKey) {
-          let new_nodes = props.provider.do_duplicate_linked(nodes[0], false)
-          selMan.setSelection(new_nodes)
+          selMan.setSelection(props.provider.do_duplicate_linked(last, false))
         } else {
-          let new_nodes = props.provider.do_duplicate(nodes[0], false)
-          selMan.setSelection(new_nodes)
+          selMan.setSelection(props.provider.do_duplicate(last, false))
         }
       }
     } else {
