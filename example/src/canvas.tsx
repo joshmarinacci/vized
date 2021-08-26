@@ -289,6 +289,12 @@ class Handle extends Rect {
     this.target.h = this.y + 5 - this.target.y
   }
 }
+
+function position_node(it:any, add: Point) {
+  it.x = add.x
+  it.y = add.y
+}
+
 export function RectCanvas(props:{provider:RectDocEditor, tool:string, grid:boolean, zoom:number}) {
   let canvas = useRef<HTMLCanvasElement>(null);
   let selMan = useContext(SelectionManagerContext)
@@ -363,9 +369,7 @@ export function RectCanvas(props:{provider:RectDocEditor, tool:string, grid:bool
     let hands = find_handle_at_pt(handles,pt)
     set_mouse_start(pt)
     set_mouse_pressed(true)
-    if(hands.length > 0) {
-      return set_drag_handle(hands[0])
-    }
+    if(hands.length > 0)  return set_drag_handle(hands[0])
     let nodes = find_node_at_pt(props.provider,pt)
     if(nodes.length > 0) {
       if(e.shiftKey) {
@@ -411,8 +415,7 @@ export function RectCanvas(props:{provider:RectDocEditor, tool:string, grid:bool
       let pt = canvas_to_point(e,scale, offset)
       let diff:Point = pt.minus(mouse_start)
       selMan.getFullSelection().forEach((it,i) => {
-        it.x = offsets[i].x + diff.x
-        it.y = offsets[i].y + diff.y
+        position_node(it,offsets[i].add(diff))
         handles.forEach(h => {
           if(h.target === it) {
             h.moveTo(new Point(it.x + it.w, it.y + it.h))

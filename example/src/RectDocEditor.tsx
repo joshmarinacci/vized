@@ -433,6 +433,10 @@ export class RectDocEditor extends TreeItemProvider {
   }
 
   getBoundsValue(ch: any):Rect {
+    if(ch.type === 'circle') {
+      let r = ch.radius
+      return new Rect(ch.x-r,ch.y-r,r*2,r*2)
+    }
     return new Rect(
       this.getNumberValue(ch,'x'),
       this.getNumberValue(ch,'y'),
