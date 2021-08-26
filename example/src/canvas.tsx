@@ -66,23 +66,27 @@ function draw_square(ctx: DrawingContext, c: CanvasRenderingContext2D, ch: any) 
 }
 
 function draw_textbox(ctx: DrawingContext, c: CanvasRenderingContext2D, ch: any) {
-  c.fillStyle = ctx.provider.getColorValue(ch, 'color')
+  //draw background
+  // c.fillStyle = ctx.provider.getColorValue(ch, 'backgroundColor')
   let bds = ctx.provider.getBoundsValue(ch)
-  bds.fill(c, ctx.provider.getColorValue(ch, 'color'))
+  bds.fill(c, ctx.provider.getColorValue(ch, 'backgroundColor'))
+
+  //draw border
   let bw = ctx.provider.getNumberValue(ch, 'borderWidth')
   if (bw > 0) bds.stroke(c, ctx.provider.getColorValue(ch, 'borderColor'), bw)
 
+  //draw text
   let txt = ctx.provider.getStringValue(ch,'text')
-  //c.fillStyle = ctx.provider.getColorValue(ch,'color')
+  c.font = `normal ${ctx.provider.getNumberValue(ch,'fontSize')}px sans-serif`;
   let metrics = c.measureText(txt)
   c.save()
   let center = bds.center()
   c.translate(center.x,center.y)
   let rect = new Rect(0,0,-metrics.actualBoundingBoxLeft+metrics.actualBoundingBoxRight,metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent)
   let cent = new Point(-rect.width()/2,-rect.height()/2)
-  rect.translate_self(cent)
-  rect.stroke(c,'green',1)
-  c.fillStyle = 'black'
+  // rect.translate_self(cent)
+  // rect.stroke(c,'green',1)
+  c.fillStyle = ctx.provider.getColorValue(ch,'color')
   c.fillText(txt,cent.x,cent.y+metrics.fontBoundingBoxAscent)
   c.restore()
 

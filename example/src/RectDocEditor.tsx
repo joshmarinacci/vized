@@ -234,7 +234,49 @@ TextboxDef.set("base",[
   }
 ])
 TextboxDef.set("geom",GEOM_GROUP)
-TextboxDef.set("style",STYLE_GROUP)
+TextboxDef.set("style",[
+  {
+    key:"color",
+    name:'color',
+    type:PROP_TYPES.ENUM,
+    live:false,
+    default: 'white',
+    values:['white','red','green','blue','yellow','black'],
+    renderer: ColorValueRenderer,
+  },
+  {
+    key:"backgroundColor",
+    name:'background color',
+    type:PROP_TYPES.ENUM,
+    live:false,
+    default: 'white',
+    values:['white','red','green','blue','yellow','black'],
+    renderer: ColorValueRenderer,
+  },
+  {
+    key:"borderColor",
+    name:"border color",
+    type:PROP_TYPES.ENUM,
+    live:false,
+    default: 'black',
+    values:['white','red','green','blue','yellow','black'],
+    renderer: ColorValueRenderer,
+  },
+  {
+    key:"borderWidth",
+    name:"border width",
+    type:PROP_TYPES.NUMBER,
+    live:false,
+    default:1,
+  },
+  {
+    key:'fontSize',
+    name:"font size",
+    type:PROP_TYPES.NUMBER,
+    live:false,
+    default:16,
+  }
+])
 
 let TYPE_MAP = new Map<string,Map<string,PropGroup>>()
 TYPE_MAP.set('square',SquareDef)
@@ -426,7 +468,12 @@ export class RectDocEditor extends TreeItemProvider {
     group1.children.push(makeFromDef(SquareDef, {id:'sq6', x:150,y:150,w:20,h:20, color:'blue',title:'child square3'}))
 
 
-    const text1 = makeFromDef(TextboxDef, {id:'tb1', title:'text box'})
+    const text1 = makeFromDef(TextboxDef, {id:'tb1', title:'text box',
+      color:'black',
+      backgroundColor:'green',
+      borderColor:'blue',
+      borderWidth:5,
+    })
     root.children.push(text1)
     return root
   }
