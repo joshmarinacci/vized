@@ -244,7 +244,7 @@ export function RectCanvas(props:{provider:RectDocEditor, tool:string, grid:bool
   const updateHandles = () => {
     let sel:any[] = selMan.getFullSelection()
     //don't make a handle for anything but squares
-    set_handles(sel.filter((n:any) => n.type === 'square').map((n:any) => {
+    set_handles(sel.filter((n:any) => (n.type === 'square' || n.type === 'textbox')).map((n:any) => {
       return new Handle(n.x+n.w-5,n.y+n.h-5,10,10,n)
     }))
     set_sel_bounds(props.provider.calc_node_array_bounds(selMan.getFullSelection()))
