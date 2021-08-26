@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useRef, MouseEvent, useState } from "reac
 import {
   SelectionManagerContext,
   SELECTION_MANAGER, TREE_ITEM_PROVIDER,
-  TreeItemProvider,
   SelectionManager,
   ContextMenu,
   PopupManagerContext,
@@ -66,8 +65,12 @@ export class Rect {
       return true
   }
 
-  bottom_center() {
+  bottom_center():Point {
     return new Point((this.x+this.x2)/2,this.y2)
+  }
+
+  translate(point:Point) {
+    return new Rect(this.x + point.x, this.y + point.y, this.width(),this.height())
   }
 }
 
@@ -133,11 +136,14 @@ function draw_group(ctx: DrawingContext, c: CanvasRenderingContext2D, ch: any) {
       bds.stroke(c, 'black', 1)
     }
   }
+  c.save()
+  c.translate(ch.x,ch.y)
   ch.children.forEach((ch:any)=>{
     if(ch.type === 'square') draw_square(ctx,c,ch)
     if(ch.type === 'circle') draw_circle(ctx,c,ch)
     if(ch.type === 'group')  draw_group(ctx,c,ch)
   })
+  c.restore()
 }
 
 function draw_circle(ctx: DrawingContext, c: CanvasRenderingContext2D, ch: any) {
@@ -355,7 +361,7 @@ export function RectCanvas(props:{provider:RectDocEditor, tool:string, grid:bool
       set_show_floating_panel(false)
     }
     set_offsets(selMan.getFullSelection().map(it => new Point(it.x,it.y)) as Point[])
-    if(selMan.getFullSelection().length >= 1) {
+    if(selMan.getFullSelection().length >= 2) {
       set_show_floating_panel(true)
       let sb = props.provider.calc_node_array_bounds(selMan.getFullSelection())
       set_float_position(sb.bottom_center().floor())

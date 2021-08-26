@@ -479,6 +479,7 @@ export class RectDocEditor extends TreeItemProvider {
       if(ch.y < bounds.y) bounds.y = ch.y
       if(ch.y2 > bounds.y2) bounds.y2 = ch.y2
     })
+    bounds = bounds.translate(new Point(group.x,group.y))
     return bounds
   }
 
