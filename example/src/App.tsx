@@ -16,13 +16,15 @@ import { RectDocEditor} from "./RectDocEditor";
 import { RectCanvas } from "./canvas";
 import { PropSheet } from "./propsheet2";
 import {
-  AddChildButton, ButtonGroup, DropdownMenu,
+  ButtonGroup, DropdownMenu,
   ExportButton,
   KeyboardWatcher,
   LoadButton, PNGButton,
   SaveButton,
   SelectedButton
 } from "./components";
+import { faPlusCircle } from "@fortawesome/free-solid-svg-icons/faPlusCircle";
+import { faMinusCircle } from "@fortawesome/free-solid-svg-icons/faMinusCircle";
 
 const STORAGE = new StorageManager()
 const selMan = new SelectionManager()
@@ -36,6 +38,7 @@ type State = {
   bottomDivider:string,
   tool:string,
   grid:boolean,
+  group_overlay:boolean,
   zoom:number,
 }
 
@@ -64,6 +67,7 @@ export class RectDocApp extends Component<Props, State> {
       bottomDivider:'0px',
       tool:'selection-tool',
       grid:false,
+      group_overlay:false,
       zoom:0,
     }
   }
@@ -84,7 +88,9 @@ export class RectDocApp extends Component<Props, State> {
           <PNGButton provider={this.props.provider}/>
         </DropdownMenu>
         <DropdownMenu provider={this.props.provider} title={"Objects"}>
-          <AddChildButton provider={provider}/>
+          <button onClick={() => this.props.provider.add_square()}>+ square</button>
+          <button onClick={() => this.props.provider.add_circle()}>+ circle</button>
+          <button onClick={() => this.props.provider.add_group()}>+ group</button>
         </DropdownMenu>
       </div>
 
@@ -95,10 +101,11 @@ export class RectDocApp extends Component<Props, State> {
           <SelectedButton onClick={()=> this.setState({tool:'selection-tool'})} selected={this.state.tool==='selection-tool'}>select</SelectedButton>
           <SelectedButton onClick={()=> this.setState({tool:'move-tool'})} selected={this.state.tool === 'move-tool'}>move</SelectedButton>
         </ButtonGroup>
-        <SelectedButton onClick={()=> this.setState({grid:!this.state.grid})} selected={this.state.grid === true}>grid</SelectedButton>
-        <button onClick={()=> this.setState({zoom:this.state.zoom-1})}> - </button>
+        <SelectedButton onClick={()=> this.setState({grid:!this.state.grid})} selected={this.state.grid}>grid</SelectedButton>
+        <SelectedButton onClick={()=> this.setState({group_overlay:!this.state.group_overlay})} selected={this.state.group_overlay}>group</SelectedButton>
+        <FontAwesomeIcon icon={faMinusCircle} onClick={()=> this.setState({zoom:this.state.zoom-1})} size={"2x"}/>
         <label>{this.state.zoom}</label>
-        <button onClick={()=> this.setState({zoom:this.state.zoom+1})}> + </button>
+        <FontAwesomeIcon icon={faPlusCircle} onClick={()=> this.setState({zoom:this.state.zoom+1})} size={"2x"}/>
         <button onClick={()=>this.props.provider.do_layout()}>layout</button>
       </div>
 
@@ -117,7 +124,7 @@ export class RectDocApp extends Component<Props, State> {
       <Resizer onMouseDown={this.resizeLeft}/>
 
       <div className="panel">
-        <RectCanvas provider={this.props.provider} tool={this.state.tool} grid={this.state.grid} zoom={this.state.zoom}/>
+        <RectCanvas provider={this.props.provider} tool={this.state.tool} grid={this.state.grid} zoom={this.state.zoom} group_overlay={this.state.group_overlay}/>
       </div>
 
       <Resizer onMouseDown={this.resizeRight}/>

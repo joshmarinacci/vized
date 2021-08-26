@@ -130,7 +130,7 @@ function draw_square(ctx: DrawingContext, c: CanvasRenderingContext2D, ch: any) 
 function draw_group(ctx: DrawingContext, c: CanvasRenderingContext2D, ch: any) {
   if(ch.type === 'group') {
     let bds = ctx.provider.calc_group_bounds_value(ch)
-    bds.stroke(c,'purple',4)
+    // bds.stroke(c,'purple',4)
     if (ctx.selection.isSelected(ch)) {
       bds.stroke(c, 'red', 3)
       bds.stroke(c, 'black', 1)
@@ -175,13 +175,18 @@ function draw_shapes(ctx: DrawingContext, c: CanvasRenderingContext2D, root:any)
 }
 
 function draw_group_bounds_overlay(ctx: DrawingContext, c: CanvasRenderingContext2D, root:any) {
-  if(root.type === 'group') {
-    c.fillStyle = 'red'
-    c.fillRect(root.x,root.y,100,100)
-  }
+  root.children.forEach((ch:any) => {
+    if(ch.type === 'group')  {
+      let bds = ctx.provider.getBoundsValue(ch)
+      c.save()
+      c.globalAlpha = 0.3
+      bds.fill(c,'red')
+      c.restore()
+    }
+  })
 }
 
-function draw_to_canvas(ctx:DrawingContext, grid:boolean) {
+function draw_to_canvas(ctx:DrawingContext, grid:boolean, group_overlay:boolean) {
   const c = ctx.canvas.getContext('2d') as CanvasRenderingContext2D
 
   //canvas background
@@ -202,7 +207,7 @@ function draw_to_canvas(ctx:DrawingContext, grid:boolean) {
   draw_shapes(ctx,c, ctx.provider.getSceneRoot())
   draw_selection_bounds(ctx,c)
   draw_handles_overlay(ctx,c)
-  draw_group_bounds_overlay(ctx,c,ctx.provider.getSceneRoot())
+  if(group_overlay)draw_group_bounds_overlay(ctx,c,ctx.provider.getSceneRoot())
 
   c.restore()
   c.restore()
@@ -264,7 +269,7 @@ function position_node(it:any, add: Point) {
   it.y = add.y
 }
 
-export function RectCanvas(props:{provider:RectDocEditor, tool:string, grid:boolean, zoom:number}) {
+export function RectCanvas(props:{provider:RectDocEditor, tool:string, grid:boolean, group_overlay:boolean, zoom:number}) {
   let canvas = useRef<HTMLCanvasElement>(null);
   let selMan = useContext(SelectionManagerContext)
   let [bounds, set_bounds] = useState(new Rect(0,0,10,10))
@@ -299,7 +304,7 @@ export function RectCanvas(props:{provider:RectDocEditor, tool:string, grid:bool
       props.provider.off(TREE_ITEM_PROVIDER.STRUCTURE_CHANGED, redraw)
       props.provider.off(TREE_ITEM_PROVIDER.STRUCTURE_REMOVED, redraw)
     }
-  },[selMan,canvas,count,props.grid,props.zoom,sel_bounds])
+  },[selMan,canvas,count,props.grid,props.zoom,props.group_overlay,sel_bounds])
 
   const pm = useContext(PopupManagerContext)
 
@@ -325,7 +330,7 @@ export function RectCanvas(props:{provider:RectDocEditor, tool:string, grid:bool
         handles:handles,
         selection:selMan,
       }
-      draw_to_canvas(ctx, props.grid)
+      draw_to_canvas(ctx, props.grid, props.group_overlay)
     }
   }
 

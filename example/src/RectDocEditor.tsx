@@ -562,7 +562,15 @@ export class RectDocEditor extends TreeItemProvider {
 
 
   add_square() {
-    this.appendChild(this.root, makeFromDef(SquareDef,{id:genID('square_'),w:50}))
+    this.appendChild(this.root, makeFromDef(SquareDef,{id:genID('square_'),w:50,h:50, title:'unnamed square'}))
+  }
+  add_circle() {
+    this.appendChild(this.root, makeFromDef(CircleDef,{id:genID('square_'),r:30, title:'unnamed circle'}))
+  }
+  add_group() {
+    let g = makeFromDef(GroupDef,{id:genID('square_'), title:"unnamed group"})
+    g.children = []
+    this.appendChild(this.root, g)
   }
 
   do_layout() {
