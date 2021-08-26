@@ -96,6 +96,8 @@ SquareDef.set("base",[
 ])
 SquareDef.set("geom",GEOM_GROUP)
 
+const COLORS = ['white','red','green','blue','yellow','black','transparent']
+
 const STYLE_GROUP:PropGroup = [
     {
       key:"color",
@@ -103,7 +105,7 @@ const STYLE_GROUP:PropGroup = [
       type:PROP_TYPES.ENUM,
       live:false,
       default: 'white',
-      values:['white','red','green','blue','yellow','black'],
+      values:COLORS,
       renderer: ColorValueRenderer,
     },
     {
@@ -112,7 +114,7 @@ const STYLE_GROUP:PropGroup = [
       type:PROP_TYPES.ENUM,
       live:false,
       default: 'black',
-      values:['white','red','green','blue','yellow','black'],
+      values:COLORS,
       renderer: ColorValueRenderer,
     },
     {
@@ -241,7 +243,7 @@ TextboxDef.set("style",[
     type:PROP_TYPES.ENUM,
     live:false,
     default: 'white',
-    values:['white','red','green','blue','yellow','black'],
+    values:COLORS,
     renderer: ColorValueRenderer,
   },
   {
@@ -250,7 +252,7 @@ TextboxDef.set("style",[
     type:PROP_TYPES.ENUM,
     live:false,
     default: 'white',
-    values:['white','red','green','blue','yellow','black'],
+    values:COLORS,
     renderer: ColorValueRenderer,
   },
   {
@@ -259,7 +261,7 @@ TextboxDef.set("style",[
     type:PROP_TYPES.ENUM,
     live:false,
     default: 'black',
-    values:['white','red','green','blue','yellow','black'],
+    values:COLORS,
     renderer: ColorValueRenderer,
   },
   {
