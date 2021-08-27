@@ -9,10 +9,6 @@ import {TreeTable, SelectionManager, SelectionManagerContext, PopupManager, Popu
 } from "vized"
 
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import {
-  faCaretRight, faCaretLeft
-} from "@fortawesome/free-solid-svg-icons";
 import { RectDocEditor} from "./RectDocEditor";
 import { RectCanvas } from "./canvas";
 import { PropSheet } from "./propsheet2";
@@ -136,15 +132,11 @@ export class RectDocApp extends Component<Props, State> {
 
       <Resizer onMouseDown={this.resizeLeft}/>
       <div className="toolbar">
-        <button onClick={this.toggleLeftPane}>
-          <FontAwesomeIcon icon={faCaretLeft}/>
-          </button>
+        <ImageIconButton icon={'caret-left'} onClick={this.toggleLeftPane}/>
         <Spacer/>
         <label>status bar</label>
         <Spacer/>
-        <button onClick={this.toggleRightPane}>
-          <FontAwesomeIcon icon={faCaretRight}/>
-        </button>
+        <ImageIconButton icon={'caret-right'} onClick={this.toggleRightPane}/>
       </div>
       <Resizer onMouseDown={this.resizeRight}/>
       <PopupContainer/>

@@ -30,6 +30,7 @@
 .prop-sheet {
     margin: 0rem;
     border: 0px solid blue;
+    padding: 0.25rem;
     font-size: 8pt;
     display: grid;
     grid-template-columns: 1fr 1fr 3fr;
@@ -146,4 +147,6 @@
     width: 2rem;
 }
 
-
+.prop-sheet .image-button-link {
+    justify-self: end;
+}

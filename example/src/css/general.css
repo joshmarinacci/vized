@@ -79,6 +79,15 @@ html {
 .toolbar .image-icon.caret-down, .image-icon.caret-down {
   background-position: calc(-1*16px) calc(-2*16px);
 }
+.image-icon.caret-right {
+  background-position: calc(-0*16px) calc(-2*16px);
+}
+.image-icon.caret-left {
+  background-position: calc(-2*16px) calc(-2*16px);
+}
+.image-icon.caret-down {
+  background-position: calc(-0*16px) calc(-2*16px);
+}
 
 
 /*.image-icon.link {*/

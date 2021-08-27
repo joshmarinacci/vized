@@ -1,5 +1,5 @@
 .canvas-wrapper {
-  border: 1px solid #333;
+  border-width: 0;
   position: relative;
 }
 .main-canvas {

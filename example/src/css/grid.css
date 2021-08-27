@@ -24,6 +24,7 @@ body {
     height: 100%;
     border: 0px solid red;
     z-index: 10;
+    user-select: none;
 }
 
 .resizer-h {

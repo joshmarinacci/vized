@@ -2,9 +2,10 @@ body {
   --color: #333;
   --bg-color: #f0f0f0;
   --selected-color: #f0f0f0;
-  --selected-bg-color: teal;
+  --selected-bg-color: #3498db;
   --hover-color: #333;
-  --hover-bg-color: #15adad;
+  --hover-bg-color: #6ec2fa;
+  --panel-border-color: gray;
 }
 
 button, .button {
@@ -78,7 +79,7 @@ button.selected {
 
 .panel {
   height: 100%;
-  border: 1px solid #aaa;
+  border: 1px solid var(--panel-border-color);
   border-width: 0px 1px 0px 0px;
   padding: 0rem;
   overflow: auto;
