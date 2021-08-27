@@ -250,8 +250,8 @@ export function ImageIconButton(props: { icon: string, selected?:boolean, onClic
     'icon-right':props.iconPosition==='right'
   }
   if(props.className) {
-    // cls[props.className] = true
+    cls[props.className] = true
   }
 
-  return <button className={toClss(cls)} onClick={props.onClick}><ImageIcon icon={props.icon} className={props.className}/>{props.text?<span>props.text</span>:<></>}</button>;
+  return <button className={toClss(cls)} onClick={props.onClick}><ImageIcon icon={props.icon}/>{props.text?<span>props.text</span>:<></>}</button>;
 }

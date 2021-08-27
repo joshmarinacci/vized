@@ -143,8 +143,7 @@ function OpenLinkEditorButton(props: { item: TreeItem, name: string, delegate: O
       PM.show(<LinkPicker delegate={delegate} item={item} name={name}/>, e.target)
   }
   // @ts-ignore
-  return <ImageIconButton onClick={open} icon="link" className={toClss({linked:linked})}/>
-  //lss({linked:linked,'image-icon':true, link:true})}/>
+  return <ImageIconButton onClick={open} icon="link" className={toClss({linked:linked, 'image-button-link':true})}/>
 }
 
 export function PropSheet(props:{provider:TreeItemProvider, }) {
