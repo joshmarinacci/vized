@@ -235,3 +235,25 @@ export const ColorValueRenderer = (props: { object: any, key: string, value: any
     backgroundColor: props.value
   }}><b className={"text"}>{props.value}</b></div>;
 };
+
+export function ImageIcon(props: { icon: string, selected?:boolean, onClick?:any, className?:string  }) {
+  let cls = {
+    "image-icon":true,
+  }
+  cls[props.icon] = true
+  if(props.className) {
+    cls[props.className] = true
+  }
+  return <div className={toClss(cls)} onClick={props.onClick}/>;
+}
+
+export function ImageIconButton(props: { icon: string, selected?:boolean, onClick?:any, className?:string, text?:string  }) {
+  let cls = {
+    'image-button':true,
+  }
+  if(props.className) {
+    cls[props.className] = true
+  }
+
+  return <button className={toClss(cls)} onClick={props.onClick}><ImageIcon icon={props.icon}/>{props.text?<span>props.text</span>:<></>}</button>;
+}

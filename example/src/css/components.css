@@ -60,7 +60,7 @@ button.selected {
 
 .toolbar button {
   border: 1px solid black;
-  font-size: 1rem;
+  font-size: 0.8rem;
   border-radius: 0.5rem;
 }
 
@@ -219,7 +219,7 @@ https://flatuicolors.com/palette/defo
 
 
 .hbox {
-  border: 1px solid black;
+  border: 0px solid black;
   display: flex;
   flex-direction: row;
 }

@@ -53,10 +53,10 @@
     margin: 0.25rem 0;
     grid-column-start: 1;
 }
-.prop-sheet .link {
-  color:red;
-  border:1px solid red;
-}
+/*.prop-sheet .link {*/
+/*  color:red;*/
+/*  border:1px solid red;*/
+/*}*/
 .prop-sheet .editor {
     font-size: 100%;
     font-family: sans-serif;
@@ -121,10 +121,10 @@
     border: 1px solid #aaa;
 }
 
-.prop-sheet button {
-    background-color: #fff;
-    border-radius: 0.25rem;
-}
+/*.prop-sheet button {*/
+/*    background-color: #fff;*/
+/*    border-radius: 0.25rem;*/
+/*}*/
 
 .prop-sheet .enum-value {
   padding:0;
@@ -147,22 +147,3 @@
 }
 
 
-/*.scale-editor input[type=number] {*/
-/*    width: 3em;*/
-/*}*/
-
-.prop-sheet .fa-link {
-  padding: 0.25em;
-  margin: 0.25em;
-  align-self: center;
-  justify-self: end;
-  color:#aaaaaa;
-  border-radius: 0.25em;
-}
-.prop-sheet .fa-link:hover {
-  background-color: #666666;
-  color:white;
-}
-.prop-sheet .fa-link.linked {
-  color:black;
-}

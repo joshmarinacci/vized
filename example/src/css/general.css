@@ -1,0 +1,83 @@
+html {
+  --image-scale: 1;
+}
+.toolbar .image-icon, .image-icon {
+  display: inline-block;
+  border-width: 0;
+  background-color: transparent;
+  background-image: url("../images/icons.png");
+  background-position: 0px 0px;
+  box-sizing: border-box;
+  border-radius: 0;
+  background-size: calc(128px*var(--image-scale));
+  width: calc(15px * var(--image-scale) + 0px);
+  height: calc(15px * var(--image-scale) + 0px);
+  min-height: calc(15px * var(--image-scale) + 0px);
+}
+
+.toolbar .image-button {
+  border-width: 0;
+  background-color: transparent;
+}
+.toolbar .image-button:hover, .image-button:hover {
+  background-color: #888888;
+}
+.toolbar .image-icon.selected, .image-icon.selected {
+  background-color: teal;
+}
+.toolbar .image-icon.grid, .image-icon.grid {
+  background-position: calc(-32px*var(--image-scale)) 0px;
+}
+.toolbar .image-icon.circle-plus, .image-icon.circle-plus {
+  background-position: calc(-0px*var(--image-scale)) 0px;
+}
+.toolbar .image-icon.circle-minus, .image-icon.circle-minus {
+  background-position: calc(-1*16px) 0px;
+}
+
+.toolbar .image-icon.plus, .image-icon.plus {
+  background-position: calc(-0*16px) calc(-3*16px);
+}
+.toolbar .image-icon.minus, .image-icon.minus {
+  background-position: calc(-1*16px) calc(-3*16px);
+}
+
+.image-icon.root {
+  background-position: calc(-3*16px) calc(-0*16px);
+}
+.image-icon.square {
+  background-position: calc(calc(-4 * 16px)*var(--image-scale)) 0px;
+}
+.image-icon.circle {
+  background-position: calc(calc(-5 * 16px)*var(--image-scale)) 0px;
+}
+.image-icon.group {
+  background-position: calc(calc(-6 * 16px)*var(--image-scale)) 0px;
+}
+.image-icon.textbox {
+  background-position: calc(calc(-7 * 16px)*var(--image-scale)) 0px;
+}
+.image-icon.link {
+  background-position: calc(calc(-1 * 16px)*var(--image-scale)) calc(calc(-1*16px)*var(--image-scale));
+}
+.image-icon.linked {
+  background-position: calc(calc(-0 * 16px)*var(--image-scale)) calc(calc(-1*16px)*var(--image-scale));
+}
+
+.image-button {
+  display: flex;
+  flex-direction: row;
+}
+.image-button span {
+  padding: 0 0.25rem;
+}
+
+/*.image-icon.link {*/
+  /*background-color: transparent;*/
+  /*background-color: inherit;*/
+  /*background-position: 0px -16px;*/
+/*}*/
+/*.image-icon.link.linked {*/
+/*  background-color: inherit;*/
+/*  background-position: -16px -16px;*/
+/*}*/

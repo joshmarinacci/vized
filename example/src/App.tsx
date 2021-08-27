@@ -1,5 +1,6 @@
 import 'vized/dist/index.css'
 import React, { Component, MouseEvent} from "react";
+import "./css/general.css"
 import "./css/grid.css"
 import "./css/treetable.css"
 import "./css/propsheet.css"
@@ -17,14 +18,12 @@ import { RectCanvas } from "./canvas";
 import { PropSheet } from "./propsheet2";
 import {
   ButtonGroup, DropdownMenu,
-  ExportButton,
+  ExportButton, ImageIcon, ImageIconButton,
   KeyboardWatcher,
   LoadButton, PNGButton,
   SaveButton,
   SelectedButton
 } from "./components";
-import { faPlusCircle } from "@fortawesome/free-solid-svg-icons/faPlusCircle";
-import { faMinusCircle } from "@fortawesome/free-solid-svg-icons/faMinusCircle";
 
 const STORAGE = new StorageManager()
 const selMan = new SelectionManager()
@@ -88,9 +87,9 @@ export class RectDocApp extends Component<Props, State> {
           <PNGButton provider={this.props.provider}/>
         </DropdownMenu>
         <DropdownMenu provider={this.props.provider} title={"Objects"}>
-          <button onClick={() => this.props.provider.add_square(selMan.getSelection())}>+ square</button>
-          <button onClick={() => this.props.provider.add_circle(selMan.getSelection())}>+ circle</button>
-          <button onClick={() => this.props.provider.add_group(selMan.getSelection())}>+ group</button>
+          <ImageIconButton icon={"plus"} onClick={() => this.props.provider.add_square(selMan.getSelection())} text={"square"}/>
+          <ImageIconButton icon={"plus"} onClick={() => this.props.provider.add_circle(selMan.getSelection())} text={"circle"}/>
+          <ImageIconButton icon={"plus"} onClick={() => this.props.provider.add_group(selMan.getSelection())} text={"group"}/>
         </DropdownMenu>
       </div>
 
@@ -101,11 +100,11 @@ export class RectDocApp extends Component<Props, State> {
           <SelectedButton onClick={()=> this.setState({tool:'selection-tool'})} selected={this.state.tool==='selection-tool'}>select</SelectedButton>
           <SelectedButton onClick={()=> this.setState({tool:'move-tool'})} selected={this.state.tool === 'move-tool'}>move</SelectedButton>
         </ButtonGroup>
-        <SelectedButton onClick={()=> this.setState({grid:!this.state.grid})} selected={this.state.grid}>grid</SelectedButton>
-        <SelectedButton onClick={()=> this.setState({group_overlay:!this.state.group_overlay})} selected={this.state.group_overlay}>group</SelectedButton>
-        <FontAwesomeIcon icon={faMinusCircle} onClick={()=> this.setState({zoom:this.state.zoom-1})} size={"2x"}/>
+        <ImageIcon selected={this.state.grid} icon={'grid'} onClick={()=>this.setState({grid:!this.state.grid})}/>
+        <SelectedButton onClick={()=> this.setState({group_overlay:!this.state.group_overlay})} selected={this.state.group_overlay}>group overlay</SelectedButton>
+        <ImageIconButton icon={"circle-minus"} onClick={()=>this.setState({zoom:this.state.zoom-1})}/>
         <label>{this.state.zoom}</label>
-        <FontAwesomeIcon icon={faPlusCircle} onClick={()=> this.setState({zoom:this.state.zoom+1})} size={"2x"}/>
+        <ImageIconButton icon={'circle-plus'} onClick={()=> this.setState({zoom:this.state.zoom+1})}/>
         <button onClick={()=>this.props.provider.do_layout()}>layout</button>
       </div>
 

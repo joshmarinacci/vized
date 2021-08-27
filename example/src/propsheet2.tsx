@@ -7,9 +7,7 @@ import {
   PopupManagerContext,
   TREE_ITEM_PROVIDER,
 } from "vized";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faLink } from "@fortawesome/free-solid-svg-icons/faLink";
-import {toClss} from "./components"
+import { ImageIconButton, toClss } from "./components";
 
 export type PropType = 'string' | 'number' | 'boolean' | 'enum'
 
@@ -145,7 +143,8 @@ function OpenLinkEditorButton(props: { item: TreeItem, name: string, delegate: O
       PM.show(<LinkPicker delegate={delegate} item={item} name={name}/>, e.target)
   }
   // @ts-ignore
-  return <FontAwesomeIcon icon={faLink} onClick={open} className={toClss({linked:linked})}/>
+  return <ImageIconButton onClick={open} icon="link" className={toClss({linked:linked})}/>
+  //lss({linked:linked,'image-icon':true, link:true})}/>
 }
 
 export function PropSheet(props:{provider:TreeItemProvider, }) {

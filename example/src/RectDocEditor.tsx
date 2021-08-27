@@ -6,24 +6,16 @@ import {
   PropCluster,
   PropDef,
   PropGroup,
+  SelectionManager,
   TREE_ITEM_PROVIDER,
   TreeItem,
-  TreeItemProvider,
-  SelectionManager
+  TreeItemProvider
 } from "vized";
 import React from "react";
 import { RectDocApp } from "./App";
 import { ObjectDelegate, PropType } from "./propsheet2";
 import "./css/components.css";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSquare } from "@fortawesome/free-solid-svg-icons/faSquare";
-import { faCircle } from "@fortawesome/free-solid-svg-icons/faCircle";
-import { faLayerGroup } from "@fortawesome/free-solid-svg-icons/faLayerGroup";
-import { faCircleNotch } from "@fortawesome/free-solid-svg-icons/faCircleNotch";
-import { ColorValueRenderer, Rect } from "./components";
-import { faSortAlphaDownAlt } from "@fortawesome/free-solid-svg-icons";
-
-
+import { ColorValueRenderer, ImageIcon, Rect } from "./components";
 
 const ID_DEF:PropDef = {
   type: PROP_TYPES.STRING,
@@ -618,13 +610,14 @@ export class RectDocEditor extends TreeItemProvider {
 
 
   getRendererForItem(item:TreeItem) {
-    let icon = <FontAwesomeIcon icon={faCircleNotch}/>
-    if (item.type === 'square')  icon = <FontAwesomeIcon icon={faSquare} />
-    if (item.type === 'group')  icon = <FontAwesomeIcon icon={faLayerGroup}/>
-    if (item.type === 'circle')  icon = <FontAwesomeIcon icon={faCircle}/>
-    if (item.type === 'textbox')  icon = <FontAwesomeIcon icon={faSortAlphaDownAlt}/>
+    let icon = <ImageIcon icon={"circle"}/>
+    if (item.type === 'square')  icon = <ImageIcon icon={"square"} />
+    if (item.type === 'group')  icon = <ImageIcon icon="group"/>
+    if (item.type === 'circle')  icon = <ImageIcon icon={"circle"}/>
+    if (item.type === 'textbox')  icon = <ImageIcon icon={"textbox"}/>
+    if (item.type === 'root')  icon = <ImageIcon icon={"root"}/>
     let title = (item as any).title
-    return <label> {icon} {title}</label>
+    return <div className={'hbox'}> {icon} <label style={{padding:'0 0.25rem'}}>{title}</label></div>
   }
 
   getDocType() {
