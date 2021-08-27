@@ -88,14 +88,9 @@ html {
 .image-icon.caret-down {
   background-position: calc(-0*16px) calc(-2*16px);
 }
-
-
-/*.image-icon.link {*/
-  /*background-color: transparent;*/
-  /*background-color: inherit;*/
-  /*background-position: 0px -16px;*/
-/*}*/
-/*.image-icon.link.linked {*/
-/*  background-color: inherit;*/
-/*  background-position: -16px -16px;*/
-/*}*/
+.image-icon.mouse-cursor {
+  background-position: calc(-0*16px) calc(-4*16px);
+}
+.image-icon.move-shape {
+  background-position: calc(-1*16px) calc(-4*16px);
+}

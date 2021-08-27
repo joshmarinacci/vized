@@ -93,8 +93,8 @@ export class RectDocApp extends Component<Props, State> {
 
       <div className="toolbar gray">
         <ButtonGroup>
-          <SelectedButton onClick={()=> this.setState({tool:'selection-tool'})} selected={this.state.tool==='selection-tool'}>select</SelectedButton>
-          <SelectedButton onClick={()=> this.setState({tool:'move-tool'})} selected={this.state.tool === 'move-tool'}>move</SelectedButton>
+          <ImageIconButton icon={"mouse-cursor"} onClick={()=> this.setState({tool:'selection-tool'})} selected={this.state.tool==='selection-tool'}/>
+          <ImageIconButton icon={"move-shape"} onClick={()=> this.setState({tool:'move-tool'})} selected={this.state.tool==='move-tool'}/>
         </ButtonGroup>
         <ImageIconButton selected={this.state.grid} icon={'grid'} onClick={()=>this.setState({grid:!this.state.grid})}/>
         <SelectedButton onClick={()=> this.setState({group_overlay:!this.state.group_overlay})} selected={this.state.group_overlay}>group overlay</SelectedButton>
@@ -131,7 +131,7 @@ export class RectDocApp extends Component<Props, State> {
 
 
       <Resizer onMouseDown={this.resizeLeft}/>
-      <div className="toolbar">
+      <div className="toolbar top-border">
         <ImageIconButton icon={'caret-left'} onClick={this.toggleLeftPane}/>
         <Spacer/>
         <label>status bar</label>

@@ -260,8 +260,9 @@ https://flatuicolors.com/palette/defo
 
 
 .button-group {
+  display: flex;
+  flex-direction: row;
   border: 1px solid black;
-  padding: 0;
   border-radius: 0.5rem;
 }
 
@@ -281,4 +282,7 @@ https://flatuicolors.com/palette/defo
 .button-group button:last-child {
   border-top-right-radius: inherit;
   border-bottom-right-radius: inherit;
+}
+.top-border {
+  border-top-width: 1px;
 }
