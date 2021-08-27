@@ -10,7 +10,6 @@ import {
 } from "vized";
 import "./css/components.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCaretDown } from "@fortawesome/free-solid-svg-icons";
 import { faAlignCenter } from "@fortawesome/free-solid-svg-icons/faAlignCenter";
 
 export function ExportButton(props:{provider:RectDocEditor}) {
@@ -56,10 +55,7 @@ export function DropdownMenu(props: {provider:RectDocEditor, title:string, child
   const open = (e:MouseEvent) => {
     PM.show(<div className="popup-menu">{props.children}</div>,e.target)
   }
-  // @ts-ignore
-  return <button onClick={open}>{props.title}
-    <FontAwesomeIcon icon={faCaretDown}/>
-  </button>
+  return <ImageIconButton onClick={open} text={props.title} icon={"caret-down"} iconPosition={"right"}/>
 }
 
 export function SelectedButton(props: { onClick: () => void, selected: boolean, children: ReactNode }) {
@@ -247,13 +243,15 @@ export function ImageIcon(props: { icon: string, selected?:boolean, onClick?:any
   return <div className={toClss(cls)} onClick={props.onClick}/>;
 }
 
-export function ImageIconButton(props: { icon: string, selected?:boolean, onClick?:any, className?:string, text?:string  }) {
+export function ImageIconButton(props: { icon: string, selected?:boolean, onClick?:any, className?:string, text?:string, iconPosition?:string  }) {
   let cls = {
     'image-button':true,
+    selected:props.selected,
+    'icon-right':props.iconPosition==='right'
   }
   if(props.className) {
-    cls[props.className] = true
+    // cls[props.className] = true
   }
 
-  return <button className={toClss(cls)} onClick={props.onClick}><ImageIcon icon={props.icon}/>{props.text?<span>props.text</span>:<></>}</button>;
+  return <button className={toClss(cls)} onClick={props.onClick}><ImageIcon icon={props.icon} className={props.className}/>{props.text?<span>props.text</span>:<></>}</button>;
 }

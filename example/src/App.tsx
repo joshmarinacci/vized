@@ -18,7 +18,7 @@ import { RectCanvas } from "./canvas";
 import { PropSheet } from "./propsheet2";
 import {
   ButtonGroup, DropdownMenu,
-  ExportButton, ImageIcon, ImageIconButton,
+  ExportButton, ImageIconButton,
   KeyboardWatcher,
   LoadButton, PNGButton,
   SaveButton,
@@ -100,7 +100,7 @@ export class RectDocApp extends Component<Props, State> {
           <SelectedButton onClick={()=> this.setState({tool:'selection-tool'})} selected={this.state.tool==='selection-tool'}>select</SelectedButton>
           <SelectedButton onClick={()=> this.setState({tool:'move-tool'})} selected={this.state.tool === 'move-tool'}>move</SelectedButton>
         </ButtonGroup>
-        <ImageIcon selected={this.state.grid} icon={'grid'} onClick={()=>this.setState({grid:!this.state.grid})}/>
+        <ImageIconButton selected={this.state.grid} icon={'grid'} onClick={()=>this.setState({grid:!this.state.grid})}/>
         <SelectedButton onClick={()=> this.setState({group_overlay:!this.state.group_overlay})} selected={this.state.group_overlay}>group overlay</SelectedButton>
         <ImageIconButton icon={"circle-minus"} onClick={()=>this.setState({zoom:this.state.zoom-1})}/>
         <label>{this.state.zoom}</label>

@@ -22,8 +22,8 @@ html {
 .toolbar .image-button:hover, .image-button:hover {
   background-color: #888888;
 }
-.toolbar .image-icon.selected, .image-icon.selected {
-  background-color: teal;
+.toolbar .image-button.selected, .image-button.selected {
+  background-color: var(--selected-bg-color);
 }
 .toolbar .image-icon.grid, .image-icon.grid {
   background-position: calc(-32px*var(--image-scale)) 0px;
@@ -71,6 +71,15 @@ html {
 .image-button span {
   padding: 0 0.25rem;
 }
+
+.image-button.icon-right {
+  flex-direction: row-reverse;
+}
+
+.toolbar .image-icon.caret-down, .image-icon.caret-down {
+  background-position: calc(-1*16px) calc(-2*16px);
+}
+
 
 /*.image-icon.link {*/
   /*background-color: transparent;*/

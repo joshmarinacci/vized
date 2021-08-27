@@ -111,7 +111,8 @@ button.selected {
 }
 
 .popup-menu > *:hover {
-  background-color: aqua;
+  background-color: var(--hover-bg-color);
+  color: var(--hover-color);
 }
 
 .popup-menu .divider {
