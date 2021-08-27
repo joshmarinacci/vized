@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { SELECTION_MANAGER, SelectionManagerContext } from "./SelectionManager";
 // @ts-ignore
 // import { PopupManagerContext, VBox } from 'appy-comps'
-import { Spacer } from './GridEditorApp'
+import { Spacer } from './grideditorapp'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   IconName,
