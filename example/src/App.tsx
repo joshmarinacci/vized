@@ -75,7 +75,7 @@ export class RectDocApp extends Component<Props, State> {
     return (
 
     <div className="grid" style={gridStyle}>
-      <div className="toolbar gray">
+      <div className="toolbar gray bottom-border">
         <DropdownMenu provider={this.props.provider} title={"File"}>
           <ExportButton provider={this.props.provider}/>
           <SaveButton provider={this.props.provider}/>
@@ -91,7 +91,7 @@ export class RectDocApp extends Component<Props, State> {
 
       <Resizer onMouseDown={this.resizeLeft}/>
 
-      <div className="toolbar gray">
+      <div className="toolbar gray bottom-border">
         <ButtonGroup>
           <ImageIconButton icon={"mouse-cursor"} onClick={()=> this.setState({tool:'selection-tool'})} selected={this.state.tool==='selection-tool'}/>
           <ImageIconButton icon={"move-shape"} onClick={()=> this.setState({tool:'move-tool'})} selected={this.state.tool==='move-tool'}/>
@@ -106,8 +106,8 @@ export class RectDocApp extends Component<Props, State> {
 
       <Resizer onMouseDown={this.resizeRight}/>
 
-      <div className="toolbar gray">
-        <label>Rectangles</label>
+      <div className="toolbar gray bottom-border">
+        <label>Properties</label>
       </div>
 
 
