@@ -17,6 +17,15 @@ import { ObjectDelegate, PropType } from "./propsheet2";
 import "./css/components.css";
 import { ColorValueRenderer, ImageIcon, Rect } from "./components";
 
+export const SHAPE_TYPES = {
+  SQUARE:"square",
+  TEXTBOX:"textbox",
+  CIRCLE:'circle',
+  GROUP:'group',
+  ROOT: "root"
+}
+
+
 const ID_DEF:PropDef = {
   type: PROP_TYPES.STRING,
   name:'ID',
@@ -85,7 +94,7 @@ SquareDef.set("base",[
     name: 'type',
     locked: true,
     key: 'type',
-    default:'square',
+    default:SHAPE_TYPES.SQUARE,
   },
 ])
 SquareDef.set("geom",GEOM_GROUP)
@@ -177,7 +186,7 @@ GroupDef.set("base",[
     name: 'type',
     locked: true,
     key: 'type',
-    default:'group',
+    default:SHAPE_TYPES.GROUP,
   }
 ])
 GroupDef.set("geom",[
@@ -218,7 +227,7 @@ TextboxDef.set("base",[
     name: 'type',
     locked: true,
     key: 'type',
-    default:'textbox',
+    default:SHAPE_TYPES.TEXTBOX,
   },
   {
     type: PROP_TYPES.STRING,
@@ -228,7 +237,26 @@ TextboxDef.set("base",[
     default:'empty text'
   }
 ])
-TextboxDef.set("geom",GEOM_GROUP)
+const BoundsDef:PropCluster = new Map<string,PropGroup>()
+BoundsDef.set("base",[
+  {
+    type: PROP_TYPES.STRING,
+    name: 'type',
+    locked: true,
+    key: 'type',
+    default:'bounds',
+  },
+])
+BoundsDef.set("geom",GEOM_GROUP)
+TextboxDef.set("geom",[
+  {
+    key:"bounds",
+    name:"bounds",
+    type: PROP_TYPES.OBJECT,
+    default: {type:"bounds",x:0,y:0,w:100,h:100},
+    objectprops:BoundsDef,
+  }
+])
 TextboxDef.set("layout",[
   {
     key:'fontSize',
@@ -292,11 +320,12 @@ TextboxDef.set("style",[
 ])
 
 let TYPE_MAP = new Map<string,Map<string,PropGroup>>()
-TYPE_MAP.set('square',SquareDef)
-TYPE_MAP.set('circle',CircleDef)
-TYPE_MAP.set('group',GroupDef)
-TYPE_MAP.set('textbox',TextboxDef)
-TYPE_MAP.set('root',RootDef)
+TYPE_MAP.set(SHAPE_TYPES.SQUARE,SquareDef)
+TYPE_MAP.set(SHAPE_TYPES.CIRCLE,CircleDef)
+TYPE_MAP.set(SHAPE_TYPES.GROUP,GroupDef)
+TYPE_MAP.set(SHAPE_TYPES.TEXTBOX,TextboxDef)
+TYPE_MAP.set(SHAPE_TYPES.ROOT,RootDef)
+TYPE_MAP.set('bounds',BoundsDef)
 
 class RDEObjectDelegate implements ObjectDelegate {
   // @ts-ignore
@@ -323,7 +352,7 @@ class RDEObjectDelegate implements ObjectDelegate {
     })
   }
 
-  propkeys(): string[] {
+  propkeys(item:TreeItem): string[] {
     return this._propkeys
   }
   isPropLinked(item:TreeItem, key:string): boolean {
@@ -386,6 +415,16 @@ class RDEObjectDelegate implements ObjectDelegate {
     //@ts-ignore
     return target.id + " : " + target.title
   }
+
+  getDelegateForObjectProperty(item:TreeItem, name: string): ObjectDelegate {
+    let def = this.propmap.get(name)
+    if(def && def.type === PROP_TYPES.OBJECT) {
+      return new RDEObjectDelegate(this.ed,this.getPropValue(item,name))
+    } else {
+      // @ts-ignore
+      return null
+    }
+  }
 }
 
 class NullObjectDelegate implements ObjectDelegate {
@@ -440,6 +479,11 @@ class NullObjectDelegate implements ObjectDelegate {
   getPropLinkTargetTitle(id:TreeItem): string {
     return "";
   }
+
+  getDelegateForObjectProperty(item:TreeItem, name: string): ObjectDelegate {
+    // @ts-ignore
+    return null
+  }
 }
 
 export class RectDocEditor extends TreeItemProvider {
@@ -458,7 +502,7 @@ export class RectDocEditor extends TreeItemProvider {
   }
   // @ts-ignore
   makeEmptyRoot(doc:any):TreeItem {
-    const root = {id:'root',type:'root',children:[], title:"foo"} as TreeItem
+    const root = {id:'root',type:SHAPE_TYPES.ROOT,children:[], title:"foo"} as TreeItem
     const square1 = makeFromDef(SquareDef,{id:'sq1',w:50, title:'master'})
     root.children.push(square1)
     const square2 = makeFromDef(SquareDef,{id:'sq2',x:150,y:20,w:30,h:30,color:'red',title:'bar'})
@@ -512,6 +556,17 @@ export class RectDocEditor extends TreeItemProvider {
     return ch[name]
   }
 
+  getObjectValue(ch: TreeItem, name: string):object {
+    let links = ch['_links']
+    if(links && links[name]) {
+      let master = this.root.children.find(c => c.id === links[name])
+      if(master) { // @ts-ignore
+        return master[name] as object
+      }
+    }
+    return ch[name]
+  }
+
   getStringValue(ch: any, name: string):string {
     let links = ch['_links']
     if(links && links[name]) {
@@ -525,14 +580,18 @@ export class RectDocEditor extends TreeItemProvider {
 
 
   getBoundsValue(ch: any):Rect {
-    if(ch.type === 'circle') {
+    if(ch.type === SHAPE_TYPES.CIRCLE) {
       let r = this.getNumberValue(ch,'radius')
       return new Rect(this.getNumberValue(ch,'x')-r,
         this.getNumberValue(ch,'y')-r,
         r*2,r*2)
     }
-    if(ch.type === 'group') {
+    if(ch.type === SHAPE_TYPES.GROUP) {
       return this.calc_group_bounds_value(ch)
+    }
+    if(ch.type === SHAPE_TYPES.TEXTBOX) {
+      let bds = this.getObjectValue(ch,'bounds') as any
+      return new Rect(bds.x,bds.y,bds.w,bds.h)
     }
     return new Rect(
       this.getNumberValue(ch,'x'),
@@ -577,21 +636,21 @@ export class RectDocEditor extends TreeItemProvider {
   // @ts-ignore
   getPropertyClusters(item:TreeItem):PropCluster {
     if (item) {
-      if (item.type === 'root') return RootDef
-      if (item.type === 'square') return SquareDef
-      if (item.type === 'group') return GroupDef
-      if (item.type === 'circle') return CircleDef
+      if (item.type === SHAPE_TYPES.ROOT) return RootDef
+      if (item.type === SHAPE_TYPES.SQUARE) return SquareDef
+      if (item.type === SHAPE_TYPES.GROUP) return GroupDef
+      if (item.type === SHAPE_TYPES.CIRCLE) return CircleDef
     }
     return new Map()
   }
 
   canAddChild(item:TreeItem) {
     console.log("target is",item.type)
-    if(item.type === 'root') return true
+    if(item.type === SHAPE_TYPES.ROOT) return true
     return false
   }
   canBeSibling(item:TreeItem,target:TreeItem) {
-    if(target.type === 'square' && item.type === 'square') return true
+    if(target.type === SHAPE_TYPES.SQUARE && item.type === SHAPE_TYPES.SQUARE) return true
     return false
   }
   moveChildAfterSibling(src:TreeItem,dst:TreeItem) {
@@ -611,11 +670,11 @@ export class RectDocEditor extends TreeItemProvider {
 
   getRendererForItem(item:TreeItem) {
     let icon = <ImageIcon icon={"circle"}/>
-    if (item.type === 'square')  icon = <ImageIcon icon={"square"} />
-    if (item.type === 'group')  icon = <ImageIcon icon="group"/>
-    if (item.type === 'circle')  icon = <ImageIcon icon={"circle"}/>
-    if (item.type === 'textbox')  icon = <ImageIcon icon={"textbox"}/>
-    if (item.type === 'root')  icon = <ImageIcon icon={"root"}/>
+    if (item.type === SHAPE_TYPES.SQUARE)  icon = <ImageIcon icon={"square"} />
+    if (item.type === SHAPE_TYPES.GROUP)  icon = <ImageIcon icon="group"/>
+    if (item.type === SHAPE_TYPES.CIRCLE)  icon = <ImageIcon icon={"circle"}/>
+    if (item.type === SHAPE_TYPES.TEXTBOX)  icon = <ImageIcon icon={"textbox"}/>
+    if (item.type === SHAPE_TYPES.ROOT)  icon = <ImageIcon icon={"root"}/>
     let title = (item as any).title
     return <div className={'hbox'}> {icon} <label style={{padding:'0 0.25rem'}}>{title}</label></div>
   }
@@ -639,7 +698,7 @@ export class RectDocEditor extends TreeItemProvider {
         fun: () => this.deleteChild(item)
       })
     }
-    if(item === this.root || item.type === 'group') {
+    if(item === this.root || item.type === SHAPE_TYPES.GROUP) {
       cmds.push({ title:'add square', fun:() =>  this.add_square(item)})
       cmds.push({ title:'add circle', fun:() =>  this.add_circle(item)})
       cmds.push({ title:'add group', fun:() =>  this.add_group(item)})

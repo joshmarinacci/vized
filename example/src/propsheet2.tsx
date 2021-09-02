@@ -6,6 +6,7 @@ import {
   TreeItem,
   PopupManagerContext,
   TREE_ITEM_PROVIDER,
+  PROP_TYPES,
 } from "vized";
 import { ImageIconButton, toClss } from "./components";
 
@@ -26,6 +27,7 @@ export interface ObjectDelegate {
   getPossibleLinkTargets(item: TreeItem, name: string): TreeItem[];
   setPropLinkTarget(item: TreeItem, name: string, target: TreeItem): void;
   getPropLinkTargetTitle(id: TreeItem): string;
+  getDelegateForObjectProperty(item:TreeItem, name:string):ObjectDelegate;
 }
 
 function NumberEditor(props: { item: TreeItem, delegate: ObjectDelegate, name:string, disabled:boolean }) {
@@ -116,6 +118,23 @@ function EnumEditor(props: { item: TreeItem, name: string, delegate: ObjectDeleg
   return <button onClick={open}  className={'editor enum-value'}>{selectedRenderedValue}</button>
 }
 
+function ObjectPropEditor(props: { item: TreeItem, disabled: boolean, name: string, delegate: ObjectDelegate }) {
+  let del = props.delegate.getDelegateForObjectProperty(props.item,props.name)
+  let item = props.delegate.getPropValue(props.item,props.name)
+  return <div>
+    {del.propkeys(item).map(name => {
+      let type = del.getPropType(item,name)
+      let id = item.id
+      let lab  = <label key={`${id}-${name}-label`} className={'label'}>{name}</label>
+      let pe   = <label key={`${id}-${name}-editor`}>---</label>
+      if(type === 'number') pe = <NumberEditor key={`${id}-${name}-editor`} delegate={del} item={item} name={name} disabled={false}/>
+      if(type === 'string') pe = <StringEditor key={`${id}-${name}-editor`} delegate={del} item={item} name={name} disabled={false}/>
+      if(type === 'enum') pe =   <EnumEditor   key={`${id}-${name}-editor`} delegate={del} item={item} name={name} disabled={false}/>
+      return [lab,pe]
+    })}
+  </div>
+}
+
 
 function LinkPicker(props: { item:TreeItem, name: string, delegate: ObjectDelegate }) {
   const {item,name, delegate} = {...props}
@@ -179,6 +198,11 @@ export function PropSheet(props:{provider:TreeItemProvider, }) {
       if(type === 'number') pe = <NumberEditor key={`${id}-${name}-editor`} delegate={del} item={item} name={name} disabled={false}/>
       if(type === 'string') pe = <StringEditor key={`${id}-${name}-editor`} delegate={del} item={item} name={name} disabled={false}/>
       if(type === 'enum') pe =   <EnumEditor   key={`${id}-${name}-editor`} delegate={del} item={item} name={name} disabled={false}/>
+      if(type === PROP_TYPES.OBJECT) pe = <ObjectPropEditor key={`${id}-${name}--editor`}
+                                                            delegate={del}
+                                                            item={item}
+                                                            name={name}
+                                                            disabled={false}/>
     } else {
       if(del.isPropLinked(item,name)) {
         pe = <label key={`${id}-${name}-value`}

@@ -8,7 +8,7 @@ import {
   SelectionManagerContext,
   TREE_ITEM_PROVIDER
 } from "vized";
-import { RectDocEditor } from "./RectDocEditor";
+import { RectDocEditor, SHAPE_TYPES } from "./RectDocEditor";
 import "./css/canvas.css";
 import { FloatingNodePanel, Rect } from "./components";
 
@@ -106,7 +106,7 @@ function draw_textbox(ctx: DrawingContext, c: CanvasRenderingContext2D, ch: any)
 
 
 function draw_group(ctx: DrawingContext, c: CanvasRenderingContext2D, ch: any) {
-  if(ch.type === 'group') {
+  if(ch.type === SHAPE_TYPES.GROUP) {
     let bds = ctx.provider.calc_group_bounds_value(ch)
     // bds.stroke(c,'purple',4)
     if (ctx.selection.isSelected(ch)) {
@@ -117,9 +117,9 @@ function draw_group(ctx: DrawingContext, c: CanvasRenderingContext2D, ch: any) {
   c.save()
   c.translate(ch.x,ch.y)
   ch.children.forEach((ch:any)=>{
-    if(ch.type === 'square') draw_square(ctx,c,ch)
-    if(ch.type === 'circle') draw_circle(ctx,c,ch)
-    if(ch.type === 'group')  draw_group(ctx,c,ch)
+    if(ch.type === SHAPE_TYPES.SQUARE) draw_square(ctx,c,ch)
+    if(ch.type === SHAPE_TYPES.CIRCLE) draw_circle(ctx,c,ch)
+    if(ch.type === SHAPE_TYPES.GROUP)  draw_group(ctx,c,ch)
   })
   c.restore()
 }
@@ -146,16 +146,16 @@ function draw_circle(ctx: DrawingContext, c: CanvasRenderingContext2D, ch: any) 
 
 function draw_shapes(ctx: DrawingContext, c: CanvasRenderingContext2D, root:any):void {
   root.children.forEach((ch:any) => {
-    if(ch.type === 'square') draw_square(ctx,c,ch)
-    if(ch.type === 'circle') draw_circle(ctx,c,ch)
-    if(ch.type === 'group')  draw_group(ctx,c,ch)
-    if(ch.type === 'textbox') draw_textbox(ctx,c,ch)
+    if(ch.type === SHAPE_TYPES.SQUARE) draw_square(ctx,c,ch)
+    if(ch.type === SHAPE_TYPES.CIRCLE) draw_circle(ctx,c,ch)
+    if(ch.type === SHAPE_TYPES.GROUP)  draw_group(ctx,c,ch)
+    if(ch.type === SHAPE_TYPES.TEXTBOX) draw_textbox(ctx,c,ch)
   })
 }
 
 function draw_group_bounds_overlay(ctx: DrawingContext, c: CanvasRenderingContext2D, root:any) {
   root.children.forEach((ch:any) => {
-    if(ch.type === 'group')  {
+    if(ch.type === SHAPE_TYPES.GROUP)  {
       let bds = ctx.provider.getBoundsValue(ch)
       if(bds.isEmpty()) return
       c.save()
@@ -244,7 +244,7 @@ export function RectCanvas(props:{provider:RectDocEditor, tool:string, grid:bool
   const updateHandles = () => {
     let sel:any[] = selMan.getFullSelection()
     //don't make a handle for anything but squares
-    set_handles(sel.filter((n:any) => (n.type === 'square' || n.type === 'textbox')).map((n:any) => {
+    set_handles(sel.filter((n:any) => (n.type === SHAPE_TYPES.SQUARE || n.type === SHAPE_TYPES.TEXTBOX)).map((n:any) => {
       return new Handle(n.x+n.w-5,n.y+n.h-5,10,10,n)
     }))
     set_sel_bounds(props.provider.calc_node_array_bounds(selMan.getFullSelection()))

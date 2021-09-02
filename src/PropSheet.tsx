@@ -17,6 +17,7 @@ export const TYPES = {
   ENUM:'enum',
   COLOR:'color',
   GROUP:'group',
+  OBJECT:'object',
 }
 
 /*
@@ -40,6 +41,7 @@ export type PropDef = {
   locked?:boolean,
   hints?:NumberHints|NoHints,
   values?:any[],
+  objectprops?:PropCluster,
 }
 export type PropGroup = PropDef[]
 export type PropCluster = Map<string,PropGroup>
