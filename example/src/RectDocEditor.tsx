@@ -425,6 +425,15 @@ class RDEObjectDelegate implements ObjectDelegate {
       return null
     }
   }
+
+  getPropGroups(item:TreeItem): string[] {
+    return Array.from(this.def.keys())
+  }
+
+  getPropsForGroup(item:TreeItem, name: string): string[] {
+    // @ts-ignore
+    return Array.from(this.def.get(name).map(df => df.key))
+  }
 }
 
 class NullObjectDelegate implements ObjectDelegate {
@@ -483,6 +492,14 @@ class NullObjectDelegate implements ObjectDelegate {
   getDelegateForObjectProperty(item:TreeItem, name: string): ObjectDelegate {
     // @ts-ignore
     return null
+  }
+
+  getPropGroups(item:TreeItem): string[] {
+    return [];
+  }
+
+  getPropsForGroup(item:TreeItem, name: string): string[] {
+    return [];
   }
 }
 

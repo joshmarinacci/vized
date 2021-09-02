@@ -28,6 +28,8 @@ export interface ObjectDelegate {
   setPropLinkTarget(item: TreeItem, name: string, target: TreeItem): void;
   getPropLinkTargetTitle(id: TreeItem): string;
   getDelegateForObjectProperty(item:TreeItem, name:string):ObjectDelegate;
+  getPropGroups(item: TreeItem): string[];
+  getPropsForGroup(item:TreeItem, name:string): string[]
 }
 
 function NumberEditor(props: { item: TreeItem, delegate: ObjectDelegate, name:string, disabled:boolean }) {
@@ -165,6 +167,45 @@ function OpenLinkEditorButton(props: { item: TreeItem, name: string, delegate: O
   return <ImageIconButton onClick={open} icon="link" className={toClss({linked:linked, 'image-button-link':true})}/>
 }
 
+function PropEditor(props:{delegate:ObjectDelegate, item:TreeItem, name:string}) {
+  let del = props.delegate
+  let item = props.item
+  let name = props.name
+  let type = del.getPropType(item,name)
+  let id = item.id
+  let lab  = <label key={`${id}-${name}-label`} className={'label'}>{name}</label>
+  let link = <OpenLinkEditorButton key={`${id}-${name}-linked`} delegate={del} item={item} name={name}/>
+  let pe   = <label key={`${id}-${name}-editor`}>---</label>
+  if(del.isPropEditable(item,name) && !del.isPropLinked(item,name)) {
+    if(type === 'number') pe = <NumberEditor key={`${id}-${name}-editor`} delegate={del} item={item} name={name} disabled={false}/>
+    if(type === 'string') pe = <StringEditor key={`${id}-${name}-editor`} delegate={del} item={item} name={name} disabled={false}/>
+    if(type === 'enum') pe =   <EnumEditor   key={`${id}-${name}-editor`} delegate={del} item={item} name={name} disabled={false}/>
+    if(type === PROP_TYPES.OBJECT) pe = <ObjectPropEditor key={`${id}-${name}--editor`} delegate={del} item={item} name={name} disabled={false}/>
+  } else {
+    if(del.isPropLinked(item,name)) {
+      pe = <label key={`${id}-${name}-value`}
+                  className={'value'}>{del.getLinkedValueToString(item,name)}</label>
+    } else {
+      pe = <label key={`${id}-${name}-value`}
+                  className={'value'}>{del.valueToString(item, name)}</label>
+    }
+  }
+  return <>
+    {lab}
+    {link}
+    {pe}
+  </>
+}
+
+function PropGroup(props: { group:string, delegate:ObjectDelegate, item:TreeItem}) {
+  return <>
+    <header>{props.group}</header>
+    {props.delegate.getPropsForGroup(props.item,props.group).map((name:string) => {
+      return <PropEditor key={'editor-'+name} name={name} delegate={props.delegate} item={props.item}/>
+    })}
+  </>
+}
+
 export function PropSheet(props:{provider:TreeItemProvider, }) {
   let selMan = useContext(SelectionManagerContext)
   const [item, setItem] = useState(selMan.getSelection())
@@ -188,32 +229,7 @@ export function PropSheet(props:{provider:TreeItemProvider, }) {
   // @ts-ignore
   let del:ObjectDelegate = prov.getObjectDelegate(item) as ObjectDelegate
 
-  return <div className="prop-sheet">{del.propkeys(item).map((name:string) => {
-    let type = del.getPropType(item,name)
-    let id = item.id
-    let lab  = <label key={`${id}-${name}-label`} className={'label'}>{name}</label>
-    let link = <OpenLinkEditorButton key={`${id}-${name}-linked`} delegate={del} item={item} name={name}/>
-    let pe   = <label key={`${id}-${name}-editor`}>---</label>
-    if(del.isPropEditable(item,name) && !del.isPropLinked(item,name)) {
-      if(type === 'number') pe = <NumberEditor key={`${id}-${name}-editor`} delegate={del} item={item} name={name} disabled={false}/>
-      if(type === 'string') pe = <StringEditor key={`${id}-${name}-editor`} delegate={del} item={item} name={name} disabled={false}/>
-      if(type === 'enum') pe =   <EnumEditor   key={`${id}-${name}-editor`} delegate={del} item={item} name={name} disabled={false}/>
-      if(type === PROP_TYPES.OBJECT) pe = <ObjectPropEditor key={`${id}-${name}--editor`}
-                                                            delegate={del}
-                                                            item={item}
-                                                            name={name}
-                                                            disabled={false}/>
-    } else {
-      if(del.isPropLinked(item,name)) {
-        pe = <label key={`${id}-${name}-value`}
-                    className={'value'}>{del.getLinkedValueToString(item,name)}</label>
-      } else {
-        pe = <label key={`${id}-${name}-value`}
-                    className={'value'}>{del.valueToString(item, name)}</label>
-      }
-    }
-
-    return [lab,link,pe]
+  return <div className="prop-sheet">{del.getPropGroups(item).map((group:string) => {
+    return <PropGroup group={group} delegate={del} item={item} key={'group-'+group}/>
   })}</div>
-
 }
