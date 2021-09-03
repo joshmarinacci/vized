@@ -24,6 +24,7 @@ export const SHAPE_TYPES = {
   GROUP:'group',
   ROOT: "root"
 }
+const COLORS = ['white','red','green','blue','yellow','black','transparent']
 
 
 const ID_DEF:PropDef = {
@@ -39,7 +40,6 @@ const TITLE_DEF:PropDef = {
   key:'title',
   default:''
 }
-
 const GEOM_GROUP:PropGroup = [
   {
     type:PROP_TYPES.NUMBER,
@@ -98,8 +98,6 @@ SquareDef.set("base",[
   },
 ])
 SquareDef.set("geom",GEOM_GROUP)
-
-const COLORS = ['white','red','green','blue','yellow','black','transparent']
 
 const STYLE_GROUP:PropGroup = [
     {
@@ -218,6 +216,14 @@ RootDef.set("base",[
   TITLE_DEF,
 ])
 
+type ObjectPowerup = {
+  treeIcon: string,
+  type: string,
+  def: PropCluster,
+  makeObject: ()=>TreeItem,
+  getBounds:(item:TreeItem,provider:RectDocEditor)=>Rect,
+}
+
 const TextboxDef:PropCluster = new Map<string,PropGroup>()
 TextboxDef.set("base",[
   ID_DEF,
@@ -319,11 +325,31 @@ TextboxDef.set("style",[
   },
 ])
 
+const TextboxPowerup:ObjectPowerup = {
+  type: "textbox",
+  treeIcon: "textbox",
+  def: TextboxDef,
+  makeObject: () => {
+    return makeFromDef(TextboxDef, {
+      id: genID('textbox'),
+      title: 'text box',
+      color: 'black',
+      backgroundColor: 'green',
+      borderColor: 'blue',
+      borderWidth: 5,
+    })
+  },
+  getBounds : (item:TreeItem, provider:RectDocEditor) => {
+    let bds = provider.getObjectValue(item,'bounds') as any;
+    return new Rect(bds.x,bds.y,bds.w,bds.h);
+  }
+}
+
+
 let TYPE_MAP = new Map<string,Map<string,PropGroup>>()
 TYPE_MAP.set(SHAPE_TYPES.SQUARE,SquareDef)
 TYPE_MAP.set(SHAPE_TYPES.CIRCLE,CircleDef)
 TYPE_MAP.set(SHAPE_TYPES.GROUP,GroupDef)
-TYPE_MAP.set(SHAPE_TYPES.TEXTBOX,TextboxDef)
 TYPE_MAP.set(SHAPE_TYPES.ROOT,RootDef)
 TYPE_MAP.set('bounds',BoundsDef)
 
@@ -504,9 +530,14 @@ class NullObjectDelegate implements ObjectDelegate {
 }
 
 export class RectDocEditor extends TreeItemProvider {
+  private powerups: ObjectPowerup[];
+  private powerupsByType: Map<string,ObjectPowerup>;
   constructor(options:any) {
     super(options)
+    this.powerups = [];
+    this.powerupsByType = new Map<string, ObjectPowerup>()
     this.root = this.makeEmptyRoot(null)
+    this.addPowerup(TextboxPowerup)
   }
 
   appendChild(parent:TreeItem, child:TreeItem) {
@@ -606,8 +637,8 @@ export class RectDocEditor extends TreeItemProvider {
     if(ch.type === SHAPE_TYPES.GROUP) {
       return this.calc_group_bounds_value(ch)
     }
-    if(ch.type === SHAPE_TYPES.TEXTBOX) {
-      let bds = this.getObjectValue(ch,'bounds') as any
+    if(this.hasPowerup(ch.type)) {
+      let bds = this.getPowerup(ch.type).getBounds(ch,this) as any
       return new Rect(bds.x,bds.y,bds.w,bds.h)
     }
     return new Rect(
@@ -687,10 +718,10 @@ export class RectDocEditor extends TreeItemProvider {
 
   getRendererForItem(item:TreeItem) {
     let icon = <ImageIcon icon={"circle"}/>
+    if(this.hasPowerup(item.type)) icon = <ImageIcon icon={this.getPowerup(item.type).treeIcon}/>
     if (item.type === SHAPE_TYPES.SQUARE)  icon = <ImageIcon icon={"square"} />
     if (item.type === SHAPE_TYPES.GROUP)  icon = <ImageIcon icon="group"/>
     if (item.type === SHAPE_TYPES.CIRCLE)  icon = <ImageIcon icon={"circle"}/>
-    if (item.type === SHAPE_TYPES.TEXTBOX)  icon = <ImageIcon icon={"textbox"}/>
     if (item.type === SHAPE_TYPES.ROOT)  icon = <ImageIcon icon={"root"}/>
     let title = (item as any).title
     return <div className={'hbox'}> {icon} <label style={{padding:'0 0.25rem'}}>{title}</label></div>
@@ -716,6 +747,10 @@ export class RectDocEditor extends TreeItemProvider {
       })
     }
     if(item === this.root || item.type === SHAPE_TYPES.GROUP) {
+      this.powerups.forEach(pow => {
+        cmds.push({ title:'add ' + pow.type,
+          fun:() => this.appendChild(item,pow.makeObject())})
+      })
       cmds.push({ title:'add square', fun:() =>  this.add_square(item)})
       cmds.push({ title:'add circle', fun:() =>  this.add_circle(item)})
       cmds.push({ title:'add group', fun:() =>  this.add_group(item)})
@@ -838,6 +873,20 @@ export class RectDocEditor extends TreeItemProvider {
     })
     this.root.children = childs
     this.fire(TREE_ITEM_PROVIDER.STRUCTURE_CHANGED, this.root)
+  }
+
+
+  addPowerup(powerup:ObjectPowerup) {
+    this.powerups.push(powerup)
+    this.powerupsByType.set(powerup.type,powerup)
+    TYPE_MAP.set(powerup.type,powerup.def)
+  }
+  hasPowerup(type:string):boolean {
+    return this.powerupsByType.has(type)
+  }
+  getPowerup(type:string):ObjectPowerup {
+    // @ts-ignore
+    return this.powerupsByType.get(type)
   }
 }
 
