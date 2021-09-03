@@ -142,7 +142,6 @@ export function RectCanvas(props:{provider:RectDocEditor, tool:string, grid:bool
   let canvas = useRef<HTMLCanvasElement>(null);
   let selMan = useContext(SelectionManagerContext)
   let [bounds, set_bounds] = useState(new Rect(0,0,10,10))
-  let [page] = useState(new Rect(0,0,800,800))
   let [offset, set_offset] = useState(new Point(10,10))
   let [count, set_count] = useState(0)
   let [show_floating_panel, set_show_floating_panel] = useState(false)
@@ -195,7 +194,7 @@ export function RectCanvas(props:{provider:RectDocEditor, tool:string, grid:bool
         canvas:can,
         provider:props.provider,
         scale:scale,
-        pageBounds:page,
+        pageBounds:props.provider.getBoundsValue(props.provider.getSceneRoot()),
         canvasBounds:bds,
         selectionBounds:sel_bounds,
         offset:offset,

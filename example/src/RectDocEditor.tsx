@@ -8,7 +8,8 @@ import {
   SelectionManager,
   TREE_ITEM_PROVIDER,
   TreeItem,
-  TreeItemProvider
+  TreeItemProvider,
+  makeFromDef
 } from "vized";
 import React from "react";
 import { RectDocApp } from "./App";
@@ -40,7 +41,15 @@ const RootDef:PropCluster = new Map<string, PropGroup>()
 RootDef.set("base",[
   ID_DEF,
   TITLE_DEF,
+  {
+    type: PROP_TYPES.STRING,
+    name: 'type',
+    locked: true,
+    key: 'type',
+    default:'root',
+  },
 ])
+RootDef.set("geom",GEOM_GROUP)
 
 export const BoundsDef:PropCluster = new Map<string,PropGroup>()
 BoundsDef.set("base",[
@@ -243,7 +252,6 @@ export class RectDocEditor extends TreeItemProvider {
     this.powerups = [];
     this.powerupsByType = new Map<string, ObjectPowerup>()
     this.root = this.makeEmptyRoot(null)
-    // this.addPowerup(TextboxPowerup)
   }
 
   appendChild(parent:TreeItem, child:TreeItem) {
@@ -256,7 +264,12 @@ export class RectDocEditor extends TreeItemProvider {
   }
   // @ts-ignore
   makeEmptyRoot(doc:any):TreeItem {
-    const root = {id:'root',type:SHAPE_TYPES.ROOT,children:[], title:"foo"} as TreeItem
+    const root = makeFromDef(RootDef,{id:'root',
+      title:'untitled doc',
+      w:200,
+      h:400,
+    }) as TreeItem
+    root.children = []
     return root
   }
   getColorValue(ch: any, name:string) {
