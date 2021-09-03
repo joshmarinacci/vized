@@ -173,23 +173,33 @@ TextboxDef.set("style",[
   },
 ])
 
-export const TextboxPowerup:ObjectPowerup = {
-  type: "textbox",
-  treeIcon: "textbox",
-  def: TextboxDef,
-  makeObject: () => {
-    return makeFromDef(TextboxDef, {
-      id: genID('textbox'),
-      title: 'text box',
-      color: 'black',
-      backgroundColor: 'green',
-      borderColor: 'blue',
-      borderWidth: 5,
-    })
-  },
-  getBounds : (item:TreeItem, provider:RectDocEditor) => {
-    let bds = provider.getObjectValue(item,'bounds') as any;
-    return new Rect(bds.x,bds.y,bds.w,bds.h);
+export class TextboxPowerup implements ObjectPowerup {
+  def() {
+    return TextboxDef
+  }
+
+  getBounds(item:TreeItem, provider: RectDocEditor): Rect {
+      let bds = provider.getObjectValue(item,'bounds') as any;
+      return new Rect(bds.x,bds.y,bds.w,bds.h);
+  }
+
+  makeObject() {
+      return makeFromDef(TextboxDef, {
+        id: genID('textbox'),
+        title: 'text box',
+        color: 'black',
+        backgroundColor: 'green',
+        borderColor: 'blue',
+        borderWidth: 5,
+      })
+  }
+
+  treeIcon(): string {
+    return "textbox";
+  }
+
+  type(): string {
+    return "textbox";
   }
 }
 

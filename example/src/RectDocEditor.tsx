@@ -473,7 +473,7 @@ export class RectDocEditor extends TreeItemProvider {
 
   getRendererForItem(item:TreeItem) {
     let icon = <ImageIcon icon={"circle"}/>
-    if(this.hasPowerup(item.type)) icon = <ImageIcon icon={this.getPowerup(item.type).treeIcon}/>
+    if(this.hasPowerup(item.type)) icon = <ImageIcon icon={this.getPowerup(item.type).treeIcon()}/>
     if (item.type === SHAPE_TYPES.SQUARE)  icon = <ImageIcon icon={"square"} />
     if (item.type === SHAPE_TYPES.GROUP)  icon = <ImageIcon icon="group"/>
     if (item.type === SHAPE_TYPES.ROOT)  icon = <ImageIcon icon={"root"}/>
@@ -502,7 +502,7 @@ export class RectDocEditor extends TreeItemProvider {
     }
     if(item === this.root || item.type === SHAPE_TYPES.GROUP) {
       this.powerups.forEach(pow => {
-        cmds.push({ title:'add ' + pow.type,
+        cmds.push({ title:'add ' + pow.type(),
           fun:() => this.appendChild(item,pow.makeObject())})
       })
       cmds.push({ title:'add square', fun:() =>  this.add_square(item)})
@@ -628,8 +628,8 @@ export class RectDocEditor extends TreeItemProvider {
 
   addPowerup(powerup:ObjectPowerup) {
     this.powerups.push(powerup)
-    this.powerupsByType.set(powerup.type,powerup)
-    TYPE_MAP.set(powerup.type,powerup.def)
+    this.powerupsByType.set(powerup.type(),powerup)
+    TYPE_MAP.set(powerup.type(),powerup.def())
   }
   hasPowerup(type:string):boolean {
     return this.powerupsByType.has(type)

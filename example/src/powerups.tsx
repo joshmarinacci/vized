@@ -16,12 +16,12 @@ import { ColorValueRenderer, Rect } from "./components";
 import { RectDocEditor, } from "./RectDocEditor";
 export const COLORS = ['white','red','green','blue','yellow','black','transparent']
 
-export type ObjectPowerup = {
-  treeIcon: string,
-  type: string,
-  def: PropCluster,
-  makeObject: () => TreeItem,
-  getBounds: (item: TreeItem, provider: RectDocEditor) => Rect,
+export interface ObjectPowerup {
+  treeIcon():string;
+  type(): string,
+  def(): PropCluster,
+  makeObject():TreeItem,
+  getBounds(item: TreeItem, provider: RectDocEditor):Rect,
 }
 
 

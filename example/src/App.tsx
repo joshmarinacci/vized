@@ -40,8 +40,8 @@ type State = {
 }
 
 let provider = new RectDocEditor({})
-provider.addPowerup(TextboxPowerup)
-provider.addPowerup(CirclePowerup)
+provider.addPowerup(new TextboxPowerup())
+provider.addPowerup(new CirclePowerup())
 
 export function App() {
   return(

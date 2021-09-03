@@ -62,25 +62,33 @@ CircleDef.set("geom",[
 CircleDef.set("style",STYLE_GROUP)
 
 
-export const CirclePowerup:ObjectPowerup = {
-  type: "circle",
-  treeIcon: "circle",
-  def: CircleDef,
-  getBounds(item, provider: RectDocEditor): Rect {
-    let r = provider.getNumberValue(item,'radius')
-    return new Rect(
-      provider.getNumberValue(item,'x')-r,
-      provider.getNumberValue(item,'y')-r,
-      r*2,
-      r*2)
-  },
+export class CirclePowerup implements ObjectPowerup {
+  def() {
+    return CircleDef;
+  }
+
+  getBounds(item:TreeItem, provider: RectDocEditor): Rect {
+      let r = provider.getNumberValue(item,'radius')
+      return new Rect(
+        provider.getNumberValue(item,'x')-r,
+        provider.getNumberValue(item,'y')-r,
+        r*2,
+        r*2)
+  }
+
   makeObject() {
     return makeFromDef(CircleDef, {
       id: genID('circle_'),
       title:"unnamed circle",
       r:30,
     })
-  },
-}
+  }
 
-//   this.appendChild(parent, makeFromDef(CircleDef,{id:genID('square_'),r:30, title:'unnamed circle'}))
+  treeIcon(): string {
+    return "circle";
+  }
+
+  type(): string {
+    return "circle";
+  }
+}
