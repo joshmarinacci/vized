@@ -20,6 +20,8 @@ import {
   SaveButton,
   SelectedButton
 } from "./components";
+import { TextboxPowerup } from "./textbox_powerup";
+import { CirclePowerup } from "./circle_powerup";
 
 const STORAGE = new StorageManager()
 const selMan = new SelectionManager()
@@ -38,6 +40,8 @@ type State = {
 }
 
 let provider = new RectDocEditor({})
+provider.addPowerup(TextboxPowerup)
+provider.addPowerup(CirclePowerup)
 
 export function App() {
   return(

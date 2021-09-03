@@ -16,6 +16,7 @@ import { RectDocApp } from "./App";
 import { ObjectDelegate, PropType } from "./propsheet2";
 import "./css/components.css";
 import { ColorValueRenderer, ImageIcon, Rect } from "./components";
+import { GEOM_GROUP, ObjectPowerup, STYLE_GROUP } from "./powerups";
 
 export const SHAPE_TYPES = {
   SQUARE:"square",
@@ -24,66 +25,22 @@ export const SHAPE_TYPES = {
   GROUP:'group',
   ROOT: "root"
 }
-const COLORS = ['white','red','green','blue','yellow','black','transparent']
+export const COLORS = ['white','red','green','blue','yellow','black','transparent']
 
 
-const ID_DEF:PropDef = {
+export const ID_DEF:PropDef = {
   type: PROP_TYPES.STRING,
   name:'ID',
   locked:true,
   key: "id",
 }
-const TITLE_DEF:PropDef = {
+export const TITLE_DEF:PropDef = {
   type:PROP_TYPES.STRING,
   name:'Title',
   locked:false,
   key:'title',
   default:''
 }
-const GEOM_GROUP:PropGroup = [
-  {
-    type:PROP_TYPES.NUMBER,
-    key:'x',
-    name:'x',
-    default:0,
-    live:true,
-    hints: {
-      incrementValue:1,
-    }
-  },
-  {
-    key:'y',
-    name:'y',
-    type:PROP_TYPES.NUMBER,
-    live:true,
-    default: 0,
-    hints:{
-      incrementValue:1,
-    }
-  },
-  {
-    key:'w',
-    name:'width',
-    type: PROP_TYPES.NUMBER,
-    default: 100,
-    live:true,
-    hints: {
-      incrementValue:1,
-      min:1,
-    },
-  },
-  {
-    key:'h',
-    name:'height',
-    type: PROP_TYPES.NUMBER,
-    default: 100,
-    live:true,
-    hints: {
-      incrementValue:1,
-      min:1,
-    }
-  },
-]
 
 export const SquareDef:PropCluster = new Map<string, PropGroup>()
 SquareDef.set("base",[
@@ -98,83 +55,7 @@ SquareDef.set("base",[
   },
 ])
 SquareDef.set("geom",GEOM_GROUP)
-
-const STYLE_GROUP:PropGroup = [
-    {
-      key:"color",
-      name:'color',
-      type:PROP_TYPES.ENUM,
-      live:false,
-      default: 'white',
-      values:COLORS,
-      renderer: ColorValueRenderer,
-    },
-    {
-      key:"borderColor",
-      name:"border color",
-      type:PROP_TYPES.ENUM,
-      live:false,
-      default: 'black',
-      values:COLORS,
-      renderer: ColorValueRenderer,
-    },
-    {
-      key:"borderWidth",
-      name:"border width",
-      type:PROP_TYPES.NUMBER,
-      live:false,
-      default:1,
-    }
-
-]
 SquareDef.set("style",STYLE_GROUP)
-
-export const CircleDef:PropCluster = new Map<string,PropGroup>()
-CircleDef.set("base",[
-  ID_DEF,
-  TITLE_DEF,
-  {
-    type: PROP_TYPES.STRING,
-    name: 'type',
-    locked: true,
-    key: 'type',
-    default:'circle',
-  },
-])
-CircleDef.set("geom",[
-  {
-    type:PROP_TYPES.NUMBER,
-    key:'x',
-    name:'x',
-    default:0,
-    live:true,
-    hints: {
-      incrementValue:1,
-    }
-  },
-  {
-    key:'y',
-    name:'y',
-    type:PROP_TYPES.NUMBER,
-    live:true,
-    default: 0,
-    hints:{
-      incrementValue:1,
-    }
-  },
-  {
-    type:PROP_TYPES.NUMBER,
-    key:'radius',
-    name:'radius',
-    default:10,
-    live:true,
-    hints: {
-      incrementValue:1,
-    }
-  },
-])
-CircleDef.set("style",STYLE_GROUP)
-
 export const GroupDef:PropCluster = new Map<string, PropGroup>()
 GroupDef.set("base",[
   ID_DEF,
@@ -216,34 +97,7 @@ RootDef.set("base",[
   TITLE_DEF,
 ])
 
-type ObjectPowerup = {
-  treeIcon: string,
-  type: string,
-  def: PropCluster,
-  makeObject: ()=>TreeItem,
-  getBounds:(item:TreeItem,provider:RectDocEditor)=>Rect,
-}
-
-const TextboxDef:PropCluster = new Map<string,PropGroup>()
-TextboxDef.set("base",[
-  ID_DEF,
-  TITLE_DEF,
-  {
-    type: PROP_TYPES.STRING,
-    name: 'type',
-    locked: true,
-    key: 'type',
-    default:SHAPE_TYPES.TEXTBOX,
-  },
-  {
-    type: PROP_TYPES.STRING,
-    name:'text',
-    locked:false,
-    key:'text',
-    default:'empty text'
-  }
-])
-const BoundsDef:PropCluster = new Map<string,PropGroup>()
+export const BoundsDef:PropCluster = new Map<string,PropGroup>()
 BoundsDef.set("base",[
   {
     type: PROP_TYPES.STRING,
@@ -254,101 +108,11 @@ BoundsDef.set("base",[
   },
 ])
 BoundsDef.set("geom",GEOM_GROUP)
-TextboxDef.set("geom",[
-  {
-    key:"bounds",
-    name:"bounds",
-    type: PROP_TYPES.OBJECT,
-    default: {type:"bounds",x:0,y:0,w:100,h:100},
-    objectprops:BoundsDef,
-  }
-])
-TextboxDef.set("layout",[
-  {
-    key:'fontSize',
-    name:"font size",
-    type:PROP_TYPES.NUMBER,
-    live:false,
-    default:16,
-  },
-  {
-    key:'horizontalAlign',
-    name:'Align H',
-    type:PROP_TYPES.ENUM,
-    live:false,
-    values:["start","center","end"],
-    default:"center",
-  },
-  {
-    key:'verticalAlign',
-    name:'Align V',
-    type:PROP_TYPES.ENUM,
-    live:false,
-    values:["start","center","end"],
-    default:"center",
-  },
-])
-TextboxDef.set("style",[
-  {
-    key:"color",
-    name:'color',
-    type:PROP_TYPES.ENUM,
-    live:false,
-    default: 'white',
-    values:COLORS,
-    renderer: ColorValueRenderer,
-  },
-  {
-    key:"backgroundColor",
-    name:'background color',
-    type:PROP_TYPES.ENUM,
-    live:false,
-    default: 'white',
-    values:COLORS,
-    renderer: ColorValueRenderer,
-  },
-  {
-    key:"borderColor",
-    name:"border color",
-    type:PROP_TYPES.ENUM,
-    live:false,
-    default: 'black',
-    values:COLORS,
-    renderer: ColorValueRenderer,
-  },
-  {
-    key:"borderWidth",
-    name:"border width",
-    type:PROP_TYPES.NUMBER,
-    live:false,
-    default:1,
-  },
-])
-
-const TextboxPowerup:ObjectPowerup = {
-  type: "textbox",
-  treeIcon: "textbox",
-  def: TextboxDef,
-  makeObject: () => {
-    return makeFromDef(TextboxDef, {
-      id: genID('textbox'),
-      title: 'text box',
-      color: 'black',
-      backgroundColor: 'green',
-      borderColor: 'blue',
-      borderWidth: 5,
-    })
-  },
-  getBounds : (item:TreeItem, provider:RectDocEditor) => {
-    let bds = provider.getObjectValue(item,'bounds') as any;
-    return new Rect(bds.x,bds.y,bds.w,bds.h);
-  }
-}
 
 
 let TYPE_MAP = new Map<string,Map<string,PropGroup>>()
 TYPE_MAP.set(SHAPE_TYPES.SQUARE,SquareDef)
-TYPE_MAP.set(SHAPE_TYPES.CIRCLE,CircleDef)
+// TYPE_MAP.set(SHAPE_TYPES.CIRCLE,CircleDef)
 TYPE_MAP.set(SHAPE_TYPES.GROUP,GroupDef)
 TYPE_MAP.set(SHAPE_TYPES.ROOT,RootDef)
 TYPE_MAP.set('bounds',BoundsDef)
@@ -537,7 +301,7 @@ export class RectDocEditor extends TreeItemProvider {
     this.powerups = [];
     this.powerupsByType = new Map<string, ObjectPowerup>()
     this.root = this.makeEmptyRoot(null)
-    this.addPowerup(TextboxPowerup)
+    // this.addPowerup(TextboxPowerup)
   }
 
   appendChild(parent:TreeItem, child:TreeItem) {
@@ -563,8 +327,6 @@ export class RectDocEditor extends TreeItemProvider {
     }
     root.children.push(child_square)
 
-    const child_circle1 = makeFromDef(CircleDef,{id:'cir1',x:200,y:200,radius:20, color:'teal', title:'circle'})
-    root.children.push(child_circle1)
 
     const group1 = makeFromDef(GroupDef, {id:'grp1', title:"group 1"})
     group1.children = []
@@ -573,13 +335,13 @@ export class RectDocEditor extends TreeItemProvider {
     group1.children.push(makeFromDef(SquareDef, {id:'sq6', x:150,y:150,w:20,h:20, color:'blue',title:'child square3'}))
 
 
-    const text1 = makeFromDef(TextboxDef, {id:'tb1', title:'text box',
-      color:'black',
-      backgroundColor:'green',
-      borderColor:'blue',
-      borderWidth:5,
-    })
-    root.children.push(text1)
+    // const text1 = makeFromDef(TextboxDef, {id:'tb1', title:'text box',
+    //   color:'black',
+    //   backgroundColor:'green',
+    //   borderColor:'blue',
+    //   borderWidth:5,
+    // })
+    // root.children.push(text1)
     return root
   }
   getColorValue(ch: any, name:string) {
@@ -628,12 +390,6 @@ export class RectDocEditor extends TreeItemProvider {
 
 
   getBoundsValue(ch: any):Rect {
-    if(ch.type === SHAPE_TYPES.CIRCLE) {
-      let r = this.getNumberValue(ch,'radius')
-      return new Rect(this.getNumberValue(ch,'x')-r,
-        this.getNumberValue(ch,'y')-r,
-        r*2,r*2)
-    }
     if(ch.type === SHAPE_TYPES.GROUP) {
       return this.calc_group_bounds_value(ch)
     }
@@ -687,7 +443,6 @@ export class RectDocEditor extends TreeItemProvider {
       if (item.type === SHAPE_TYPES.ROOT) return RootDef
       if (item.type === SHAPE_TYPES.SQUARE) return SquareDef
       if (item.type === SHAPE_TYPES.GROUP) return GroupDef
-      if (item.type === SHAPE_TYPES.CIRCLE) return CircleDef
     }
     return new Map()
   }
@@ -721,7 +476,6 @@ export class RectDocEditor extends TreeItemProvider {
     if(this.hasPowerup(item.type)) icon = <ImageIcon icon={this.getPowerup(item.type).treeIcon}/>
     if (item.type === SHAPE_TYPES.SQUARE)  icon = <ImageIcon icon={"square"} />
     if (item.type === SHAPE_TYPES.GROUP)  icon = <ImageIcon icon="group"/>
-    if (item.type === SHAPE_TYPES.CIRCLE)  icon = <ImageIcon icon={"circle"}/>
     if (item.type === SHAPE_TYPES.ROOT)  icon = <ImageIcon icon={"root"}/>
     let title = (item as any).title
     return <div className={'hbox'}> {icon} <label style={{padding:'0 0.25rem'}}>{title}</label></div>
@@ -752,7 +506,6 @@ export class RectDocEditor extends TreeItemProvider {
           fun:() => this.appendChild(item,pow.makeObject())})
       })
       cmds.push({ title:'add square', fun:() =>  this.add_square(item)})
-      cmds.push({ title:'add circle', fun:() =>  this.add_circle(item)})
       cmds.push({ title:'add group', fun:() =>  this.add_group(item)})
     }
     // cmds.push({divider: true})
@@ -762,9 +515,6 @@ export class RectDocEditor extends TreeItemProvider {
 
   add_square(parent:any) {
     this.appendChild(parent, makeFromDef(SquareDef,{id:genID('square_'),w:50,h:50, title:'unnamed square'}))
-  }
-  add_circle(parent:any) {
-    this.appendChild(parent, makeFromDef(CircleDef,{id:genID('square_'),r:30, title:'unnamed circle'}))
   }
   add_group(parent:any) {
     let g = makeFromDef(GroupDef,{id:genID('square_'), title:"unnamed group"})
