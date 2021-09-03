@@ -1,15 +1,10 @@
 import {
   genID,
   makeFromDef,
-  Point,
   PROP_TYPES,
   PropCluster,
-  PropDef,
   PropGroup,
-  SelectionManager,
-  TREE_ITEM_PROVIDER,
-  TreeItem,
-  TreeItemProvider
+  TreeItem
 } from "vized";
 
 import { ObjectPowerup } from "./powerups";
@@ -74,5 +69,25 @@ export class GroupPowerup implements ObjectPowerup {
 
   type(): string {
     return "group";
+  }
+
+  draw(ctx: any, c: CanvasRenderingContext2D, ch: any): void {
+    if(ch.type === SHAPE_TYPES.GROUP) {
+      let bds = ctx.provider.calc_group_bounds_value(ch)
+      // bds.stroke(c,'purple',4)
+      if (ctx.selection.isSelected(ch)) {
+        bds.stroke(c, 'red', 3)
+        bds.stroke(c, 'black', 1)
+      }
+    }
+    c.save()
+    c.translate(ch.x,ch.y)
+    ch.children.forEach((ch:any)=>{
+      if(ctx.provider.hasPowerup(ch.type)) {
+        ctx.provider.getPowerup(ch.type).draw(ctx,c,ch);
+      }
+      // if(ch.type === SHAPE_TYPES.GROUP)  draw_group(ctx,c,ch)
+    })
+    c.restore()
   }
 }

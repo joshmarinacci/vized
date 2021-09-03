@@ -15,6 +15,7 @@ export interface ObjectPowerup {
   def(): PropCluster,
   makeObject():TreeItem,
   getBounds(item: TreeItem, provider: RectDocEditor):Rect,
+  draw(ctx:any,c: CanvasRenderingContext2D, ch: any):void,
 }
 
 

@@ -1,15 +1,10 @@
 import {
   genID,
   makeFromDef,
-  Point,
   PROP_TYPES,
   PropCluster,
-  PropDef,
   PropGroup,
-  SelectionManager,
-  TREE_ITEM_PROVIDER,
-  TreeItem,
-  TreeItemProvider
+  TreeItem
 } from "vized";
 import { ID_DEF, RectDocEditor, TITLE_DEF } from "./RectDocEditor";
 import { ObjectPowerup, STYLE_GROUP } from "./powerups";
@@ -90,5 +85,24 @@ export class CirclePowerup implements ObjectPowerup {
 
   type(): string {
     return "circle";
+  }
+
+  draw(ctx: any, c: CanvasRenderingContext2D, ch: any): void {
+      c.beginPath()
+      c.arc(ch.x,ch.y,ch.radius,0,Math.PI*2)
+      c.closePath()
+      c.fillStyle = ctx.provider.getColorValue(ch, 'color')
+      c.fill()
+      let bw = ctx.provider.getNumberValue(ch, 'borderWidth')
+      if (bw > 0) {
+        c.strokeStyle = ctx.provider.getColorValue(ch, 'borderColor')
+        c.lineWidth = bw
+        c.stroke()
+      }
+      if (ctx.selection.isSelected(ch)) {
+        let bds = ctx.provider.getBoundsValue(ch)
+        bds.stroke(c, 'red', 3)
+        bds.stroke(c, 'black', 1)
+      }
   }
 }

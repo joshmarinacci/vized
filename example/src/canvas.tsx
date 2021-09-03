@@ -53,103 +53,11 @@ function draw_page_overlay(ctx: DrawingContext, c: CanvasRenderingContext2D):voi
   ctx.pageBounds.fill(c,'white')
 }
 
-function draw_square(ctx: DrawingContext, c: CanvasRenderingContext2D, ch: any) {
-  c.fillStyle = ctx.provider.getColorValue(ch, 'color')
-  let bds = ctx.provider.getBoundsValue(ch)
-  bds.fill(c, ctx.provider.getColorValue(ch, 'color'))
-  let bw = ctx.provider.getNumberValue(ch, 'borderWidth')
-  if (bw > 0) bds.stroke(c, ctx.provider.getColorValue(ch, 'borderColor'), bw)
-  if (ctx.selection.isSelected(ch)) {
-    bds.stroke(c, 'red', 3)
-    bds.stroke(c, 'black', 1)
-  }
-}
-
-function draw_textbox(ctx: DrawingContext, c: CanvasRenderingContext2D, ch: any) {
-  //draw background
-  // c.fillStyle = ctx.provider.getColorValue(ch, 'backgroundColor')
-  let bds = ctx.provider.getBoundsValue(ch)
-  bds.fill(c, ctx.provider.getColorValue(ch, 'backgroundColor'))
-
-  //draw border
-  let bw = ctx.provider.getNumberValue(ch, 'borderWidth')
-  if (bw > 0) bds.stroke(c, ctx.provider.getColorValue(ch, 'borderColor'), bw)
-
-  c.save()
-  c.translate(bds.x,bds.y)
-
-  //draw text
-  let txt = ctx.provider.getStringValue(ch,'text')
-  c.font = `normal ${ctx.provider.getNumberValue(ch,'fontSize')}px sans-serif`;
-  let metrics = c.measureText(txt)
-  let txt_bounds = new Rect(0,0,-metrics.actualBoundingBoxLeft+metrics.actualBoundingBoxRight,metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent)
-
-  let pt = new Point(0,0)
-  let halign = ctx.provider.getStringValue(ch,'horizontalAlign')
-  if(halign === 'start')  pt.x = txt_bounds.x
-  if(halign === 'center') pt.x = bds.width()/2 - txt_bounds.width()/2
-  if(halign === 'end')    pt.x = bds.width() - txt_bounds.width()
-  let valign = ctx.provider.getStringValue(ch,'verticalAlign')
-  if(valign === 'start')  pt.y = txt_bounds.y
-  if(valign === 'center') pt.y = bds.height()/2 - txt_bounds.height()/2
-  if(valign === 'end')    pt.y = bds.height() - txt_bounds.height()
-
-  c.fillStyle = ctx.provider.getColorValue(ch,'color')
-  c.fillText(txt,pt.x,pt.y+metrics.fontBoundingBoxAscent)
-  c.restore()
-
-  if (ctx.selection.isSelected(ch)) {
-    bds.stroke(c, 'red', 3)
-    bds.stroke(c, 'black', 1)
-  }
-}
-
-
-function draw_group(ctx: DrawingContext, c: CanvasRenderingContext2D, ch: any) {
-  if(ch.type === SHAPE_TYPES.GROUP) {
-    let bds = ctx.provider.calc_group_bounds_value(ch)
-    // bds.stroke(c,'purple',4)
-    if (ctx.selection.isSelected(ch)) {
-      bds.stroke(c, 'red', 3)
-      bds.stroke(c, 'black', 1)
-    }
-  }
-  c.save()
-  c.translate(ch.x,ch.y)
-  ch.children.forEach((ch:any)=>{
-    if(ch.type === SHAPE_TYPES.SQUARE) draw_square(ctx,c,ch)
-    if(ch.type === SHAPE_TYPES.CIRCLE) draw_circle(ctx,c,ch)
-    if(ch.type === SHAPE_TYPES.GROUP)  draw_group(ctx,c,ch)
-  })
-  c.restore()
-}
-
-function draw_circle(ctx: DrawingContext, c: CanvasRenderingContext2D, ch: any) {
-  c.beginPath()
-  c.arc(ch.x,ch.y,ch.radius,0,Math.PI*2)
-  c.closePath()
-  c.fillStyle = ctx.provider.getColorValue(ch, 'color')
-  c.fill()
-  let bw = ctx.provider.getNumberValue(ch, 'borderWidth')
-  if (bw > 0) {
-    c.strokeStyle = ctx.provider.getColorValue(ch, 'borderColor')
-    c.lineWidth = bw
-    c.stroke()
-  }
-  if (ctx.selection.isSelected(ch)) {
-    let bds = ctx.provider.getBoundsValue(ch)
-    bds.stroke(c, 'red', 3)
-    bds.stroke(c, 'black', 1)
-  }
-
-}
-
 function draw_shapes(ctx: DrawingContext, c: CanvasRenderingContext2D, root:any):void {
   root.children.forEach((ch:any) => {
-    if(ch.type === SHAPE_TYPES.SQUARE) draw_square(ctx,c,ch)
-    if(ch.type === SHAPE_TYPES.CIRCLE) draw_circle(ctx,c,ch)
-    if(ch.type === SHAPE_TYPES.GROUP)  draw_group(ctx,c,ch)
-    if(ch.type === SHAPE_TYPES.TEXTBOX) draw_textbox(ctx,c,ch)
+    if(ctx.provider.hasPowerup(ch.type)) {
+      ctx.provider.getPowerup(ch.type).draw(ctx,c,ch);
+    }
   })
 }
 

@@ -1,6 +1,5 @@
 import {
   genID,
-  makeFromDef,
   Point,
   PROP_TYPES,
   PropCluster,
@@ -16,12 +15,11 @@ import { RectDocApp } from "./App";
 import { ObjectDelegate, PropType } from "./propsheet2";
 import "./css/components.css";
 import { ColorValueRenderer, ImageIcon, Rect } from "./components";
-import { GEOM_GROUP, ObjectPowerup, STYLE_GROUP } from "./powerups";
+import { GEOM_GROUP, ObjectPowerup} from "./powerups";
 
 export const SHAPE_TYPES = {
   SQUARE:"square",
   TEXTBOX:"textbox",
-  CIRCLE:'circle',
   GROUP:'group',
   ROOT: "root"
 }

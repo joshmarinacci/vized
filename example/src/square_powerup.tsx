@@ -1,15 +1,10 @@
 import {
   genID,
   makeFromDef,
-  Point,
   PROP_TYPES,
   PropCluster,
-  PropDef,
   PropGroup,
-  SelectionManager,
-  TREE_ITEM_PROVIDER,
-  TreeItem,
-  TreeItemProvider
+  TreeItem
 } from "vized";
 
 import { GEOM_GROUP, ObjectPowerup, STYLE_GROUP } from "./powerups";
@@ -55,6 +50,18 @@ export class SquarePowerup implements ObjectPowerup {
 
   type(): string {
     return "square";
+  }
+
+  draw(ctx: any, c: CanvasRenderingContext2D, ch: any): void {
+      c.fillStyle = ctx.provider.getColorValue(ch, 'color')
+      let bds = ctx.provider.getBoundsValue(ch)
+      bds.fill(c, ctx.provider.getColorValue(ch, 'color'))
+      let bw = ctx.provider.getNumberValue(ch, 'borderWidth')
+      if (bw > 0) bds.stroke(c, ctx.provider.getColorValue(ch, 'borderColor'), bw)
+      if (ctx.selection.isSelected(ch)) {
+        bds.stroke(c, 'red', 3)
+        bds.stroke(c, 'black', 1)
+      }
   }
 
 }

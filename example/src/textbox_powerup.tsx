@@ -201,5 +201,44 @@ export class TextboxPowerup implements ObjectPowerup {
   type(): string {
     return "textbox";
   }
+
+  draw(ctx: any, c: CanvasRenderingContext2D, ch: any): void {
+    //draw background
+    // c.fillStyle = ctx.provider.getColorValue(ch, 'backgroundColor')
+    let bds = ctx.provider.getBoundsValue(ch)
+    bds.fill(c, ctx.provider.getColorValue(ch, 'backgroundColor'))
+
+    //draw border
+    let bw = ctx.provider.getNumberValue(ch, 'borderWidth')
+    if (bw > 0) bds.stroke(c, ctx.provider.getColorValue(ch, 'borderColor'), bw)
+
+    c.save()
+    c.translate(bds.x,bds.y)
+
+    //draw text
+    let txt = ctx.provider.getStringValue(ch,'text')
+    c.font = `normal ${ctx.provider.getNumberValue(ch,'fontSize')}px sans-serif`;
+    let metrics = c.measureText(txt)
+    let txt_bounds = new Rect(0,0,-metrics.actualBoundingBoxLeft+metrics.actualBoundingBoxRight,metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent)
+
+    let pt = new Point(0,0)
+    let halign = ctx.provider.getStringValue(ch,'horizontalAlign')
+    if(halign === 'start')  pt.x = txt_bounds.x
+    if(halign === 'center') pt.x = bds.width()/2 - txt_bounds.width()/2
+    if(halign === 'end')    pt.x = bds.width() - txt_bounds.width()
+    let valign = ctx.provider.getStringValue(ch,'verticalAlign')
+    if(valign === 'start')  pt.y = txt_bounds.y
+    if(valign === 'center') pt.y = bds.height()/2 - txt_bounds.height()/2
+    if(valign === 'end')    pt.y = bds.height() - txt_bounds.height()
+
+    c.fillStyle = ctx.provider.getColorValue(ch,'color')
+    c.fillText(txt,pt.x,pt.y+metrics.fontBoundingBoxAscent)
+    c.restore()
+
+    if (ctx.selection.isSelected(ch)) {
+      bds.stroke(c, 'red', 3)
+      bds.stroke(c, 'black', 1)
+    }
+  }
 }
 
