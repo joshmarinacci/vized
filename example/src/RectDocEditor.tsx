@@ -25,8 +25,6 @@ export const SHAPE_TYPES = {
   GROUP:'group',
   ROOT: "root"
 }
-export const COLORS = ['white','red','green','blue','yellow','black','transparent']
-
 
 export const ID_DEF:PropDef = {
   type: PROP_TYPES.STRING,
@@ -56,40 +54,6 @@ SquareDef.set("base",[
 ])
 SquareDef.set("geom",GEOM_GROUP)
 SquareDef.set("style",STYLE_GROUP)
-export const GroupDef:PropCluster = new Map<string, PropGroup>()
-GroupDef.set("base",[
-  ID_DEF,
-  TITLE_DEF,
-  {
-    type: PROP_TYPES.STRING,
-    name: 'type',
-    locked: true,
-    key: 'type',
-    default:SHAPE_TYPES.GROUP,
-  }
-])
-GroupDef.set("geom",[
-  {
-    type:PROP_TYPES.NUMBER,
-    key:'x',
-    name:'x',
-    default:0,
-    live:true,
-    hints: {
-      incrementValue:1,
-    }
-  },
-  {
-    key:'y',
-    name:'y',
-    type:PROP_TYPES.NUMBER,
-    live:true,
-    default: 0,
-    hints:{
-      incrementValue:1,
-    }
-  },
-])
 
 const RootDef:PropCluster = new Map<string, PropGroup>()
 RootDef.set("base",[
@@ -112,8 +76,6 @@ BoundsDef.set("geom",GEOM_GROUP)
 
 let TYPE_MAP = new Map<string,Map<string,PropGroup>>()
 TYPE_MAP.set(SHAPE_TYPES.SQUARE,SquareDef)
-// TYPE_MAP.set(SHAPE_TYPES.CIRCLE,CircleDef)
-TYPE_MAP.set(SHAPE_TYPES.GROUP,GroupDef)
 TYPE_MAP.set(SHAPE_TYPES.ROOT,RootDef)
 TYPE_MAP.set('bounds',BoundsDef)
 
@@ -326,22 +288,6 @@ export class RectDocEditor extends TreeItemProvider {
       color:square3.id,
     }
     root.children.push(child_square)
-
-
-    const group1 = makeFromDef(GroupDef, {id:'grp1', title:"group 1"})
-    group1.children = []
-    root.children.push(group1)
-    group1.children.push(makeFromDef(SquareDef, {id:'sq5', x:100,y:100,w:20,h:20, color:'blue',title:'child square'}))
-    group1.children.push(makeFromDef(SquareDef, {id:'sq6', x:150,y:150,w:20,h:20, color:'blue',title:'child square3'}))
-
-
-    // const text1 = makeFromDef(TextboxDef, {id:'tb1', title:'text box',
-    //   color:'black',
-    //   backgroundColor:'green',
-    //   borderColor:'blue',
-    //   borderWidth:5,
-    // })
-    // root.children.push(text1)
     return root
   }
   getColorValue(ch: any, name:string) {
@@ -390,12 +336,8 @@ export class RectDocEditor extends TreeItemProvider {
 
 
   getBoundsValue(ch: any):Rect {
-    if(ch.type === SHAPE_TYPES.GROUP) {
-      return this.calc_group_bounds_value(ch)
-    }
     if(this.hasPowerup(ch.type)) {
-      let bds = this.getPowerup(ch.type).getBounds(ch,this) as any
-      return new Rect(bds.x,bds.y,bds.w,bds.h)
+      return this.getPowerup(ch.type).getBounds(ch,this)
     }
     return new Rect(
       this.getNumberValue(ch,'x'),
@@ -442,7 +384,6 @@ export class RectDocEditor extends TreeItemProvider {
     if (item) {
       if (item.type === SHAPE_TYPES.ROOT) return RootDef
       if (item.type === SHAPE_TYPES.SQUARE) return SquareDef
-      if (item.type === SHAPE_TYPES.GROUP) return GroupDef
     }
     return new Map()
   }
@@ -475,7 +416,6 @@ export class RectDocEditor extends TreeItemProvider {
     let icon = <ImageIcon icon={"circle"}/>
     if(this.hasPowerup(item.type)) icon = <ImageIcon icon={this.getPowerup(item.type).treeIcon()}/>
     if (item.type === SHAPE_TYPES.SQUARE)  icon = <ImageIcon icon={"square"} />
-    if (item.type === SHAPE_TYPES.GROUP)  icon = <ImageIcon icon="group"/>
     if (item.type === SHAPE_TYPES.ROOT)  icon = <ImageIcon icon={"root"}/>
     let title = (item as any).title
     return <div className={'hbox'}> {icon} <label style={{padding:'0 0.25rem'}}>{title}</label></div>
@@ -506,7 +446,6 @@ export class RectDocEditor extends TreeItemProvider {
           fun:() => this.appendChild(item,pow.makeObject())})
       })
       cmds.push({ title:'add square', fun:() =>  this.add_square(item)})
-      cmds.push({ title:'add group', fun:() =>  this.add_group(item)})
     }
     // cmds.push({divider: true})
     return cmds
@@ -515,11 +454,6 @@ export class RectDocEditor extends TreeItemProvider {
 
   add_square(parent:any) {
     this.appendChild(parent, makeFromDef(SquareDef,{id:genID('square_'),w:50,h:50, title:'unnamed square'}))
-  }
-  add_group(parent:any) {
-    let g = makeFromDef(GroupDef,{id:genID('square_'), title:"unnamed group"})
-    g.children = []
-    this.appendChild(parent, g)
   }
 
   do_layout() {

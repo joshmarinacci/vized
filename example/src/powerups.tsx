@@ -1,15 +1,8 @@
 import {
-  genID,
-  makeFromDef,
-  Point,
   PROP_TYPES,
   PropCluster,
-  PropDef,
   PropGroup,
-  SelectionManager,
-  TREE_ITEM_PROVIDER,
-  TreeItem,
-  TreeItemProvider
+  TreeItem
 } from "vized";
 
 import { ColorValueRenderer, Rect } from "./components";
