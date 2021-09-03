@@ -115,6 +115,9 @@ class RDEObjectDelegate implements ObjectDelegate {
   }
   setPropValue(item:TreeItem, name: string, value: any): void {
     item[name] = value
+    if(this.ed.hasPowerup(item.type)) {
+      this.ed.getPowerup(item.type).afterSetProp(item,name,value)
+    }
     this.ed.fire(TREE_ITEM_PROVIDER.PROPERTY_CHANGED,item)
   }
   valueToString(item:TreeItem, name: string): string {
@@ -420,10 +423,18 @@ export class RectDocEditor extends TreeItemProvider {
         fun: () => this.deleteChild(item)
       })
     }
-    if(item === this.root || item.type === SHAPE_TYPES.GROUP) {
+    if(item === this.root) {
       this.powerups.forEach(pow => {
         cmds.push({ title:'add ' + pow.type(),
           fun:() => this.appendChild(item,pow.makeObject())})
+      })
+    }
+    if(this.hasPowerup(item.type)) {
+      this.powerups.forEach(pow => {
+        if(this.getPowerup(item.type).canAddChild(item,pow.type())) {
+          cmds.push({ title:'add ' + pow.type(),
+            fun:() => this.appendChild(item,pow.makeObject())})
+        }
       })
     }
     // cmds.push({divider: true})

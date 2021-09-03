@@ -24,6 +24,7 @@ import { TextboxPowerup } from "./textbox_powerup";
 import { CirclePowerup } from "./circle_powerup";
 import { GroupPowerup } from "./group_powerup";
 import { SquarePowerup } from "./square_powerup";
+import { FlexPowerup } from "./flex_powerup";
 
 const STORAGE = new StorageManager()
 const selMan = new SelectionManager()
@@ -46,6 +47,7 @@ provider.addPowerup(new SquarePowerup())
 provider.addPowerup(new TextboxPowerup())
 provider.addPowerup(new CirclePowerup())
 provider.addPowerup(new GroupPowerup())
+provider.addPowerup(new FlexPowerup())
 
 export function App() {
   return(

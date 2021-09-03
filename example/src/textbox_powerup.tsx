@@ -166,7 +166,7 @@ TextboxDef.set("style",[
   },
 ])
 
-export class TextboxPowerup implements ObjectPowerup {
+export class TextboxPowerup extends ObjectPowerup {
   def() {
     return TextboxDef
   }

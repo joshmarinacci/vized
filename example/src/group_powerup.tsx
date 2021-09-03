@@ -46,7 +46,7 @@ GroupDef.set("geom",[
   },
 ])
 
-export class GroupPowerup implements ObjectPowerup {
+export class GroupPowerup extends ObjectPowerup {
   def() {
     return GroupDef;
   }
@@ -92,5 +92,9 @@ export class GroupPowerup implements ObjectPowerup {
   }
   useResizeHandle(item:TreeItem): boolean {
     return false
+  }
+
+  canAddChild(parent:TreeItem, childType: string): boolean {
+    return true
   }
 }

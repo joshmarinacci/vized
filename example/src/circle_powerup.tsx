@@ -57,7 +57,7 @@ CircleDef.set("geom",[
 CircleDef.set("style",STYLE_GROUP)
 
 
-export class CirclePowerup implements ObjectPowerup {
+export class CirclePowerup extends ObjectPowerup {
   def() {
     return CircleDef;
   }

@@ -9,14 +9,26 @@ import { ColorValueRenderer, Rect } from "./components";
 import { RectDocEditor, } from "./RectDocEditor";
 export const COLORS = ['white','red','green','blue','yellow','black','transparent']
 
-export interface ObjectPowerup {
-  treeIcon():string;
-  type(): string,
-  def(): PropCluster,
-  makeObject():TreeItem,
-  getBounds(item: TreeItem, provider: RectDocEditor):Rect,
-  draw(ctx:any,c: CanvasRenderingContext2D, ch: any):void,
-  useResizeHandle(item:TreeItem):boolean,
+export abstract class ObjectPowerup {
+  treeIcon():string {
+    return "unknown"
+  };
+  abstract type(): string;
+  abstract def(): PropCluster;
+  abstract makeObject():TreeItem;
+  abstract getBounds(item: TreeItem, provider: RectDocEditor):Rect;
+  draw(ctx:any, c: CanvasRenderingContext2D, ch: any):void {
+
+  }
+  useResizeHandle(item:TreeItem):boolean {
+    return false
+  }
+  canAddChild(parent:TreeItem,childType:string):boolean {
+    return false
+  }
+  afterSetProp(item:TreeItem,prop:string,value:any):void {
+    // console.log("doing nothing")
+  }
 }
 
 

@@ -12,6 +12,7 @@ import { RectDocEditor, SHAPE_TYPES } from "./RectDocEditor";
 import "./css/canvas.css";
 import { FloatingNodePanel, Rect } from "./components";
 import { TreeItem } from "../../src";
+import { ObjectDelegate } from "./propsheet2";
 
 
 type DrawingContext = {
@@ -119,17 +120,19 @@ function find_handle_at_pt(handles: ResizeHandle[], pt: Point):ResizeHandle[] {
 
 class ResizeHandle extends Rect {
   target: any;
-  constructor(x:number,y:number,w:number,h:number,n:any) {
+  private delegate: ObjectDelegate;
+  constructor(x:number,y:number,w:number,h:number,target:any, delegate:ObjectDelegate) {
     super(x,y,w,h);
-    this.target = n
+    this.target = target
+    this.delegate = delegate
   }
   moveTo(pt:Point) {
     this.x = pt.x-5
     this.y = pt.y-5
     this.x2 = this.x+10
     this.y2 = this.y+10
-    this.target.w = this.x + 5 - this.target.x
-    this.target.h = this.y + 5 - this.target.y
+    this.delegate.setPropValue(this.target,'w',this.x+5-this.target.x)
+    this.delegate.setPropValue(this.target,'h',this.y+5-this.target.y)
   }
 }
 
@@ -156,7 +159,8 @@ export function RectCanvas(props:{provider:RectDocEditor, tool:string, grid:bool
       if(!props.provider.hasPowerup(ch.type)) return false
       return props.provider.getPowerup(ch.type).useResizeHandle(ch)
     }
-    set_handles(sel.filter(useHandles).map((n:any) => new ResizeHandle(n.x+n.w-5,n.y+n.h-5,10,10,n)))
+    set_handles(sel.filter(useHandles).map((n:any) => new ResizeHandle(n.x+n.w-5,n.y+n.h-5,10,10,n,
+      props.provider.getObjectDelegate(n as TreeItem))))
     set_sel_bounds(props.provider.calc_node_array_bounds(selMan.getFullSelection()))
     if(selMan.isEmpty()) set_show_floating_panel(false)
     redraw()
