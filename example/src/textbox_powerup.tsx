@@ -14,6 +14,7 @@ import {
 import { ColorValueRenderer, Rect } from "./components";
 import { RectDocEditor } from "./RectDocEditor";
 import { COLORS, ObjectPowerup } from "./powerups";
+import { SquareDef } from "./square_powerup";
 
 export const BoundsDef:PropCluster = new Map<string,PropGroup>()
 BoundsDef.set("base",[
@@ -102,15 +103,7 @@ TextboxDef.set("base",[
     default:'empty text'
   }
 ])
-TextboxDef.set("geom",[
-  {
-    key:"bounds",
-    name:"bounds",
-    type: PROP_TYPES.OBJECT,
-    default: {type:"bounds",x:0,y:0,w:100,h:100},
-    objectprops:BoundsDef,
-  }
-])
+TextboxDef.set("geom",GEOM_GROUP)
 TextboxDef.set("layout",[
   {
     key:'fontSize',
@@ -179,8 +172,12 @@ export class TextboxPowerup implements ObjectPowerup {
   }
 
   getBounds(item:TreeItem, provider: RectDocEditor): Rect {
-      let bds = provider.getObjectValue(item,'bounds') as any;
-      return new Rect(bds.x,bds.y,bds.w,bds.h);
+    return new Rect(
+      provider.getNumberValue(item,'x'),
+      provider.getNumberValue(item,'y'),
+      provider.getNumberValue(item,'w'),
+      provider.getNumberValue(item,'h'),
+    )
   }
 
   makeObject() {

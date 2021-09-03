@@ -22,7 +22,7 @@ type DrawingContext = {
   canvasBounds:Rect,
   selectionBounds:Rect,
   offset:Point,
-  handles:Handle[],
+  handles:ResizeHandle[],
 }
 
 function draw_grid_overlay(ctx:DrawingContext,c:CanvasRenderingContext2D):void {
@@ -112,11 +112,11 @@ function find_node_at_pt(provider: RectDocEditor, pt: Point):any[] {
   return provider.getSceneRoot().children.filter((ch:any) => provider.getBoundsValue(ch).contains(pt))
 }
 
-function find_handle_at_pt(handles: Handle[], pt: Point):Handle[] {
+function find_handle_at_pt(handles: ResizeHandle[], pt: Point):ResizeHandle[] {
   return handles.filter((h:any) => h.contains(pt))
 }
 
-class Handle extends Rect {
+class ResizeHandle extends Rect {
   target: any;
   constructor(x:number,y:number,w:number,h:number,n:any) {
     super(x,y,w,h);
@@ -147,13 +147,13 @@ export function RectCanvas(props:{provider:RectDocEditor, tool:string, grid:bool
   let [show_floating_panel, set_show_floating_panel] = useState(false)
   let [float_position, set_float_position] = useState(new Point(0,0))
   let [sel_bounds, set_sel_bounds] = useState(new Rect(0,0,10,10))
-  let [handles, set_handles] = useState([] as Handle[])
+  let [handles, set_handles] = useState([] as ResizeHandle[])
 
   const updateHandles = () => {
     let sel:any[] = selMan.getFullSelection()
     //don't make a handle for anything but squares
     set_handles(sel.filter((n:any) => (n.type === SHAPE_TYPES.SQUARE || n.type === SHAPE_TYPES.TEXTBOX)).map((n:any) => {
-      return new Handle(n.x+n.w-5,n.y+n.h-5,10,10,n)
+      return new ResizeHandle(n.x+n.w-5,n.y+n.h-5,10,10,n)
     }))
     set_sel_bounds(props.provider.calc_node_array_bounds(selMan.getFullSelection()))
     if(selMan.isEmpty()) set_show_floating_panel(false)
@@ -206,7 +206,7 @@ export function RectCanvas(props:{provider:RectDocEditor, tool:string, grid:bool
   let [mouse_pressed, set_mouse_pressed] = useState(false)
   let [mouse_start, set_mouse_start] = useState(new Point(0,0))
   let [offsets, set_offsets] = useState([] as Point[])
-  let [drag_handle, set_drag_handle] = useState(null as unknown as Handle)
+  let [drag_handle, set_drag_handle] = useState(null as unknown as ResizeHandle)
 
   const mouseDown = (e:MouseEvent<HTMLCanvasElement>) => {
     let pt = canvas_to_point(e,scale, offset)
@@ -270,7 +270,7 @@ export function RectCanvas(props:{provider:RectDocEditor, tool:string, grid:bool
     }
   }
   const mouseUp = (e:MouseEvent<HTMLCanvasElement>) => {
-    if(drag_handle) set_drag_handle(null as unknown as Handle)
+    if(drag_handle) set_drag_handle(null as unknown as ResizeHandle)
     set_mouse_pressed(false)
     set_mouse_start(new Point(0,0))
     let sb = props.provider.calc_node_array_bounds(selMan.getFullSelection())
