@@ -11,6 +11,7 @@ import {
 import { RectDocEditor, SHAPE_TYPES } from "./RectDocEditor";
 import "./css/canvas.css";
 import { FloatingNodePanel, Rect } from "./components";
+import { TreeItem } from "../../src";
 
 
 type DrawingContext = {
@@ -152,9 +153,11 @@ export function RectCanvas(props:{provider:RectDocEditor, tool:string, grid:bool
   const updateHandles = () => {
     let sel:any[] = selMan.getFullSelection()
     //don't make a handle for anything but squares
-    set_handles(sel.filter((n:any) => (n.type === SHAPE_TYPES.SQUARE || n.type === SHAPE_TYPES.TEXTBOX)).map((n:any) => {
-      return new ResizeHandle(n.x+n.w-5,n.y+n.h-5,10,10,n)
-    }))
+    function useHandles(ch:TreeItem) {
+      if(!props.provider.hasPowerup(ch.type)) return false
+      return props.provider.getPowerup(ch.type).useResizeHandle(ch)
+    }
+    set_handles(sel.filter(useHandles).map((n:any) => new ResizeHandle(n.x+n.w-5,n.y+n.h-5,10,10,n)))
     set_sel_bounds(props.provider.calc_node_array_bounds(selMan.getFullSelection()))
     if(selMan.isEmpty()) set_show_floating_panel(false)
     redraw()

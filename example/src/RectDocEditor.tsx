@@ -18,8 +18,6 @@ import { ColorValueRenderer, ImageIcon, Rect } from "./components";
 import { GEOM_GROUP, ObjectPowerup} from "./powerups";
 
 export const SHAPE_TYPES = {
-  SQUARE:"square",
-  TEXTBOX:"textbox",
   GROUP:'group',
   ROOT: "root"
 }

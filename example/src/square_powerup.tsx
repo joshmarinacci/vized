@@ -27,6 +27,9 @@ SquareDef.set("geom",GEOM_GROUP)
 SquareDef.set("style",STYLE_GROUP)
 
 export class SquarePowerup implements ObjectPowerup {
+  useResizeHandle(item: TreeItem): boolean {
+    return true
+  }
   def() {
     return SquareDef
   }

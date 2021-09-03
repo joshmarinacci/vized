@@ -105,4 +105,7 @@ export class CirclePowerup implements ObjectPowerup {
         bds.stroke(c, 'black', 1)
       }
   }
+  useResizeHandle(item:TreeItem): boolean {
+    return false;
+  }
 }

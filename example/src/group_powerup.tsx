@@ -90,4 +90,7 @@ export class GroupPowerup implements ObjectPowerup {
     })
     c.restore()
   }
+  useResizeHandle(item:TreeItem): boolean {
+    return false
+  }
 }

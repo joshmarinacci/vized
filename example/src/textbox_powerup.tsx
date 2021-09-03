@@ -237,5 +237,9 @@ export class TextboxPowerup implements ObjectPowerup {
       bds.stroke(c, 'black', 1)
     }
   }
+
+  useResizeHandle(item:TreeItem): boolean {
+    return true
+  }
 }
 
