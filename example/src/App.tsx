@@ -23,6 +23,7 @@ import {
 import { TextboxPowerup } from "./textbox_powerup";
 import { CirclePowerup } from "./circle_powerup";
 import { GroupPowerup } from "./group_powerup";
+import { SquarePowerup } from "./square_powerup";
 
 const STORAGE = new StorageManager()
 const selMan = new SelectionManager()
@@ -41,6 +42,7 @@ type State = {
 }
 
 let provider = new RectDocEditor({})
+provider.addPowerup(new SquarePowerup())
 provider.addPowerup(new TextboxPowerup())
 provider.addPowerup(new CirclePowerup())
 provider.addPowerup(new GroupPowerup())

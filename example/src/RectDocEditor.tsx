@@ -40,21 +40,6 @@ export const TITLE_DEF:PropDef = {
   default:''
 }
 
-export const SquareDef:PropCluster = new Map<string, PropGroup>()
-SquareDef.set("base",[
-  ID_DEF,
-  TITLE_DEF,
-  {
-    type: PROP_TYPES.STRING,
-    name: 'type',
-    locked: true,
-    key: 'type',
-    default:SHAPE_TYPES.SQUARE,
-  },
-])
-SquareDef.set("geom",GEOM_GROUP)
-SquareDef.set("style",STYLE_GROUP)
-
 const RootDef:PropCluster = new Map<string, PropGroup>()
 RootDef.set("base",[
   ID_DEF,
@@ -75,7 +60,6 @@ BoundsDef.set("geom",GEOM_GROUP)
 
 
 let TYPE_MAP = new Map<string,Map<string,PropGroup>>()
-TYPE_MAP.set(SHAPE_TYPES.SQUARE,SquareDef)
 TYPE_MAP.set(SHAPE_TYPES.ROOT,RootDef)
 TYPE_MAP.set('bounds',BoundsDef)
 
@@ -277,17 +261,6 @@ export class RectDocEditor extends TreeItemProvider {
   // @ts-ignore
   makeEmptyRoot(doc:any):TreeItem {
     const root = {id:'root',type:SHAPE_TYPES.ROOT,children:[], title:"foo"} as TreeItem
-    const square1 = makeFromDef(SquareDef,{id:'sq1',w:50, title:'master'})
-    root.children.push(square1)
-    const square2 = makeFromDef(SquareDef,{id:'sq2',x:150,y:20,w:30,h:30,color:'red',title:'bar'})
-    root.children.push(square2)
-    const square3 = makeFromDef(SquareDef,{id:'sq3',x:30,y:220,w:30,h:30,color:'green', title:'source square'})
-    root.children.push(square3)
-    const child_square = makeFromDef(SquareDef,{id:'sq4',x:50,y:50,w:20,h:100, color:'teal',title:"linked color"})
-    child_square['_links'] = {
-      color:square3.id,
-    }
-    root.children.push(child_square)
     return root
   }
   getColorValue(ch: any, name:string) {
@@ -383,7 +356,6 @@ export class RectDocEditor extends TreeItemProvider {
   getPropertyClusters(item:TreeItem):PropCluster {
     if (item) {
       if (item.type === SHAPE_TYPES.ROOT) return RootDef
-      if (item.type === SHAPE_TYPES.SQUARE) return SquareDef
     }
     return new Map()
   }
@@ -394,7 +366,7 @@ export class RectDocEditor extends TreeItemProvider {
     return false
   }
   canBeSibling(item:TreeItem,target:TreeItem) {
-    if(target.type === SHAPE_TYPES.SQUARE && item.type === SHAPE_TYPES.SQUARE) return true
+    // if(target.type === SHAPE_TYPES.SQUARE && item.type === SHAPE_TYPES.SQUARE) return true
     return false
   }
   moveChildAfterSibling(src:TreeItem,dst:TreeItem) {
@@ -415,7 +387,6 @@ export class RectDocEditor extends TreeItemProvider {
   getRendererForItem(item:TreeItem) {
     let icon = <ImageIcon icon={"circle"}/>
     if(this.hasPowerup(item.type)) icon = <ImageIcon icon={this.getPowerup(item.type).treeIcon()}/>
-    if (item.type === SHAPE_TYPES.SQUARE)  icon = <ImageIcon icon={"square"} />
     if (item.type === SHAPE_TYPES.ROOT)  icon = <ImageIcon icon={"root"}/>
     let title = (item as any).title
     return <div className={'hbox'}> {icon} <label style={{padding:'0 0.25rem'}}>{title}</label></div>
@@ -445,15 +416,9 @@ export class RectDocEditor extends TreeItemProvider {
         cmds.push({ title:'add ' + pow.type(),
           fun:() => this.appendChild(item,pow.makeObject())})
       })
-      cmds.push({ title:'add square', fun:() =>  this.add_square(item)})
     }
     // cmds.push({divider: true})
     return cmds
-  }
-
-
-  add_square(parent:any) {
-    this.appendChild(parent, makeFromDef(SquareDef,{id:genID('square_'),w:50,h:50, title:'unnamed square'}))
   }
 
   do_layout() {
