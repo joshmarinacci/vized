@@ -29,6 +29,10 @@ export abstract class ObjectPowerup {
   afterSetProp(item:TreeItem,prop:string,value:any):void {
     // console.log("doing nothing")
   }
+
+  afterAddChild(parent: TreeItem, child: TreeItem) {
+    //console.log("doing nothing")
+  }
 }
 
 

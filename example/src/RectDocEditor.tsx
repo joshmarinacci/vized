@@ -259,6 +259,7 @@ export class RectDocEditor extends TreeItemProvider {
 
   appendChild(parent:TreeItem, child:TreeItem) {
     parent.children.push(child)
+    if(this.hasPowerup(parent.type)) this.getPowerup(parent.type).afterAddChild(parent,child);
     this.fire(TREE_ITEM_PROVIDER.STRUCTURE_ADDED, child)
   }
   deleteChild(child:TreeItem):void {

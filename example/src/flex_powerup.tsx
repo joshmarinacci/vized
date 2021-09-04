@@ -45,6 +45,13 @@ FlexDef.set("base",[
     key:'direction',
     default: "vertical",
     values:["vertical","horizontal"],
+  },
+  {
+    type: PROP_TYPES.ENUM,
+    name:'justify',
+    key:"justify",
+    default:'start',
+    values:['start','center','end']
   }
 ])
 FlexDef.set("geom",GEOM_GROUP)
@@ -106,6 +113,14 @@ export class FlexPowerup extends ObjectPowerup {
     return false
   }
   afterSetProp(item:any,prop:string,value:any):void {
+    this.performLayout(item)
+  }
+
+  afterAddChild(parent:TreeItem, child:TreeItem) {
+    this.performLayout(parent)
+  }
+
+  private performLayout(item: any) {
     // console.log("doing layout on",item,prop,value)
     if(item.direction === "vertical") {
       let y = 0
@@ -114,6 +129,20 @@ export class FlexPowerup extends ObjectPowerup {
         ch.y = y
         y += ch.h
       })
+      let leftover = item.h - y
+      if(leftover > 0) {
+        if (item.justify === 'start') {
+          //move nothing
+        }
+        if (item.justify === 'center') {
+          //shift all by half the leftover amount
+          item.children.forEach((ch:any) => ch.y += leftover/2)
+        }
+        if (item.justify === 'end') {
+          //shift all to the end by leftover amount
+          item.children.forEach((ch:any) => ch.y += leftover)
+        }
+      }
     }
     if(item.direction === 'horizontal') {
       let x = 0
@@ -122,7 +151,20 @@ export class FlexPowerup extends ObjectPowerup {
         ch.y = 0
         x += ch.w
       })
+      let leftover = item.w - x
+      if(leftover > 0) {
+        if (item.justify === 'start') {
+          //move nothing
+        }
+        if (item.justify === 'center') {
+          //shift all by half the leftover amount
+          item.children.forEach((ch:any) => ch.x += leftover/2)
+        }
+        if (item.justify === 'end') {
+          //shift all to the end by leftover amount
+          item.children.forEach((ch:any) => ch.x += leftover)
+        }
+      }
     }
   }
-
 }
