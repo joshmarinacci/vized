@@ -52,6 +52,13 @@ FlexDef.set("base",[
     key:"justify",
     default:'start',
     values:['start','center','end']
+  },
+  {
+    type: PROP_TYPES.ENUM,
+    name:'align',
+    key:"align",
+    default:'start',
+    values:['start','center','end','stretch']
   }
 ])
 FlexDef.set("geom",GEOM_GROUP)
@@ -143,6 +150,21 @@ export class FlexPowerup extends ObjectPowerup {
           item.children.forEach((ch:any) => ch.y += leftover)
         }
       }
+      if(item.align === 'start') {
+        item.children.forEach((ch: any) => ch.x = 0)
+      }
+      if(item.align === 'center') {
+        item.children.forEach((ch: any) => ch.x = (item.w-ch.w)/2)
+      }
+      if(item.align === 'end') {
+        item.children.forEach((ch: any) => ch.x = item.w-ch.w)
+      }
+      if(item.align === 'stretch') {
+        item.children.forEach((ch: any) => {
+          ch.x = 0
+          ch.w = item.w
+        })
+      }
     }
     if(item.direction === 'horizontal') {
       let x = 0
@@ -164,6 +186,21 @@ export class FlexPowerup extends ObjectPowerup {
           //shift all to the end by leftover amount
           item.children.forEach((ch:any) => ch.x += leftover)
         }
+      }
+      if(item.align === 'start') {
+        item.children.forEach((ch: any) => ch.y = 0)
+      }
+      if(item.align === 'center') {
+        item.children.forEach((ch: any) => ch.y = (item.h-ch.h)/2)
+      }
+      if(item.align === 'end') {
+        item.children.forEach((ch: any) => ch.y = item.h-ch.h)
+      }
+      if(item.align === 'stretch') {
+        item.children.forEach((ch: any) => {
+          ch.y = 0
+          ch.h = item.h
+        })
       }
     }
   }
