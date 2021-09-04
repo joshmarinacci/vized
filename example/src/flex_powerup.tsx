@@ -117,6 +117,7 @@ export class FlexPowerup extends ObjectPowerup {
 
   canAddChild(parent:TreeItem, childType: string): boolean {
     if(childType === 'square') return true
+    if(childType === 'flexbox') return true
     return false
   }
   afterSetProp(item:any,prop:string,value:any):void {
